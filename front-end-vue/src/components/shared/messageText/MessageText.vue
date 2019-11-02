@@ -1,8 +1,8 @@
 <template>
     <div class="text-container">
 
-        <div class="message-text">
-            <span>{{msg.body}}</span>
+        <div class="message-text" >
+            <span v-html="msgFormated"></span>
         </div>
 
         <MessageTime :msg="msg"/>
@@ -14,6 +14,8 @@
     import MessageIconStatus from "../messageIconStatus/MessageIconStatus";
     import MessageTime from "../messageTime/MessageTime";
 
+    import {msg} from '@/helper.js'
+
     export default {
         name: "MessageText",
         components: {
@@ -24,6 +26,11 @@
             msg: {
                 type: Object,
                 required: true
+            }
+        },
+        computed: {
+            msgFormated() {
+                return msg.formatMsg(this.msg.body);
             }
         }
     };

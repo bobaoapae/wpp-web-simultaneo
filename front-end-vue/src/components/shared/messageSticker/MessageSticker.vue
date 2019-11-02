@@ -1,10 +1,22 @@
 <template>
-    <img :src="imagem" alt="sticker">
+    <div class="sticker-container">
+        <div class="box-sticker">
+            <img :src="imagem" alt="sticker" class="sticker">
+        </div>
+
+        <MessageTime :msg="msg"/>
+    </div>
 </template>
 
 <script>
+    import MessageTime from '@/components/shared/messageTime/MessageTime.vue';
+    import api from '@/api.js';
+
     export  default {
         name: 'MessageSticker',
+        components: {
+            MessageTime
+        },
         props: {
             msg: {
                 type: Object,
@@ -13,7 +25,7 @@
         },
         data() {
             return {
-                imagem:''
+                imagem: ''
             }
         },
         created() {
@@ -33,5 +45,19 @@
 
 
 <style scoped>
+    .sticker-container {
+        max-width: 125px;
+        max-height: 125px;
+    }
 
+    .box-sticker {
+        width: 100%;
+        height: 100%;
+        margin-bottom: 30px;
+    }
+
+    img {
+        width: 100%;
+        height: 100%;
+    }
 </style>

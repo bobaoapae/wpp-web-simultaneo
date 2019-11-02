@@ -1,6 +1,7 @@
 <template>
     <div class="message-in">
         <div class="message-in-container">
+            <!-- Identificador de mensagens no grupo -->
             <div class="identify-msg-group p-2" v-if="activeChat.type === 'group'">
                 <div v-if="msg.sender.name">
                     {{msg.sender.name}}
@@ -15,7 +16,8 @@
 
 
             <MessageText :msg="msg" v-if="isChat"/>
-            <MessagePhoto :msg="msg" v-if="isImage"/>
+            <MessagePhoto :msg="msg" v-else-if="isImage"/>
+            <MessageSticker :msg="msg" v-else-if="isSticker"/>
         </div>
     </div>
 </template>
@@ -24,12 +26,14 @@
     import {mapState} from 'vuex';
     import MessageText from "@/components/shared/messageText/MessageText.vue";
     import MessagePhoto from "@/components/shared/messagePhoto/MessagePhoto.vue";
+    import MessageSticker from "@/components/shared/messageSticker/MessageSticker";
 
     export default {
         name: "MessageIn",
         components: {
             MessageText,
-            MessagePhoto
+            MessagePhoto,
+            MessageSticker
         },
         props: {
             msg: {
@@ -44,6 +48,9 @@
             },
             isImage() {
                 return this.msg.type === "image";
+            },
+            isSticker() {
+                return this.msg.type === 'sticker'
             }
         }
     };

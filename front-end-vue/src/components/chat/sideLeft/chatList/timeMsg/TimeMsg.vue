@@ -49,9 +49,7 @@
                     hour = '0' + hour
                 }
 
-
                 time = hour + ":" + min;
-
 
                 const hoje = new Date();
                 const hoje_dia = hoje.getDate();

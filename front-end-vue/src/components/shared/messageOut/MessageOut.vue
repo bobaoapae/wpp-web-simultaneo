@@ -11,7 +11,7 @@
 <script>
     import MessageText from "@/components/shared/messageText/MessageText.vue";
     import MessagePhoto from "@/components/shared/messagePhoto/MessagePhoto.vue";
-    import MessageSticker from "../messageSticker/MessageSticker";
+    import MessageSticker from "@/components/shared/messageSticker/MessageSticker";
 
     export default {
         name: "MessageOut",
