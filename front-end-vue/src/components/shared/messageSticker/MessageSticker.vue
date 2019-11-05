@@ -1,7 +1,7 @@
 <template>
     <div class="sticker-container">
         <div class="box-sticker">
-            <img :src="imagem" alt="sticker" class="sticker">
+            <img :src="srcSticker" alt="sticker" class="sticker">
         </div>
 
         <MessageTime :msg="msg"/>
@@ -9,10 +9,11 @@
 </template>
 
 <script>
+    import {mapState, mapActions} from 'vuex';
     import MessageTime from '@/components/shared/messageTime/MessageTime.vue';
     import api from '@/api.js';
 
-    export  default {
+    export default {
         name: 'MessageSticker',
         components: {
             MessageTime
@@ -25,19 +26,48 @@
         },
         data() {
             return {
-                imagem: ''
+                sticker: ''
+            }
+        },
+        computed: {
+            ...mapState(['activeChat']),
+
+            srcSticker() {
+                if (this.msg.base64MediaFull) {
+                    return this.msg.base64MediaFull;
+                } else {
+                    return this.sticker;
+                }
             }
         },
         created() {
-            this.getFullImage();
+            this.getSticker();
         },
         methods: {
-            getFullImage() {
-                console.log('GET STICKER');
-                api.get(`/api/whatsApp/mediaMessage/${this.msg.id._serialized}`)
-                    .then(r => {
-                        this.imagem = r.data.base64;
-                    })
+            ...mapActions(['addFullMediaInMsg']),
+
+            getSticker() {
+                if (!this.msg.base64MediaFull) {
+                    console.log('GET STICKER');
+                    api.get(`/api/whatsApp/mediaMessage/${this.msg.id._serialized}`)
+                        .then(r => {
+                            //console.log(r);
+                            this.sticker = r.data.base64;
+
+                            let idChat;
+                            if (this.msg.id.fromMe) {
+                                idChat = this.msg.to;
+                            } else {
+                                idChat = this.msg.from;
+                            }
+
+                            this.addFullMediaInMsg({
+                                idChat: idChat,
+                                idMsg: this.msg.id,
+                                imagem: r.data.base64,
+                            })
+                        })
+                }
             }
         }
     }
@@ -46,13 +76,16 @@
 
 <style scoped>
     .sticker-container {
-        max-width: 125px;
-        max-height: 125px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     .box-sticker {
-        width: 100%;
-        height: 100%;
+        min-width: 125px;
+        max-width: 125px;
+        min-height: 125px;
+        max-height: 125px;
         margin-bottom: 30px;
     }
 

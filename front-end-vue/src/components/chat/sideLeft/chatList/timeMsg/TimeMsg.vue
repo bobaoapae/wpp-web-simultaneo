@@ -16,10 +16,12 @@
         computed: {
             time() {
                 const t = this.chat.msgs.length;
-                const lastMsgTime = this.chat.msgs[t - 1].t;
-                return this.timeConverter(lastMsgTime);
+                const lastMsg= this.chat.msgs[t - 1];
 
-
+                if (lastMsg === undefined) {
+                    return  ''
+                }
+                return this.timeConverter(lastMsg.t);
             },
             isUnread() {
                 return this.chat.unreadCount > 0;

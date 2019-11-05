@@ -1,9 +1,9 @@
 <template>
-    <div id="last-msg" class="flex-grow-1" :class="{unread : isUnread}">
+    <div id="last-msg" class="flex-grow-1" :class="{unread : isUnread}" v-if="lastMsg">
         <MessageIconStatus :ack="lastMsg.ack"/>
 
         <span v-if="isGroup && lastMsg.sender">
-            {{lastMsg.sender.name || lastMsg.sender.id}}:
+            {{lastMsg.sender.name || '+'+lastMsg.sender.id.replace('@c.us', '')}}:
         </span>
 
         <MessageBody :lastMsg="lastMsg"/>

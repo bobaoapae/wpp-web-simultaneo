@@ -1,5 +1,10 @@
 <template>
     <div id="wpp">
+        <div class="my-modal">
+
+        </div>
+
+
         <QrCode v-show="!isQrCodeLogged && isLoadingChat" />
         <Loading v-if="isLoadingChat && isQrCodeLogged" />
         <Chat v-else-if="isQrCodeLogged &&  !isLoadingChat" />

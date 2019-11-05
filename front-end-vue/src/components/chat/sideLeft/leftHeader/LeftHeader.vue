@@ -5,7 +5,15 @@
                     class="photo-profile"
                     :src="self.picture"
                     alt="User profile photo"
+                    v-if="self.picture"
             />
+
+            <img
+                    class="photo-profile"
+                    src="@/assets/images/wpp-photo-user.svg"
+                    alt="User profile photo"
+                    v-else
+            >
         </div>
 
         <div class="box-icons">

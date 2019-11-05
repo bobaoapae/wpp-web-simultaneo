@@ -22,6 +22,11 @@
         <img src="@/assets/images/wpp-type-gif.svg" alt="">
         GIF
     </span>
+
+    <span v-else-if="isDocument">
+        <img src="@/assets/images/wpp-type-document.svg" alt="">
+        {{lastMsg.filename}}
+    </span>
 </template>
 
 <script>
@@ -48,11 +53,16 @@
             },
             isGif() {
                 return this.lastMsg.type === 'gif';
+            },
+            isDocument() {
+                return this.lastMsg.type === 'document';
             }
         }
     }
 </script>
 
 <style scoped>
-
+    span img {
+        margin-right: 4px;
+    }
 </style>

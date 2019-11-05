@@ -1,20 +1,13 @@
 <template>
-    <div class="message-photo">
-        <div class="photo-container">
-            <div class="box-image" :class="{blur : !imageFull}">
-                <img
-                        class="imageFull"
-                        :src="imageFull"
-                        @click="handleClick"
-                        v-if="imageFull"
-                />
-
-                <img class="preview" :src="preview" v-else/>
+    <div class="message-video">
+        <div class="video-container" @click="handleClick">
+            <div class="box-preview blur">
+                <img :src=" 'data:image/jpeg;base64,'+ msg.body" alt="body">
             </div>
 
-            <LoadingMedia v-if="!imageFull"/>
+            <LoadingMedia v-if="!srcVideo"/>
+            <PlayMedia v-else/>
         </div>
-
 
         <div class="box-caption" v-if="msg.caption">
             <span v-html="captionFormated"></span>
@@ -25,15 +18,17 @@
 </template>
 
 <script>
-    import MessageTime from "../messageTime/MessageTime";
-    import api from '@/api.js';
-    import {msg} from '@/helper.js';
+    import api from '@/api.js'
     import {mapActions, mapMutations} from 'vuex'
-    import LoadingMedia from "../loadingMedia/LoadingMedia";
+    import {msg} from '@/helper.js';
+    import LoadingMedia from "../loadingMedia/LoadingMedia.vue";
+    import MessageTime from '../messageTime/MessageTime.vue';
+    import PlayMedia from "../playMedia/PlayMedia";
 
     export default {
-        name: "MessagePhoto",
+        name: "VideoMessage",
         components: {
+            PlayMedia,
             LoadingMedia,
             MessageTime
         },
@@ -45,38 +40,35 @@
         },
         data() {
             return {
-                imageFull: this.msg.base64MediaFull
+                srcVideo: this.msg.base64MediaFull,
             }
         },
         created() {
-            //console.log('imageFull:', this.imageFull);
-            this.getFullImage();
+            this.getVideo()
         },
         computed: {
-            preview() {
-                return "data:image/jpeg;base64," + this.msg.body
-            },
-            haveCaption() {
-                return this.msg.caption !== undefined;
-            },
             captionFormated() {
                 if (this.msg.caption) {
                     return msg.formatMsg(this.msg.caption);
                 } else {
                     return '';
                 }
-            }
+            },
+            haveCaption() {
+                return this.msg.caption !== undefined;
+            },
         },
         methods: {
-            ...mapMutations(['SET_MODAL']),
             ...mapActions(['addFullMediaInMsg']),
+            ...mapMutations(['SET_MODAL']),
 
-            getFullImage() {
+            getVideo() {
                 if (!this.msg.base64MediaFull) {
-                    console.log('GET PHOTO');
+                    console.log('GET VIDEO');
                     api.get(`/api/whatsApp/mediaMessage/${this.msg.id._serialized}`)
                         .then(r => {
-                            this.imageFull = r.data.base64;
+                            //console.log(r.data.base64);
+                            this.srcVideo = r.data.base64;
 
                             let idChat;
                             if (this.msg.id.fromMe) {
@@ -94,27 +86,30 @@
                 }
             },
             handleClick() {
-                this.SET_MODAL({
-                    show: true,
-                    media: this.imageFull,
-                    type: 'img'
-                })
+                if (this.srcVideo) {
+                    this.SET_MODAL({
+                        show: true,
+                        type: 'video',
+                        media: this.srcVideo
+                    });
+                }
+
             }
         }
-    };
+    }
 </script>
 
 <style scoped>
-    .message-photo {
-        padding: 5px;
+    .message-video {
+        padding: 3px;
     }
 
-    .photo-container {
-        max-width: 330px;
-        min-width: 330px;
+    .video-container {
+        max-width: 220px;
+        min-width: 220px;
 
-        max-height: 330px;
-        min-height: 100px;
+        max-height: 160px;
+        min-height: 160px;
 
         overflow: hidden;
         display: flex;
@@ -124,11 +119,11 @@
     }
 
     .box-caption {
-        max-width: 330px;
-        min-width: 330px;
+        max-width: 220px;
+        min-width: 220px;
     }
 
-    .box-image {
+    .box-preview {
         min-width: 100%;
         min-height: 100%;
     }
@@ -140,10 +135,6 @@
     img {
         width: 100%;
         height: 100%;
-    }
-
-    .imageFull {
-        cursor: pointer;
     }
 
     .no-caption {

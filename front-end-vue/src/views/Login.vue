@@ -32,7 +32,7 @@
 
 <script>
 import api from "@/api";
-import $ from "jquery";
+import {mapMutations} from 'vuex'
 
 export default {
     name: "Login",
@@ -45,26 +45,17 @@ export default {
         };
     },
     methods: {
+        ...mapMutations(['SET_IS_LOGGED']),
         handleLogin() {
-            // const param = $.param({
-            //     login: this.form.user,
-            //     senha: this.form.pass,
-            //     estabelecimento: "11e9827c-23f6-46c7-9c91-4bca525f4311"
-            // });
-
-            // api.get(`manager/generateToken?${param}`)
-            //     .then((r) => {
-            //         localStorage.TOKEN = r.data.token;
-            //         this.$router.push("/");
-            //     });
 
             const f = new FormData();
-            f.append('login', this.form.user)
-            f.append('senha',this.form.pass)
+            f.append('login', this.form.user);
+            f.append('senha',this.form.pass);
 
             api.post('/api/auth/login', f)
                 .then((r) => {
                     localStorage.TOKEN = r.data.token;
+                    this.SET_IS_LOGGED(true);
                     this.$router.push("/");
                 })
         }

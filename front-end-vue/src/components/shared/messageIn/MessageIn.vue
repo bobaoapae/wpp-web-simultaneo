@@ -13,11 +13,14 @@
                 </div>
             </div>
 
-
+            <!-- Mensagem Encaminhada -->
+            <ForwardedIndicator v-if="msg.isForwarded"/>
 
             <MessageText :msg="msg" v-if="isChat"/>
             <MessagePhoto :msg="msg" v-else-if="isImage"/>
             <MessageSticker :msg="msg" v-else-if="isSticker"/>
+            <MessageVideo :msg="msg" v-else-if="isVideo"/>
+            <MessageDocument :msg="msg" v-else-if="isDocument"/>
         </div>
     </div>
 </template>
@@ -26,14 +29,20 @@
     import {mapState} from 'vuex';
     import MessageText from "@/components/shared/messageText/MessageText.vue";
     import MessagePhoto from "@/components/shared/messagePhoto/MessagePhoto.vue";
-    import MessageSticker from "@/components/shared/messageSticker/MessageSticker";
+    import MessageSticker from "@/components/shared/messageSticker/MessageSticker.vue";
+    import MessageVideo from '@/components/shared/messageVideo/VideoMessage.vue';
+    import MessageDocument from "@/components/shared/messageDocument/MessageDocument";
+    import ForwardedIndicator from "../forwardedIndicator/ForwardedIndicator";
 
     export default {
         name: "MessageIn",
         components: {
+            ForwardedIndicator,
             MessageText,
             MessagePhoto,
-            MessageSticker
+            MessageSticker,
+            MessageVideo,
+            MessageDocument
         },
         props: {
             msg: {
@@ -51,6 +60,12 @@
             },
             isSticker() {
                 return this.msg.type === 'sticker'
+            },
+            isVideo() {
+                return this.msg.type === 'video';
+            },
+            isDocument() {
+                return this.msg.type === 'document';
             }
         }
     };

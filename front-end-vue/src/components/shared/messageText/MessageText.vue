@@ -50,5 +50,7 @@
         margin-right: 55px;
         white-space: pre-wrap;
         word-wrap: break-word;
+        color: #262626;
+        font-size: 14.2px;
     }
 </style>

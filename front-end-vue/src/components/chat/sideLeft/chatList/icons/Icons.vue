@@ -1,7 +1,7 @@
 <template>
     <div id="icons">
         <div id="unreadCount">
-            <div v-if="countUnread">{{countUnread}}</div>
+            <div v-show="chat.unreadCount">{{chat.unreadCount}}</div>
         </div>
     </div>
 </template>
@@ -20,24 +20,8 @@ export default {
 
         }
     },
-    watch: {
-        // 'chat.msgs': function () {
-        //     console.log('mudou');
-        //     this.qtdMsgs = this.countUnread();
-        //     console.log(this.qtdMsgs)
-        // }
-    },
     computed: {
-        countUnread() {
-            ///console.log('CALCULANDO QUANDIDADE DE MSG NAO LIDA...')
-            const chatsNaoLido = this.chat.msgs.filter((element) => {
-                //console.log("element", element);
-                //console.log(element.body ,element.ack);
-                //return element.ack === -1 && element.id.fromMe === false
-            });
 
-            return chatsNaoLido.length;
-        }
     }
 };
 </script>

@@ -1,5 +1,5 @@
 <template>
-    <span class="time">{{timeConverted}} <MessageIconStatus :ack="msg.ack" /></span>
+    <span class="time">{{timeConverted}} <MessageIconStatus :ack="msg.ack" v-if="msg.id.fromMe" /></span>
 </template>
 
 <script>

@@ -1,28 +1,41 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-
 import Login from '@/views/Login'
 import Wpp from '@/views/Wpp'
 
-Vue.use(VueRouter)
+Vue.use(VueRouter);
 
 const routes = [
-  {
-    path: '/',
-    name: 'wpp',
-    component: Wpp
-  },
-  {
-    path: '/login',
-    name: 'login',
-    component: Login
-  }
-]
+    {
+        path: '/',
+        name: 'wpp',
+        component: Wpp,
+        beforeEnter: (to, from, next) => {
+            const store = require('../store/index.js');
+            console.log('beforeEnter');
+            console.log(store.default.state.isLogged);
+            console.log(localStorage.TOKEN);
+
+            if (localStorage.TOKEN) {
+                next();
+            } else {
+                console.log('ir para login');
+                router.push('/login')
+            }
+
+        }
+    },
+    {
+        path: '/login',
+        name: 'login',
+        component: Login
+    }
+];
 
 const router = new VueRouter({
-  mode: 'history',
-  base: process.env.BASE_URL,
-  routes
-})
+    mode: 'history',
+    base: process.env.BASE_URL,
+    routes
+});
 
 export default router
