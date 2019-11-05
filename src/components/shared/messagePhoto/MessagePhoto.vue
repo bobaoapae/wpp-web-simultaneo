@@ -74,7 +74,7 @@
             getFullImage() {
                 if (!this.msg.base64MediaFull) {
                     console.log('GET PHOTO');
-                    api.get(`/api/whatsApp/mediaMessage/${this.msg.id._serialized}`)
+                    api.get(`/api/whatsApp/mediaMessage/${this.msg.id._serialized}/false`)
                         .then(r => {
                             this.imageFull = r.data.base64;
 
@@ -97,7 +97,8 @@
                 this.SET_MODAL({
                     show: true,
                     media: this.imageFull,
-                    type: 'img'
+                    type: 'img',
+                    id: this.msg.id._serialized
                 })
             }
         }

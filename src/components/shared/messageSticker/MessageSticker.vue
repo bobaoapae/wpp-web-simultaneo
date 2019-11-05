@@ -49,7 +49,7 @@
             getSticker() {
                 if (!this.msg.base64MediaFull) {
                     console.log('GET STICKER');
-                    api.get(`/api/whatsApp/mediaMessage/${this.msg.id._serialized}`)
+                    api.get(`/api/whatsApp/mediaMessage/${this.msg.id._serialized}/false`)
                         .then(r => {
                             //console.log(r);
                             this.sticker = r.data.base64;

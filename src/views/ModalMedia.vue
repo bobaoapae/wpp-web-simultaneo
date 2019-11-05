@@ -1,7 +1,10 @@
 <template>
     <div class="my-modal" v-show="modal.show">
         <div class="modal-header">
-            <img class="icon-download" src="@/assets/images/wpp-icon-donwload-modal.svg" @click="download">
+            <a :href="formatedHref" target="_blank">
+                <img class="icon-download" src="@/assets/images/wpp-icon-donwload-modal.svg">
+            </a>
+
             <img class="icon-close" src="@/assets/images/wpp-icon-close-modal.svg" @click="closeModal">
         </div>
 
@@ -22,7 +25,10 @@
     export default {
         name: "ModalMedia",
         computed: {
-            ...mapState(["modal"])
+            ...mapState(["modal"]),
+            formatedHref() {
+                return `${localStorage.baseURL}/api/whatsApp/mediaMessage/${this.modal.id}/true?token=${sessionStorage.TOKEN}`
+            }
         },
         methods: {
             ...mapMutations(['SET_MODAL']),

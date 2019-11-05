@@ -14,9 +14,9 @@ const routes = [
             const store = require('../store/index.js');
             console.log('beforeEnter');
             console.log(store.default.state.isLogged);
-            console.log(localStorage.TOKEN);
+            console.log(sessionStorage.TOKEN);
 
-            if (localStorage.TOKEN) {
+            if (sessionStorage.TOKEN) {
                 next();
             } else {
                 console.log('ir para login');

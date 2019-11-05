@@ -39,8 +39,8 @@ export default {
     data() {
         return {
             form: {
-                user: "joao",
-                pass: "joao0123@"
+                user: "",
+                pass: ""
             }
         };
     },
@@ -54,7 +54,9 @@ export default {
 
             api.post('/api/auth/login', f)
                 .then((r) => {
-                    localStorage.TOKEN = r.data.token;
+                    sessionStorage.TOKEN = r.data.token;
+                    api.defaults.headers['Authorization'] = "Bearer "+sessionStorage.TOKEN;
+
                     this.SET_IS_LOGGED(true);
                     this.$router.push("/");
                 })

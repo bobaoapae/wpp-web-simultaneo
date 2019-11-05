@@ -19,7 +19,8 @@ const store = new Vuex.Store({
         modal: {
             type:'',
             media:'',
-            show: false
+            show: false,
+            id: ''
         }
     },
 
@@ -80,13 +81,14 @@ const store = new Vuex.Store({
             state.modal.type = payload.type;
             state.modal.media = payload.media;
             state.modal.show = payload.show;
+            state.modal.id = payload.id;
         }
 
     },
 
     actions: {
         setNewEvent(context) {
-            const ws = new WebSocket(`ws://zapia.com.br:1100/api/ws?token=${localStorage.TOKEN}`);
+            const ws = new WebSocket(`${localStorage.baseURL.replace('http','ws')}/api/ws?token=${sessionStorage.TOKEN}`);
 
 
             ws.onmessage = function(e) {
@@ -198,7 +200,7 @@ const store = new Vuex.Store({
 
             /*
             let event = new EventSource(
-                `${localStorage.baseURL}/api/whatsApp/events?token=${localStorage.TOKEN}`,
+                `${localStorage.baseURL}/api/whatsApp/events?token=${sessionStorage.TOKEN}`,
             );
 
             event.addEventListener('update-estado', e => {
@@ -280,7 +282,7 @@ const store = new Vuex.Store({
 
         },
         getChats(context) {
-            const TOKEN = localStorage.TOKEN;
+            const TOKEN = sessionStorage.TOKEN;
             api.get(`/api/chats?token=${TOKEN}`)
                 .then((r) => {
                     const data = r.data;

@@ -65,7 +65,7 @@
             getVideo() {
                 if (!this.msg.base64MediaFull) {
                     console.log('GET VIDEO');
-                    api.get(`/api/whatsApp/mediaMessage/${this.msg.id._serialized}`)
+                    api.get(`/api/whatsApp/mediaMessage/${this.msg.id._serialized}/false`)
                         .then(r => {
                             //console.log(r.data.base64);
                             this.srcVideo = r.data.base64;
@@ -90,7 +90,8 @@
                     this.SET_MODAL({
                         show: true,
                         type: 'video',
-                        media: this.srcVideo
+                        media: this.srcVideo,
+                        id: this.msg.id._serialized
                     });
                 }
 
