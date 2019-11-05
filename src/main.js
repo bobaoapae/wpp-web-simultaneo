@@ -5,7 +5,7 @@ import store from './store'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 
-Vue.config.productionTip = false
+Vue.config.productionTip = true
 
 const vm = new Vue({
   router,

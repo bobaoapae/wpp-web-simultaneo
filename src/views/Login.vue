@@ -17,9 +17,9 @@
                         v-model="form.pass"
                     />
 
-                    <button type="submit">ENTRAR</button>
+                    <button type="submit" :disabled="btn.loading">{{btn.label}}</button>
 
-                    <span class="error">Usuario e/ou Senha invalido</span>
+                    <span class="error" v-show="error.active">Usuario e/ou Senha invalido</span>
                 </form>
 
                 <hr />
@@ -41,12 +41,22 @@ export default {
             form: {
                 user: "",
                 pass: ""
+            },
+            btn: {
+                label: 'ENTRAR',
+                loading: false
+            },
+            error: {
+                active: false
             }
         };
     },
     methods: {
         ...mapMutations(['SET_IS_LOGGED']),
         handleLogin() {
+            this.btn.label = "ENTRANDO..."
+            this.btn.loading = true;
+
 
             const f = new FormData();
             f.append('login', this.form.user);
@@ -54,11 +64,19 @@ export default {
 
             api.post('/api/auth/login', f)
                 .then((r) => {
+                    this.btn.label = "ENTRAR"
+                    this.btn.loading = false;
                     sessionStorage.TOKEN = r.data.token;
                     api.defaults.headers['Authorization'] = "Bearer "+sessionStorage.TOKEN;
 
                     this.SET_IS_LOGGED(true);
                     this.$router.push("/");
+                })
+                .catch(r => {
+                    this.btn.label = "ENTRAR"
+                    this.btn.loading = false;
+
+                    this.error.active = true;
                 })
         }
     }
@@ -155,11 +173,6 @@ form button:hover {
 .error {
     text-align: center;
     color: red;
-    display: none;
-}
-
-.error.active {
-    display: block;
 }
 
 hr {

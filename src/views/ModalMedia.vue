@@ -1,7 +1,7 @@
 <template>
     <div class="my-modal" v-show="modal.show">
         <div class="modal-header">
-            <a :href="formatedHref" target="_blank">
+            <a :href="formatedHref" download>
                 <img class="icon-download" src="@/assets/images/wpp-icon-donwload-modal.svg">
             </a>
 
