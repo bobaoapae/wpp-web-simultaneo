@@ -28,7 +28,7 @@
         name: "InputMessage",
         data() {
             return {
-                mensagem:''
+                mensagem: ''
             }
         },
         computed: {
@@ -50,9 +50,14 @@
             sendMsg() {
                 const form = new FormData();
                 form.append('chatId', this.activeChat.id);
-                form.append('message', this.mensagem);
+                form.append('message', this.capitalize(this.mensagem));
 
                 api.post('/api/whatsApp/sendMessage', form);
+            },
+            capitalize(value) {
+                if (!value) return '';
+                value = value.toString();
+                return value.charAt(0).toUpperCase() + value.slice(1)
             }
 
         }

@@ -17,8 +17,8 @@ const store = new Vuex.Store({
         activeChat: null,
         poolContext: [],
         modal: {
-            type:'',
-            media:'',
+            type: '',
+            media: '',
             show: false,
             id: ''
         }
@@ -88,10 +88,16 @@ const store = new Vuex.Store({
 
     actions: {
         setNewEvent(context) {
-            const ws = new WebSocket(`${localStorage.baseURL.replace('http','ws')}/api/ws?token=${sessionStorage.TOKEN}`);
+            const ws = new WebSocket(`${localStorage.baseURL.replace('http', 'ws')}/api/ws?token=${sessionStorage.TOKEN}`);
+            ws.onclose = function (e) {
+                window.location.reload();
+            };
+            ws.onerror = function (e) {
+                window.location.reload();
+            };
 
 
-            ws.onmessage = function(e) {
+            ws.onmessage = function (e) {
                 const response = e.data.split(/,(.+)/);
                 //console.log(response);
 
@@ -178,24 +184,6 @@ const store = new Vuex.Store({
                     }
                 }
             };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
             /*
