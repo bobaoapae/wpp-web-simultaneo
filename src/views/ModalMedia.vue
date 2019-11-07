@@ -87,11 +87,17 @@
         align-items: center;
     }
 
+    .box-image, .box-video {
+        padding: 15px;
+    }
+
     .box-image img {
         max-height: calc(100vh - 100px);
+        max-width: 100%;
     }
 
     .box-video video {
         max-height: calc(100vh - 100px);
+        max-width: 100%;
     }
 </style>

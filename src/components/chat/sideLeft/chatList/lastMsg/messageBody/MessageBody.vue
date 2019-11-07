@@ -4,28 +4,33 @@
     </span>
 
     <span v-else-if="isImage">
-        <img src="@/assets/images/wpp-type-foto.svg" alt="">
+        <img src="@/assets/images/wpp-type-foto.svg">
         Foto
     </span>
 
     <span v-else-if="isSticker">
-        <img src="@/assets/images/wpp-type-sticker.svg" alt="">
+        <img src="@/assets/images/wpp-type-sticker.svg">
         Figurinha
     </span>
 
     <span v-else-if="isVideo">
-        <img src="@/assets/images/wpp-type-video.svg" alt="">
+        <img src="@/assets/images/wpp-type-video.svg">
         Video
     </span>
 
     <span v-else-if="isGif">
-        <img src="@/assets/images/wpp-type-gif.svg" alt="">
+        <img src="@/assets/images/wpp-type-gif.svg">
         GIF
     </span>
 
     <span v-else-if="isDocument">
-        <img src="@/assets/images/wpp-type-document.svg" alt="">
+        <img src="@/assets/images/wpp-type-document.svg">
         {{lastMsg.filename}}
+    </span>
+
+    <span v-else-if="isAudio">
+        <img src="@/assets/images/wpp-type-ptt-blue.svg">
+        {{duration}}
     </span>
 </template>
 
@@ -56,13 +61,41 @@
             },
             isDocument() {
                 return this.lastMsg.type === 'document';
+            },
+            isAudio() {
+                return this.lastMsg.type === 'ptt';
+            },
+
+
+            duration() {
+                const duration = this.lastMsg.duration;
+
+                if (duration < 10) {
+                    return `0:0${duration}`
+                } else if (duration < 60) {
+                    return `0:${duration}`
+                } else if (duration >= 60) {
+
+                    const m = Math.floor(duration / 60);
+                    let s = Math.floor( ( ( (duration / 60) - m ) * 60) );
+
+                    if (s < 10) s = '0'+s;
+
+                    return `${m}:${s}`;
+                }
             }
         }
     }
 </script>
 
 <style scoped>
+    span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
     span img {
-        margin-right: 4px;
+        margin-right: 3px;
     }
 </style>

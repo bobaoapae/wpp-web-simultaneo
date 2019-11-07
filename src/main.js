@@ -5,10 +5,10 @@ import store from './store'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 
-Vue.config.productionTip = true
+Vue.config.productionTip = false;
 
 const vm = new Vue({
   router,
   store,
   render: h => h(App)
-}).$mount('#app')
+}).$mount('#app');

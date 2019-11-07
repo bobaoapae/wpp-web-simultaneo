@@ -10,12 +10,17 @@
                     <input type="text" id="user" placeholder="USUARIO" required v-model="form.user" />
 
                     <input
-                        type="password"
+                        :type="showPass ? 'text' : 'password'"
                         id="password"
                         placeholder="SENHA"
                         required
                         v-model="form.pass"
                     />
+                    <div class="show-pass">
+                        <label for="showPass">Mostrar senha</label>
+                        <input type="checkbox" id="showPass" v-model="showPass">
+                    </div>
+
 
                     <button type="submit" :disabled="btn.loading">{{btn.label}}</button>
 
@@ -48,7 +53,8 @@ export default {
             },
             error: {
                 active: false
-            }
+            },
+            showPass: false
         };
     },
     methods: {
@@ -157,6 +163,31 @@ form input {
     padding: 10px;
 }
 
+div.show-pass {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    margin-bottom: 20px;
+}
+
+div.show-pass label {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 0;
+    margin-right: 15px;
+}
+
+form input#password {
+    margin-bottom: 0;
+}
+
+form input#showPass {
+    margin: 0;
+    padding: 0;
+    height: 15px;
+    width: 15px;
+}
+
 form button {
     border: none;
     height: 45px;
@@ -165,6 +196,10 @@ form button {
     transition: opacity 0.3s;
     color: aliceblue;
 }
+
+
+
+
 
 form button:hover {
     opacity: 0.7;

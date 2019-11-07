@@ -64,7 +64,7 @@
                             this.addFullMediaInMsg({
                                 idChat: idChat,
                                 idMsg: this.msg.id,
-                                imagem: r.data.base64,
+                                media: r.data.base64,
                             })
                         })
                 }

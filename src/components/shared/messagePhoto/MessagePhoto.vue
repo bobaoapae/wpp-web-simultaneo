@@ -88,7 +88,7 @@
                             this.addFullMediaInMsg({
                                 idChat: idChat,
                                 idMsg: this.msg.id,
-                                imagem: r.data.base64,
+                                media: r.data.base64,
                             })
                         })
                 }
@@ -127,6 +127,7 @@
     .box-caption {
         max-width: 330px;
         min-width: 330px;
+        word-wrap: break-word;
     }
 
     .box-image {

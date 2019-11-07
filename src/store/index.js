@@ -61,20 +61,16 @@ const store = new Vuex.Store({
             state.chats[payload.index].msgs.push(payload.newMsg)
         },
 
-        SET_IMAGE_IN_MSG(state, payload) {
-            state.chats[payload.indexChat].msgs[payload.indexMsg].base64MediaFull = payload.imagem;
+        SET_MEDIA_IN_MSG(state, payload) {
+            state.chats[payload.indexChat].msgs[payload.indexMsg].base64MediaFull = payload.media;
         },
 
         SET_CHAT(state, payload) {
             state.chats[payload.index] = payload.chat;
         },
 
-        SET_MSG(state, payload) {
+        UPDATE_MSG(state, payload) {
             state.chats[payload.indexChat].msgs[payload.indexMsg].ack = payload.msg.ack;
-        },
-
-        SET_UNREADCOUNT(state, payload) {
-            state.chats[payload.indexChat].unreadCount = payload.msg.unreadCount;
         },
 
         SET_MODAL(state, payload) {
@@ -82,6 +78,16 @@ const store = new Vuex.Store({
             state.modal.media = payload.media;
             state.modal.show = payload.show;
             state.modal.id = payload.id;
+        },
+
+        UPDATE_CHAT(state, payload) {
+            state.chats[payload.indexChat].muteExpiration = payload.chat.muteExpiration;
+            state.chats[payload.indexChat].name = payload.chat.name;
+            state.chats[payload.indexChat].noEarlierMsgs = payload.chat.noEarlierMsgs;
+            state.chats[payload.indexChat].picture = payload.chat.picture;
+            state.chats[payload.indexChat].pin = payload.chat.pin;
+            state.chats[payload.indexChat].t = payload.chat.t;
+            state.chats[payload.indexChat].unreadCount = payload.chat.unreadCount;
         }
 
     },
@@ -106,19 +112,12 @@ const store = new Vuex.Store({
 
                 switch (responseType) {
 
-                    case 'init': {
-                        const r = JSON.parse(pako.inflate(atob(responseData), {to: 'string'}));
-                        console.log('init', r);
+                    case 'need-qrcode': {
+                        console.log('need-qrcode', responseData);
+                        context.commit("SET_IMG_QRCODE", responseData);
 
-                        context.commit("SET_CHATS", r.chats);
-                        context.commit("SET_SELF", r.self);
-                        context.commit("SET_IS_LOADING_CHAT", false);
-                        context.state.poolContext.forEach(func => func());
-                        context.state.poolContext = [];
-
-                        break
+                        break;
                     }
-
 
                     case 'update-estado': {
                         console.log('update-estado', responseData);
@@ -134,20 +133,38 @@ const store = new Vuex.Store({
                             context.commit('SET_IS_LOADING_CHAT', true);
                         }
 
-                        break
+                        break;
+                    }
+
+
+                    case 'init': {
+                        const r = JSON.parse(pako.inflate(atob(responseData), {to: 'string'}));
+                        console.log('init', r);
+
+                        context.commit("SET_CHATS", r.chats);
+                        context.commit("SET_SELF", r.self);
+                        context.commit("SET_IS_LOADING_CHAT", false);
+                        context.state.poolContext.forEach(func => func());
+                        context.state.poolContext = [];
+
+                        break;
+                    }
+
+
+                    case 'new-chat': {
+                        const r = JSON.parse(responseData);
+                        console.log('new-chat::', r);
+
+
+                        break;
                     }
 
                     case 'chat-update': {
-
-                        break
-                    }
-
-                    case 'update-msg': {
                         const r = JSON.parse(responseData);
-                        console.log('update-msg', r);
+                        console.log('chat-update::', r);
 
                         let funcao = () => {
-                            context.dispatch("updateMsg", r);
+                            context.dispatch("updateChat", r);
                         };
 
                         if (context.state.isLoadingChat) {
@@ -156,19 +173,12 @@ const store = new Vuex.Store({
                             funcao();
                         }
 
-                        break
-                    }
-
-                    case 'need-qrcode': {
-                        console.log('need-qrcode', responseData);
-                        context.commit("SET_IMG_QRCODE", responseData);
-
-                        break
+                        break;
                     }
 
                     case 'new-msg': {
                         const r = JSON.parse(responseData);
-                        console.log('new-msg', r);
+                        console.log('new-msg::', r);
 
                         let funcao = () => {
                             context.dispatch("addNewMsgInChat", r);
@@ -180,95 +190,32 @@ const store = new Vuex.Store({
                             funcao();
                         }
 
-                        break
+                        break;
+                    }
+
+                    case 'update-msg': {
+                        const r = JSON.parse(responseData);
+                        console.log('update-msg::', r);
+
+                        let funcao = () => {
+                            context.dispatch("updateMsg", r);
+                        };
+
+                        if (context.state.isLoadingChat) {
+                            context.state.poolContext.push(funcao);
+                        } else {
+                            funcao();
+                        }
+
+                        break;
                     }
                 }
             };
-
-
-            /*
-            let event = new EventSource(
-                `${localStorage.baseURL}/api/whatsApp/events?token=${sessionStorage.TOKEN}`,
-            );
-
-            event.addEventListener('update-estado', e => {
-                console.log('update-estado', e);
-
-                if (e.data === 'QR_CODE_SCANNED') {
-                    context.commit("SET_QR_CODE_LOGGED", true);
-                } else if (e.data === 'LOADING_STORE') {
-                    context.commit("SET_QR_CODE_LOGGED", true);
-                } else if (e.data === 'LOGGED') {
-                    context.commit("SET_QR_CODE_LOGGED", true);
-                } else if (e.data === 'WAITING_QR_CODE_SCAN') {
-                    context.commit("SET_QR_CODE_LOGGED", false);
-                    context.commit('SET_IS_LOADING_CHAT', true);
-                }
-            });
-
-            event.addEventListener('chat-update', e => {
-                const r = JSON.parse(e.data);
-                console.log('chat-update', r);
-            });
-
-            event.addEventListener('update-msg', e => {
-                const r = JSON.parse(e.data);
-                console.log('update-msg', r);
-
-                let funcao = () => {
-                    context.dispatch("updateMsg", r);
-                };
-
-                if (context.state.isLoadingChat) {
-                    context.state.poolContext.push(funcao);
-                } else {
-                    funcao();
-                }
-            });
-
-            event.addEventListener('need-qrcode', e => {
-                // e.data = base64 qrcode
-                console.log('need-qrcode', e);
-                context.commit("SET_IMG_QRCODE", e.data);
-            });
-
-            event.addEventListener('new-msg', e => {
-                const r = JSON.parse(e.data);
-                console.log('new-msg', r);
-
-                let funcao = () => {
-                    context.dispatch("addNewMsgInChat", r);
-                };
-
-                if (context.state.isLoadingChat) {
-                    context.state.poolContext.push(funcao);
-                } else {
-                    funcao();
-                }
-            });
-
-            event.addEventListener('init', e => {
-                const r = JSON.parse(pako.inflate(atob(e.data), {to: 'string'}));
-                console.log('init', r);
-
-                context.commit("SET_CHATS", r.chats);
-                context.commit("SET_SELF", r.self);
-                context.commit("SET_IS_LOADING_CHAT", false);
-                context.state.poolContext.forEach(func => func());
-                context.state.poolContext = [];
-            });
-
-            event.addEventListener('low-batery', e => {
-                console.log('low-batery', e);
-            });
-
-            event.addEventListener('new-msg-v3', e => {
-                console.log('new-msg-v3', e);
-            });
-
-            */
-
         },
+
+        /*
+            CHATS
+        */
         getChats(context) {
             const TOKEN = sessionStorage.TOKEN;
             api.get(`/api/chats?token=${TOKEN}`)
@@ -281,6 +228,43 @@ const store = new Vuex.Store({
                 });
 
         },
+
+        updateChat(context, payload) {
+            const indexChat = context.state.chats.findIndex((element) => {
+                return element.id === payload.id;
+            });
+
+            const data = {
+                indexChat,
+                chat: payload
+            };
+
+            context.commit('UPDATE_CHAT', data);
+        },
+
+        sortChatsByTime(context) {
+            //console.log('ORDENANDO CHATS...');
+            const chats = context.state.chats;
+
+            chats.sort(function (a, b) {
+                if (a.msgs[a.msgs.length - 1] === undefined || b.msgs[b.msgs.length - 1] === undefined) {
+                    return 0;
+                }
+                if (a.msgs[a.msgs.length - 1].t < b.msgs[b.msgs.length - 1].t) {
+                    return 1;
+                }
+                if (a.msgs[a.msgs.length - 1].t > b.msgs[b.msgs.length - 1].t) {
+                    return -1;
+                }
+                return 0;
+            });
+            context.commit('SET_CHATS', chats);
+        },
+
+
+        /*
+            MESSAGES
+        */
         addNewMsgInChat(context, payload) {
 
             // pegar o indice do chat
@@ -318,24 +302,19 @@ const store = new Vuex.Store({
             });
 
 
-            // definir msgs nao lidas
-            const data = {
-                indexChat: indiceChat,
-                msg: payload
-            };
-
-            context.commit('SET_UNREADCOUNT', data);
             context.dispatch("sortChatsByTime");
         },
+
         updateMsg(context, payload) {
-            // pegar o indice do chat
+            let chatId;
+            if (payload.id.fromMe) {
+                chatId = payload.to;
+            } else {
+                chatId = payload.from;
+            }
+
             const indexChat = context.state.chats.findIndex((element) => {
-                // SE a mensagem foi enviado por mim
-                if (payload.id.fromMe) {
-                    return element.id === payload.to;
-                } else {
-                    return element.id === payload.from;
-                }
+                return element.id === chatId;
             });
 
             const indexMsg = context.state.chats[indexChat].msgs.findIndex((element) => {
@@ -348,35 +327,15 @@ const store = new Vuex.Store({
                 msg: payload
             };
 
-            context.commit('SET_MSG', data);
-            context.commit('SET_UNREADCOUNT', data);
+            context.commit('UPDATE_MSG', data);
         },
-        sortChatsByTime(context) {
-            //console.log('ORDENANDO CHATS...');
-            const chats = context.state.chats;
 
-            chats.sort(function (a, b) {
-                if (a.msgs[a.msgs.length - 1] === undefined || b.msgs[b.msgs.length - 1] === undefined) {
-                    return 0;
-                }
-                if (a.msgs[a.msgs.length - 1].t < b.msgs[b.msgs.length - 1].t) {
-                    return 1;
-                }
-                if (a.msgs[a.msgs.length - 1].t > b.msgs[b.msgs.length - 1].t) {
-                    return -1;
-                }
-                return 0;
-            });
-            context.commit('SET_CHATS', chats);
-        },
         addFullMediaInMsg(context, payload) {
             const idChat = payload.idChat;
             const idMsg = payload.idMsg;
-            const imagem = payload.imagem;
+            const media = payload.media;
 
             const indexChat = context.state.chats.findIndex((element) => {
-                //console.log('idChat:', idChat);
-                //console.log('element.id:', element.id);
                 return element.id === idChat;
             });
 
@@ -384,15 +343,16 @@ const store = new Vuex.Store({
                 return element.id === idMsg;
             });
 
-
             const data = {
                 indexChat,
                 indexMsg,
-                imagem
+                media
             };
 
-            context.commit('SET_IMAGE_IN_MSG', data);
-        }
+            context.commit('SET_MEDIA_IN_MSG', data);
+        },
+
+
     },
     modules: {}
 });

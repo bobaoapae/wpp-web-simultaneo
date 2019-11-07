@@ -21,6 +21,7 @@
             <MessageSticker :msg="msg" v-else-if="isSticker"/>
             <MessageVideo :msg="msg" v-else-if="isVideo"/>
             <MessageDocument :msg="msg" v-else-if="isDocument"/>
+            <MessageAudio :msg="msg" v-else-if="isAudio" />
         </div>
     </div>
 </template>
@@ -32,11 +33,13 @@
     import MessageSticker from "@/components/shared/messageSticker/MessageSticker.vue";
     import MessageVideo from '@/components/shared/messageVideo/VideoMessage.vue';
     import MessageDocument from "@/components/shared/messageDocument/MessageDocument";
-    import ForwardedIndicator from "../forwardedIndicator/ForwardedIndicator";
+    import ForwardedIndicator from "@/components/shared/forwardedIndicator/ForwardedIndicator";
+    import MessageAudio from "@/components/shared/messageAudio/MessageAudio";
 
     export default {
         name: "MessageIn",
         components: {
+            MessageAudio,
             ForwardedIndicator,
             MessageText,
             MessagePhoto,
@@ -66,7 +69,10 @@
             },
             isDocument() {
                 return this.msg.type === 'document';
-            }
+            },
+            isAudio() {
+                return this.msg.type === 'ptt'
+            },
         }
     };
 </script>

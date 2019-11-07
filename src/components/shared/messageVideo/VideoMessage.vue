@@ -69,21 +69,23 @@
                         .then(r => {
                             //console.log(r.data.base64);
                             this.srcVideo = r.data.base64;
-
-                            let idChat;
-                            if (this.msg.id.fromMe) {
-                                idChat = this.msg.to;
-                            } else {
-                                idChat = this.msg.from;
-                            }
-
-                            this.addFullMediaInMsg({
-                                idChat: idChat,
-                                idMsg: this.msg.id,
-                                imagem: r.data.base64,
-                            })
+                            this.saveInCache(r.data.base64)
                         })
                 }
+            },
+            saveInCache(media) {
+                let idChat;
+                if (this.msg.id.fromMe) {
+                    idChat = this.msg.to;
+                } else {
+                    idChat = this.msg.from;
+                }
+
+                this.addFullMediaInMsg({
+                    idChat: idChat,
+                    idMsg: this.msg.id,
+                    media: media,
+                })
             },
             handleClick() {
                 if (this.srcVideo) {

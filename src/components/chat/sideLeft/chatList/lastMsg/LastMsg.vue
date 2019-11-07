@@ -1,6 +1,6 @@
 <template>
-    <div id="last-msg" class="flex-grow-1" :class="{unread : isUnread}" v-if="lastMsg">
-        <MessageIconStatus :ack="lastMsg.ack"/>
+    <div class="last-msg flex-grow-1 d-flex align-items-center" :class="{unread : isUnread}" v-if="lastMsg">
+        <MessageIconStatus :ack="lastMsg.ack" class="icon-status"/>
 
         <span v-if="isGroup && lastMsg.sender">
             {{lastMsg.sender.name || '+'+lastMsg.sender.id.replace('@c.us', '')}}:
@@ -17,7 +17,7 @@
     // audio
     // sticker
     // video
-    // ptt = documento
+    // ptt = audio
     // document
     // revoked = Mensagem apagada
     // e2e_notification = O código de segurança de ... mudou.
@@ -81,15 +81,17 @@
 </script>
 
 <style scoped>
-    #last-msg {
+    .last-msg {
         overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
     }
 
-    #last-msg span {
+    .last-msg span {
         color: rgba(0, 0, 0, 0.4);
         font-size: 14px;
+    }
+
+    .icon-status {
+        margin-right: 3px;
     }
 
     .unread span {
