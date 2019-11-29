@@ -94,7 +94,10 @@ const store = new Vuex.Store({
 
     actions: {
         setNewEvent(context) {
-            const ws = new WebSocket(`${localStorage.baseURL.replace('http', 'ws')}/api/ws?token=${sessionStorage.TOKEN}`);
+            const ws = new WebSocket(`${localStorage.baseURL.replace('http', 'ws')}/api/ws`);
+            ws.onopen = function(e) {
+                ws.send(`token, ${sessionStorage.TOKEN}`);
+            };
             ws.onclose = function (e) {
                 window.location.reload();
             };
@@ -210,6 +213,7 @@ const store = new Vuex.Store({
                         break;
                     }
                 }
+                return false;
             };
         },
 
