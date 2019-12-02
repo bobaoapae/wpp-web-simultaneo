@@ -95,7 +95,7 @@ const store = new Vuex.Store({
     actions: {
         setNewEvent(context) {
             const ws = new WebSocket(`${localStorage.baseURL.replace('http', 'ws')}/api/ws`);
-            ws.onopen = function(e) {
+            ws.onopen = function (e) {
                 ws.send(`token, ${sessionStorage.TOKEN}`);
             };
             ws.onclose = function (e) {
@@ -251,6 +251,10 @@ const store = new Vuex.Store({
             const chats = context.state.chats;
 
             chats.sort(function (a, b) {
+                var n = a.pin || 0
+                    , r = b.pin || 0;
+                if (n || r)
+                    return n !== r ? n > r ? -1 : 1 : a.id._serialized < b.id._serialized ? -1 : 1;
                 if (a.msgs[a.msgs.length - 1] === undefined || b.msgs[b.msgs.length - 1] === undefined) {
                     return 0;
                 }
