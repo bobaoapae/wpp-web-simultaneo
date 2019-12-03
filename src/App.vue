@@ -26,4 +26,16 @@ body {
 ::-webkit-scrollbar-track {
     background: hsla(0,0%,100%,.08);
 }
+
+#conversation-header .emojione {
+    width: 20px;
+}
+
+.box-info-chat .emojione {
+    width: 20px;
+}
+
+#messages-panel .emojione {
+    width: 24px;
+}
 </style>

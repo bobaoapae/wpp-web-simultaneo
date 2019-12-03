@@ -4,12 +4,13 @@
         class="flex-grow-1"
         :class="{unread : isUnread}"
     >
-        <span v-if="chat.contact.name">{{chat.contact.name }}</span>
-        <span v-else>{{ chat.contact.id | formatNumber }}</span>
+        <span v-html="nameEmojify"></span>
     </div>
 </template>
 
 <script>
+import emojione from 'emojione';
+
 export default {
     name: "NameChat",
     props: {
@@ -18,19 +19,15 @@ export default {
             required: true
         }
     },
-    filters: {
-        formatNumber(value) {
-            value = value.replace('@c.us', '');
-             value = '+' + value;
-            return value;
-        }
-    },
     computed: {
         isUnread() {
-            if (this.chat.unreadCount > 0) {
-                return true;
+            return this.chat.unreadCount > 0;
+        },
+        nameEmojify() {
+            if (this.chat.contact.name) {
+                return emojione.toImage(this.chat.contact.name);
             } else {
-                return false;
+                return "+" + this.chat.id.replace('@c.us', '');
             }
         }
     }

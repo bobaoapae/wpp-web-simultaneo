@@ -138,7 +138,8 @@ const store = new Vuex.Store({
 
 
                     case 'init': {
-                        const r = JSON.parse(pako.inflate(atob(responseData), {to: 'string'}));
+                        //const r = JSON.parse(pako.inflate(atob(responseData), {to: 'string'}));
+                        const r = JSON.parse(responseData);
                         console.log('init', r);
 
                         context.commit("SET_CHATS", r.chats);

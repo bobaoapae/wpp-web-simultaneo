@@ -5,9 +5,7 @@
         </div>
 
         <div class="box-info">
-            <div class="nome">
-                {{activeChat.contact.name || "+"+activeChat.id.replace('@c.us','')}}
-            </div>
+            <div class="nome" v-html="nameEmojify"></div>
 
             <div class="info">
 
@@ -44,7 +42,14 @@
             }
         },
         computed: {
-            ...mapState(['activeChat'])
+            ...mapState(['activeChat']),
+            nameEmojify() {
+                if (this.activeChat.contact.name) {
+                    return emojione.toImage(this.activeChat.contact.name)
+                } else {
+                    return "+" + this.activeChat.id.replace('@c.us', '');
+                }
+            }
         },
         created() {
             console.log('activeChat', this.activeChat);

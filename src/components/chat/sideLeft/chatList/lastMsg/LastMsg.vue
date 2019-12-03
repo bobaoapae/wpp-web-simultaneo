@@ -2,8 +2,8 @@
     <div class="last-msg flex-grow-1 d-flex align-items-center" :class="{unread : isUnread}" v-if="lastMsg">
         <MessageIconStatus :ack="lastMsg.ack" class="icon-status"/>
 
-        <span v-if="isGroup && lastMsg.sender">
-            {{lastMsg.sender.name || '+'+lastMsg.sender.id.replace('@c.us', '')}}:
+        <span v-if="isGroup && lastMsg.sender && !lastMsg.id.fromMe">
+            {{senderFormated}}:
         </span>
 
         <MessageBody :lastMsg="lastMsg"/>
@@ -33,6 +33,7 @@
     //notification_template
     //broadcast_notification
 
+    import emojione from "emojione";
     import MessageBody from './messageBody/MessageBody.vue';
     import MessageIconStatus from "@/components/shared/messageIconStatus/MessageIconStatus.vue";
 
@@ -72,6 +73,13 @@
                 });
 
                 return msgsFiltered[msgsFiltered.length - 1];
+            },
+            senderFormated() {
+                if (this.lastMsg.sender.shortName) {
+                    return emojione.toImage(this.lastMsg.sender.shortName);
+                } else {
+                    return '+'+this.lastMsg.sender.id.replace('@c.us', '');
+                }
             }
         },
         methods: {
@@ -88,6 +96,12 @@
     .last-msg span {
         color: rgba(0, 0, 0, 0.4);
         font-size: 14px;
+        white-space: nowrap;
+        margin-right: 3px;
+    }
+
+    img {
+        width: 20px;
     }
 
     .icon-status {

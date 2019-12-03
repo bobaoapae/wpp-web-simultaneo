@@ -1,7 +1,14 @@
 <template>
     <div>
         <div class="collapse" id="collapseEmoji">
-            <picker set="emojione" @select="addEmoji" :showPreview="false" :emojiSize="32" :recent="[]"/>
+            <picker
+                    set="emojione"
+                    @select="addEmoji"
+                    :showPreview="false"
+                    :emojiSize="32"
+                    :recent="[]"
+                    :style="{ height:'320px' }"
+            />
         </div>
 
 
@@ -17,8 +24,7 @@
                         class="input"
                         contenteditable="true"
                         @keypress.enter.exact.prevent="handleEnterPress"
-                        @input="onEdit"
-                        v-html="mensagem"
+                        @input="onInput"
                 ></div>
             </div>
 
@@ -32,26 +38,28 @@
 
 <script>
     import api from '@/api.js';
-    import {Collapse} from 'bootstrap';
-    import {Picker} from 'emoji-mart-vue';
-    import { Emoji } from 'emoji-mart-vue'
-    import {mapState} from 'vuex';
+    import { Collapse } from 'bootstrap';
+    import { Picker } from 'emoji-mart-vue';
+    import { mapState } from 'vuex';
+    import emojione from 'emojione'
 
     export default {
         name: "InputMessage",
         components: {
             Picker,
-            Emoji,
         },
         data() {
             return {
-                mensagem: ""
+                mensagem: "<b>dw</b>",
             }
         },
         computed: {
             ...mapState(['activeChat'])
         },
         methods: {
+            onChange(evt) {
+                console.log(evt);
+            },
             addEmoji(evt) {
                 console.log(evt);
             },
@@ -68,9 +76,10 @@
                 evt.target.innerText = '';
                 this.mensagem = '';
             },
-            onEdit(evt) {
-                //this.mensagem = evt.target.innerText;
-                //console.log("onEdit ->", this.mensagem);
+            onInput(evt) {
+                this.mensagem = evt.target.innerText;
+                console.log("onEdit ->", evt.target.innerHTML);
+                console.log("this.mensagem =>", this.mensagem);
             },
             sendMsg() {
                 const form = new FormData();
