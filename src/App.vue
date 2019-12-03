@@ -38,4 +38,8 @@ body {
 #messages-panel .emojione {
     width: 24px;
 }
+
+.box-input .emojione {
+    width: 20px;
+}
 </style>

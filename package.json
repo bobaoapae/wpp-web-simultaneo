@@ -12,7 +12,6 @@
     "core-js": "^3.3.2",
     "emoji-mart-vue": "^2.6.6",
     "emojione": "^4.5.0",
-    "eventsource": "^1.0.7",
     "jquery": "^3.4.1",
     "pako": "^1.0.10",
     "popper.js": "^1.16.0",
