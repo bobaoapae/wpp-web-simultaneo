@@ -5,7 +5,15 @@ import store from './store'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 
+import VueEmoji from 'vue-emojione';
+
+Vue.use(VueEmoji, {
+  imageType: 'svg',
+  sprites: true
+});
+
 Vue.config.productionTip = false;
+
 
 const vm = new Vue({
   router,

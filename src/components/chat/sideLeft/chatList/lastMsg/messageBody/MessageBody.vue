@@ -1,7 +1,5 @@
 <template>
-    <span v-if="isChat">
-        {{lastMsg.body}}
-    </span>
+    <span v-if="isChat" v-html="bodyFormated"></span>
 
     <span v-else-if="isImage">
         <img src="@/assets/images/wpp-type-foto.svg">
@@ -35,6 +33,7 @@
 </template>
 
 <script>
+    import emojione from 'emojione';
     export default {
         name:'MessageBody',
         props: {
@@ -65,8 +64,9 @@
             isAudio() {
                 return this.lastMsg.type === 'ptt';
             },
-
-
+            bodyFormated() {
+                return emojione.toImage(this.lastMsg.body);
+            },
             duration() {
                 const duration = this.lastMsg.duration;
 

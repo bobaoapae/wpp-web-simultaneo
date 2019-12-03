@@ -1,59 +1,96 @@
 <template>
-    <div id="input-message">
-        <div class="box-icon-send">
-            <img src="@/assets/images/wpp-icon-emoji.svg" alt="Button emoji">
+    <div>
+        <div class="collapse" id="collapseEmoji">
+            <picker
+                    set="emojione"
+                    @select="addEmoji"
+                    :showPreview="false"
+                    :emojiSize="32"
+                    :recent="[]"
+                    :style="{ height:'320px' }"
+            />
         </div>
 
-        <div class="box-input">
-            <div
-                    class="input"
-                    contenteditable="true"
-                    @keypress.prevent.enter="handleEnterPress"
-                    v-html="mensagem"
-                    @input="onEdit"
-            ></div>
+
+        <div id="input-message">
+            <div class="box-icon-send">
+                <img src="@/assets/images/wpp-icon-emoji.svg" alt="Button emoji" data-toggle="collapse"
+                     href="#collapseEmoji" role="button">
+            </div>
+
+            <div class="box-input">
+                <div
+                        data-text="Digite uma mensagem"
+                        class="input"
+                        contenteditable="true"
+                        @keypress.enter.exact.prevent="handleEnterPress"
+                        @input="onInput"
+                ></div>
+            </div>
+
+            <div class="box-icon-emoji">
+                <img src="@/assets/images/wpp-icon-send.svg" alt="Button emoji">
+            </div>
         </div>
 
-        <div class="box-icon-emoji">
-            <img src="@/assets/images/wpp-icon-send.svg" alt="Button emoji">
-        </div>
     </div>
 </template>
 
 <script>
-    import api from '@/api.js'
-    import {mapState} from 'vuex'
+    import api from '@/api.js';
+    import { Collapse } from 'bootstrap';
+    import { Picker } from 'emoji-mart-vue';
+    import { mapState } from 'vuex';
+    import emojione from 'emojione'
 
     export default {
         name: "InputMessage",
+        components: {
+            Picker,
+        },
         data() {
             return {
-                mensagem: ''
+                mensagem: "<b>dw</b>",
             }
         },
         computed: {
             ...mapState(['activeChat'])
         },
         methods: {
+            onChange(evt) {
+                console.log(evt);
+            },
+            addEmoji(evt) {
+                console.log(evt);
+            },
+            labelClick() {
+
+            },
             handleEnterPress(evt) {
+                console.log("handleEnterPress -> ");
                 this.mensagem = evt.target.innerText;
-                //console.log('ENVIAR MENSAGEM:', this.mensagem);
+                console.log('ENVIAR MENSAGEM:', this.mensagem);
 
                 this.sendMsg();
 
                 evt.target.innerText = '';
                 this.mensagem = '';
             },
-            onEdit(evt) {
-
+            onInput(evt) {
+                this.mensagem = evt.target.innerText;
+                console.log("onEdit ->", evt.target.innerHTML);
+                console.log("this.mensagem =>", this.mensagem);
             },
             sendMsg() {
                 const form = new FormData();
                 form.append('chatId', this.activeChat.id);
-                form.append('message', this.capitalize(this.mensagem));
+                form.append('message', this.mensagem);
 
-                api.post('/api/whatsApp/sendMessage', form);
+                console.log("ENVIAR -> ", this.mensagem);
+
+                //api.post('/api/whatsApp/sendMessage', form);
             },
+
             capitalize(value) {
                 if (!value) return '';
                 value = value.toString();
@@ -65,6 +102,23 @@
 </script>
 
 <style scoped>
+    .emoji-mart {
+        width: 100% !important;
+    }
+
+    [contentEditable=true]:empty:before {
+        content: attr(data-text);
+        color: #a0a0a0;
+        cursor: text;
+    }
+
+    .label {
+        display: none;
+        position: absolute;
+        color: #a0a0a0;
+        visibility: visible;
+    }
+
     #input-message {
         display: flex;
         background: #EFEFEF;
@@ -105,7 +159,6 @@
         outline: none;
         overflow-x: hidden;
         overflow-y: auto;
-        position: relative;
         white-space: pre-wrap;
         word-wrap: break-word;
         z-index: 1;

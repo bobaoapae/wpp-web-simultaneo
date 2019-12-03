@@ -15,6 +15,7 @@
     import MessageTime from "../messageTime/MessageTime";
 
     import {msg} from '@/helper.js'
+    import emojione from "emojione";
 
     export default {
         name: "MessageText",
@@ -30,7 +31,7 @@
         },
         computed: {
             msgFormated() {
-                return msg.formatMsg(this.msg.body);
+                return emojione.toImage(msg.formatMsg(this.msg.body));
             }
         }
     };
