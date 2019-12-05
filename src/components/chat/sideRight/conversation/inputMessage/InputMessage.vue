@@ -66,6 +66,7 @@
 <script>
     import api from "@/api.js";
     import {Picker} from 'emoji-mart-vue-fast'
+    import {collapse} from 'bootstrap'
     import {mapState} from "vuex";
     import jquery from "jquery";
     import {msg} from '@/helper.js'
@@ -112,27 +113,21 @@
             },
             handleEnterPress(evt) {
                 console.log("handleEnterPress -> ");
-                this.mensagem = evt.target.innerText;
+                this.mensagem = this.formatarEnviar(jquery(this.$refs.input));
                 console.log("ENVIAR MENSAGEM:", this.mensagem);
 
                 if (this.mensagem !== '') {
                     this.sendMsg();
-
-                    evt.target.innerText = "";
+                    this.$refs.input.innerHTML = "";
                     this.mensagem = "";
                 }
-            },
-            onInput(evt) {
-                this.mensagem = evt.target.innerText;
-                console.log("onEdit ->", evt.target.innerHTML);
-                console.log("this.mensagem =>", this.mensagem);
             },
             sendMsg() {
                 console.log("SEND MSG ENVIAR ->");
 
                 const form = new FormData();
                 form.append("chatId", this.activeChat.id);
-                form.append("message", this.formatarEnviar(jquery(".input")));
+                form.append("message", this.mensagem);
 
                 console.log("ENVIAR -> ", this.mensagem);
 
