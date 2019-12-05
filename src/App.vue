@@ -24,12 +24,16 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-    background: hsla(0,0%,100%,.08);
+    background: hsla(0, 0%, 100%, .08);
 }
 
 .emoji-mart-category-label span {
     background-color: #f0f0f0 !important;
     color: #969696;
+}
+
+.emoji-type-image.emoji-set-apple {
+    background-image: url("assets/images/emojis-apple.png") !important;
 }
 
 </style>
