@@ -1,7 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import api from '@/api';
-import pako from 'pako';
 
 Vue.use(Vuex);
 

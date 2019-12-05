@@ -27,19 +27,9 @@ body {
     background: hsla(0,0%,100%,.08);
 }
 
-#conversation-header .emojione {
-    width: 20px;
+.emoji-mart-category-label span {
+    background-color: #f0f0f0 !important;
+    color: #969696;
 }
 
-.box-info-chat .emojione {
-    width: 20px;
-}
-
-#messages-panel .emojione {
-    width: 24px;
-}
-
-.box-input .emojione {
-    width: 20px;
-}
 </style>

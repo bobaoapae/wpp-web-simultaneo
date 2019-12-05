@@ -4,13 +4,7 @@ import router from './router'
 import store from './store'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
-
-import VueEmoji from 'vue-emojione';
-
-Vue.use(VueEmoji, {
-  imageType: 'svg',
-  sprites: true
-});
+import 'emoji-mart-vue-fast/css/emoji-mart.css'
 
 Vue.config.productionTip = false;
 

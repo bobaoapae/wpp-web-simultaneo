@@ -33,9 +33,9 @@
     //notification_template
     //broadcast_notification
 
-    import emojione from "emojione";
     import MessageBody from './messageBody/MessageBody.vue';
     import MessageIconStatus from "@/components/shared/messageIconStatus/MessageIconStatus.vue";
+    import {msg} from '@/helper.js'
 
     export default {
         name: "LastMsg",
@@ -76,7 +76,7 @@
             },
             senderFormated() {
                 if (this.lastMsg.sender.shortName) {
-                    return emojione.toImage(this.lastMsg.sender.shortName);
+                    return msg.processNativeEmojiToImage(this.lastMsg.sender.shortName);
                 } else {
                     return '+'+this.lastMsg.sender.id.replace('@c.us', '');
                 }

@@ -30,6 +30,7 @@
     import {mapState} from 'vuex'
     import api from '@/api.js';
     import ChatActivePhoto from './chatActivePhoto/ChatActivePhoto.vue'
+    import {msg} from '@/helper.js'
 
     export default {
         name: "ConversationHeader",
@@ -45,7 +46,7 @@
             ...mapState(['activeChat']),
             nameEmojify() {
                 if (this.activeChat.contact.name) {
-                    return emojione.toImage(this.activeChat.contact.name)
+                    return msg.processNativeEmojiToImage(this.activeChat.contact.name)
                 } else {
                     return "+" + this.activeChat.id.replace('@c.us', '');
                 }

@@ -33,9 +33,10 @@
 </template>
 
 <script>
-    import emojione from 'emojione';
+    import {msg} from '@/helper.js'
+
     export default {
-        name:'MessageBody',
+        name: 'MessageBody',
         props: {
             lastMsg: {
                 type: Object,
@@ -65,7 +66,7 @@
                 return this.lastMsg.type === 'ptt';
             },
             bodyFormated() {
-                return emojione.toImage(this.lastMsg.body);
+                return msg.processNativeEmojiToImage(this.lastMsg.body);
             },
             duration() {
                 const duration = this.lastMsg.duration;
@@ -77,9 +78,9 @@
                 } else if (duration >= 60) {
 
                     const m = Math.floor(duration / 60);
-                    let s = Math.floor( ( ( (duration / 60) - m ) * 60) );
+                    let s = Math.floor((((duration / 60) - m) * 60));
 
-                    if (s < 10) s = '0'+s;
+                    if (s < 10) s = '0' + s;
 
                     return `${m}:${s}`;
                 }

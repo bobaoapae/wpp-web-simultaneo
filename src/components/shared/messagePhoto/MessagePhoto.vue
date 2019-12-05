@@ -28,7 +28,6 @@
     import MessageTime from "../messageTime/MessageTime";
     import LoadingMedia from "../loadingMedia/LoadingMedia";
     import api from '@/api.js';
-    import emojione from "emojione";
     import {msg} from '@/helper.js';
     import {mapActions, mapMutations} from 'vuex'
 
@@ -63,7 +62,7 @@
             },
             captionFormated() {
                 if (this.msg.caption) {
-                    return emojione.toImage(msg.formatMsg(this.msg.caption));
+                    return msg.processNativeEmojiToImage(msg.formatMsg(this.msg.caption));
                 } else {
                     return '';
                 }

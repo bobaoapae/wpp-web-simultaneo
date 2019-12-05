@@ -1,51 +1,51 @@
 <template>
     <div
-        id="name-chat"
-        class="flex-grow-1"
-        :class="{unread : isUnread}"
+            :class="{unread : isUnread}"
+            class="flex-grow-1"
+            id="name-chat"
     >
         <span v-html="nameEmojify"></span>
     </div>
 </template>
 
 <script>
-import emojione from 'emojione';
+    import {msg} from '@/helper.js'
 
-export default {
-    name: "NameChat",
-    props: {
-        chat: {
-            type: Object,
-            required: true
-        }
-    },
-    computed: {
-        isUnread() {
-            return this.chat.unreadCount > 0;
+    export default {
+        name: "NameChat",
+        props: {
+            chat: {
+                type: Object,
+                required: true
+            }
         },
-        nameEmojify() {
-            if (this.chat.contact.name) {
-                return emojione.toImage(this.chat.contact.name);
-            } else {
-                return "+" + this.chat.id.replace('@c.us', '');
+        computed: {
+            isUnread() {
+                return this.chat.unreadCount > 0;
+            },
+            nameEmojify() {
+                if (this.chat.contact.name) {
+                    return msg.processNativeEmojiToImage(this.chat.contact.name);
+                } else {
+                    return "+" + this.chat.id.replace('@c.us', '');
+                }
             }
         }
-    }
-};
+    };
 </script>
 
 <style scoped>
-#name-chat {
-    font-size: 17px;
-    color: #000000;
+    #name-chat {
+        font-size: 17px;
+        color: #000000;
 
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 
-.unread {
-    font-weight: 500 !important;
-    color: #262626 !important;
-}
+    .unread {
+        font-weight: 500 !important;
+        color: #262626 !important;
+    }
 </style>
