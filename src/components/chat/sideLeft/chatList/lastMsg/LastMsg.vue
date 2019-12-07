@@ -2,7 +2,7 @@
     <div class="last-msg flex-grow-1 d-flex align-items-center" :class="{unread : isUnread}" v-if="lastMsg">
         <MessageIconStatus :ack="lastMsg.ack" class="icon-status"/>
 
-        <span v-if="isGroup && lastMsg.sender && !lastMsg.id.fromMe">
+        <span v-if="isGroup && lastMsg.senderObj && !lastMsg.id.fromMe">
             {{senderFormated}}:
         </span>
 
@@ -65,7 +65,7 @@
                 return this.chat.unreadCount > 0;
             },
             isGroup() {
-                return this.chat.type === 'group';
+                return this.chat.kind === 'group';
             },
             lastMsg() {
                 const msgsFiltered = this.chat.msgs.filter((element) => {
@@ -75,10 +75,10 @@
                 return msgsFiltered[msgsFiltered.length - 1];
             },
             senderFormated() {
-                if (this.lastMsg.sender.shortName) {
-                    return msg.processNativeEmojiToImage(this.lastMsg.sender.shortName);
+                if (this.lastMsg.senderObj.shortName) {
+                    return msg.processNativeEmojiToImage(this.lastMsg.senderObj.shortName);
                 } else {
-                    return '+'+this.lastMsg.sender.id.replace('@c.us', '');
+                    return '+' + this.lastMsg.senderObj.id.replace('@c.us', '');
                 }
             }
         },

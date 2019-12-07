@@ -2,14 +2,14 @@
     <div class="message-in">
         <div class="message-in-container">
             <!-- Identificador de mensagens no grupo -->
-            <div class="identify-msg-group p-2" v-if="activeChat.type === 'group'">
-                <div v-if="msg.sender.name">
-                    {{msg.sender.name}}
+            <div class="identify-msg-group p-2" v-if="activeChat.kind === 'group'">
+                <div v-if="msg.senderObj.name">
+                    {{msg.senderObj.name}}
                 </div>
 
                 <div class="d-flex justify-content-between" v-else>
-                    <span class="number">+{{msg.sender.id.replace('@c.us','')}}</span>
-                    <span class="name">~{{msg.sender.pushname}}</span>
+                    <span class="number">+{{msg.senderObj.id.replace('@c.us','')}}</span>
+                    <span class="name">~{{msg.senderObj.pushname}}</span>
                 </div>
             </div>
 

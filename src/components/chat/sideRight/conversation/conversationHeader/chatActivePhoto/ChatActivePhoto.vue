@@ -29,7 +29,7 @@ export default {
         handleError() {
             this.imgOrigial = false;
 
-            if (this.activeChat.type === "group") {
+            if (this.activeChat.kind === "group") {
                 this.imgUser = false;
                 this.imgGroup = true;
             } else {

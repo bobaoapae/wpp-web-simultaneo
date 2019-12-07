@@ -30,10 +30,10 @@ export default {
     computed: {
         ...mapState(["activeChat"]),
         isChat() {
-            return this.activeChat.type === 'chat';
+            return this.activeChat.kind === 'chat';
         },
         isGroup() {
-            return this.activeChat.type === 'group';
+            return this.activeChat.kind === 'group';
         }
     },
     mounted() {
