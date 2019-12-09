@@ -1,8 +1,6 @@
 <template>
     <div>
-        <div @mousemove="handlePickerChange" @wheel="handlePickerChange"
-             class="collapse"
-             id="collapseEmoji">
+        <b-collapse id="collapse-emoji">
             <picker
                     :color="'#009688'"
                     :data="emojiIndex"
@@ -29,16 +27,15 @@
                     @select="addEmoji"
                     set="apple"
             />
-        </div>
+        </b-collapse>
 
         <div id="input-message">
             <div class="box-icon-emoji">
-                <img
+                <b-img
+                        v-b-toggle.collapse-emoji
                         @mousedown.prevent
                         alt="Button emoji"
                         class="btn-emoji-open"
-                        data-toggle="collapse"
-                        href="#collapseEmoji"
                         role="button"
                         src="@/assets/images/wpp-icon-emoji.svg"
                 />
@@ -66,9 +63,7 @@
 <script>
     import api from "@/api.js";
     import {Picker} from 'emoji-mart-vue-fast'
-    import {collapse} from 'bootstrap'
     import {mapState} from "vuex";
-    import jquery from "jquery";
     import {msg} from '@/helper.js'
 
     export default {
@@ -87,33 +82,19 @@
         },
         methods: {
             onPaste(evt) {
-                console.log("PASTE", evt.clipboardData.getData("text"));
                 const textMsg = msg.processNativeEmojiToImage(evt.clipboardData.getData("text"));
                 document.execCommand("insertHTML", false, textMsg);
             },
-            onChange(evt) {
-                console.log(evt);
+            onInput(evt) {
+
             },
             addEmoji(emoji) {
                 this.$refs.input.focus();
                 emoji = emoji.native;
                 document.execCommand("insertHTML", false, msg.processNativeEmojiToImage(emoji));
             },
-            handlePickerChange() {
-                console.log("handlePickerChange");
-                jquery(".emoji-mart-emoji").on("mousedown", (e) => {
-                    e.preventDefault();
-                });
-                jquery(".emoji-type-image").on("mousedown", (e) => {
-                    e.preventDefault();
-                });
-                jquery(".emoji-mart-anchor").on("mousedown", (e) => {
-                    e.preventDefault();
-                });
-            },
             handleEnterPress(evt) {
-                console.log("handleEnterPress -> ");
-                this.mensagem = this.formatarEnviar(jquery(this.$refs.input));
+                this.mensagem = this.formatarEnviar(this.$refs.input);
                 console.log("ENVIAR MENSAGEM:", this.mensagem);
 
                 if (this.mensagem !== '') {
@@ -123,14 +104,9 @@
                 }
             },
             sendMsg() {
-                console.log("SEND MSG ENVIAR ->");
-
                 const form = new FormData();
                 form.append("chatId", this.activeChat.id);
                 form.append("message", this.mensagem);
-
-                console.log("ENVIAR -> ", this.mensagem);
-
                 api.post('/api/whatsApp/sendMessage', form);
             },
             capitalize(value) {
@@ -140,17 +116,17 @@
             },
             formatarEnviar(domElement) {
                 let msg = "";
-                domElement.contents().each(function (e) {
-                    let nodeName = jquery(this)[0].nodeName;
+                domElement.childNodes.forEach(function (e) {
+                    let nodeName = e.nodeName;
                     if (nodeName == "#text") {
-                        msg += jquery(this)[0].data;
+                        msg += e.data;
                     } else if (nodeName == "IMG") {
-                        msg += jquery(this)[0].alt;
+                        msg += e.alt;
                     } else if (nodeName == "BR") {
                         msg += "\n";
                     }
                 });
-                domElement.empty();
+                domElement.innerHTML = "";
                 return msg;
             }
         }
