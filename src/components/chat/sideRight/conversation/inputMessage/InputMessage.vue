@@ -44,8 +44,11 @@
             <div class="box-input">
                 <div
                         @keypress.enter.exact.prevent="handleEnterPress"
-                        @keypress.shift.enter
                         @paste.prevent="onPaste"
+                        @focusin="restorePosition"
+                        @input="savePosition"
+                        @keyup="savePosition"
+                        @mouseup="savePosition"
                         class="input"
                         contenteditable="true"
                         data-text="Digite uma mensagem"
@@ -65,6 +68,7 @@
     import {Picker} from 'emoji-mart-vue-fast'
     import {mapState} from "vuex";
     import {msg} from '@/helper.js'
+    import {rageSave} from '@/rangeSelectionSaveRestore.js'
 
     export default {
         name: "InputMessage",
@@ -75,6 +79,7 @@
             return {
                 mensagem: "",
                 emojiIndex: msg.emojiIndex(),
+                restore: null
             };
         },
         computed: {
@@ -85,8 +90,14 @@
                 const textMsg = msg.processNativeEmojiToImage(evt.clipboardData.getData("text"));
                 document.execCommand("insertHTML", false, textMsg);
             },
-            onInput(evt) {
-
+            restorePosition(evt) {
+                if (this.restore) {
+                    rageSave.restoreSelection(this.restore);
+                    this.restore = null;
+                }
+            },
+            savePosition(evt) {
+                this.restore = rageSave.saveSelection();
             },
             addEmoji(emoji) {
                 this.$refs.input.focus();
@@ -101,6 +112,7 @@
                     this.sendMsg();
                     this.$refs.input.innerHTML = "";
                     this.mensagem = "";
+                    this.restore = null
                 }
             },
             sendMsg() {
@@ -130,7 +142,8 @@
                 return msg;
             }
         }
-    };
+    }
+    ;
 </script>
 
 <style scoped>
