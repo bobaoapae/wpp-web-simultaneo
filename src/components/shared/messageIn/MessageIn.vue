@@ -71,7 +71,7 @@
                 return this.msg.type === 'document';
             },
             isAudio() {
-                return this.msg.type === 'ptt'
+                return this.msg.type === 'ptt' || this.msg.type === 'audio'
             },
         }
     };

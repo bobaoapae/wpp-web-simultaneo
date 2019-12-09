@@ -1,5 +1,5 @@
 <template>
-    <div class="message-photo">
+    <div class="message-photo" v-b-visible.once="onVisible">
         <div class="photo-container">
             <div class="box-image" :class="{blur : !imageFull}">
                 <img
@@ -49,10 +49,6 @@
                 imageFull: this.msg.base64MediaFull
             }
         },
-        created() {
-            //console.log('imageFull:', this.imageFull);
-            this.getFullImage();
-        },
         computed: {
             preview() {
                 return "data:image/jpeg;base64," + this.msg.body
@@ -92,6 +88,8 @@
                                 media: r.data.base64,
                             })
                         })
+                } else {
+                    this.imageFull = this.msg.base64MediaFull;
                 }
             },
             handleClick() {
@@ -101,6 +99,11 @@
                     type: 'img',
                     id: this.msg.id._serialized
                 })
+            },
+            onVisible(visible) {
+                if (visible && !this.imageFull) {
+                    this.getFullImage();
+                }
             }
         }
     };

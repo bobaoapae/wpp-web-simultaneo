@@ -1,5 +1,5 @@
 <template>
-    <div class="message-video">
+    <div class="message-video" v-b-visible.once="onVisible">
         <div class="video-container" @click="handleClick">
             <div class="box-preview blur">
                 <img :src=" 'data:image/jpeg;base64,'+ msg.body" alt="body">
@@ -43,9 +43,6 @@
                 srcVideo: this.msg.base64MediaFull,
             }
         },
-        created() {
-            this.getVideo()
-        },
         computed: {
             captionFormated() {
                 if (this.msg.caption) {
@@ -71,6 +68,8 @@
                             this.srcVideo = r.data.base64;
                             this.saveInCache(r.data.base64)
                         })
+                } else {
+                    this.srcVideo = this.msg.base64MediaFull;
                 }
             },
             saveInCache(media) {
@@ -97,6 +96,11 @@
                     });
                 }
 
+            },
+            onVisible(visible) {
+                if (visible && !this.srcVideo) {
+                    this.getVideo();
+                }
             }
         }
     }

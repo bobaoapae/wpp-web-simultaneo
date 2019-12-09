@@ -1,5 +1,5 @@
 <template>
-    <div class="message-audio">
+    <div class="message-audio" v-b-visible.once="onVisible">
         <div class="audio-container">
             <div class="box-spinner" v-show="srcLoading && !srcAudio">
                 <svg
@@ -55,11 +55,6 @@
                 srcError: false
             }
         },
-        created() {
-            if (!this.msg.base64MediaFull) {
-                this.getAudio();
-            }
-        },
         methods: {
             ...mapActions(['addFullMediaInMsg']),
 
@@ -68,18 +63,24 @@
 
                 this.srcLoading = true;
 
-                api.get(`/api/whatsApp/mediaMessage/${this.msg.id._serialized}/false`)
-                    .then(r => {
-                        console.log(r);
-                        this.srcAudio = r.data.base64;
-                        this.srcLoading = false;
-                        this.srcError = false;
-                        this.saveInCache(r.data.base64);
-                    })
-                    .catch(e => {
-                        this.srcLoading = false;
-                        this.srcError = true;
-                    })
+                if (!this.msg.base64MediaFull) {
+                    api.get(`/api/whatsApp/mediaMessage/${this.msg.id._serialized}/false`)
+                        .then(r => {
+                            console.log(r);
+                            this.srcAudio = r.data.base64;
+                            this.srcLoading = false;
+                            this.srcError = false;
+                            this.saveInCache(r.data.base64);
+                        })
+                        .catch(e => {
+                            this.srcLoading = false;
+                            this.srcError = true;
+                        })
+                } else {
+                    this.srcAudio = this.msg.base64MediaFull;
+                    this.srcLoading = false;
+                    this.srcError = false;
+                }
             },
             saveInCache(media) {
                 let idChat;
@@ -95,6 +96,11 @@
                     media: media,
                 })
             },
+            onVisible(visible) {
+                if (visible && !this.srcAudio) {
+                    this.getAudio();
+                }
+            }
         }
     }
 </script>

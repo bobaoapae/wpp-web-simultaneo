@@ -1,7 +1,7 @@
 <template>
-    <div class="sticker-container">
+    <div class="sticker-container" v-b-visible.once="onVisible">
         <div class="box-sticker">
-            <img :src="srcSticker" alt="sticker" class="sticker">
+            <img :src="this.sticker" alt="sticker" class="sticker"/>
         </div>
 
         <MessageTime :msg="msg"/>
@@ -26,22 +26,11 @@
         },
         data() {
             return {
-                sticker: ''
+                sticker: this.msg.base64MediaFull
             }
         },
         computed: {
-            ...mapState(['activeChat']),
-
-            srcSticker() {
-                if (this.msg.base64MediaFull) {
-                    return this.msg.base64MediaFull;
-                } else {
-                    return this.sticker;
-                }
-            }
-        },
-        created() {
-            this.getSticker();
+            ...mapState(['activeChat'])
         },
         methods: {
             ...mapActions(['addFullMediaInMsg']),
@@ -67,6 +56,13 @@
                                 media: r.data.base64,
                             })
                         })
+                } else {
+                    this.sticker = this.msg.base64MediaFull;
+                }
+            },
+            onVisible(visible) {
+                if (visible && !this.sticker) {
+                    this.getSticker();
                 }
             }
         }
