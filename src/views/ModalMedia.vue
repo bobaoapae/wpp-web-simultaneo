@@ -1,5 +1,5 @@
 <template>
-    <div class="my-modal" v-show="modal.show">
+    <div class="my-modal" v-if="modal.show">
         <div class="modal-header">
             <a :href="formatedHref" download>
                 <img class="icon-download" src="@/assets/images/wpp-icon-donwload-modal.svg">
@@ -8,11 +8,11 @@
             <img class="icon-close" src="@/assets/images/wpp-icon-close-modal.svg" @click="closeModal">
         </div>
 
-        <div class="content">
+        <div class="content" @click.stop="handleClick">
             <div class="box-image" v-if="modal.type === 'img'">
                 <img :src="modal.media">
             </div>
-            
+
             <div class="box-video" v-else-if="modal.type === 'video'">
                 <video autoplay controls :src="modal.media"></video>
             </div>
@@ -22,20 +22,48 @@
 
 <script>
     import {mapState, mapMutations} from 'vuex'
+
     export default {
         name: "ModalMedia",
+        data() {
+            return {
+                listener: {}
+            }
+        },
         computed: {
             ...mapState(["modal"]),
             formatedHref() {
                 return `${localStorage.baseURL}/api/whatsApp/mediaMessage/${this.modal.id}/true?token=${sessionStorage.TOKEN}`
             }
         },
+        updated() {
+            this.handleModalKeydown();
+        },
         methods: {
             ...mapMutations(['SET_MODAL']),
+
+            handleModalKeydown() {
+                if (this.modal.show) {
+                    this.listener = (event) => {
+                        if(event.key === "Escape") {
+                            this.closeModal();
+                        }
+                    };
+
+                    document.addEventListener('keydown', this.listener, false);
+                } else {
+                    document.removeEventListener('keydown', this.listener, false);
+                }
+            },
             closeModal() {
                 this.SET_MODAL({
                     show: false
                 });
+            },
+            handleClick(evt) {
+                if (evt.toElement.className === "content") {
+                    this.closeModal();
+                }
             },
             download() {
                 const element = document.createElement('a');
@@ -60,7 +88,7 @@
         left: 0;
         width: 100vw;
         height: 100vh;
-        background-color: rgba(255,255,255,0.90);
+        background-color: rgba(255, 255, 255, 0.90);
         display: flex;
         flex-direction: column;
         z-index: 9999;
