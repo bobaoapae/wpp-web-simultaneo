@@ -1,7 +1,7 @@
 <template>
     <div class="message-photo" v-b-visible.once="onVisible">
-        <div class="photo-container">
-            <div class="box-image" :class="{blur : !imageFull}">
+        <div class="photo-container" >
+            <div class="box-image" >
                 <img
                         class="imageFull"
                         :src="imageFull"
@@ -9,7 +9,7 @@
                         v-if="imageFull"
                 />
 
-                <img class="preview" :src="preview" v-else/>
+                <img class="preview" :src="preview" :class="{blur : !imageFull}" v-else/>
             </div>
 
             <LoadingMedia v-if="!imageFull"/>
@@ -70,7 +70,6 @@
 
             getFullImage() {
                 if (!this.msg.base64MediaFull) {
-                    console.log('GET PHOTO');
                     api.get(`/api/whatsApp/mediaMessage/${this.msg.id._serialized}/false`)
                         .then(r => {
                             this.imageFull = r.data.base64;

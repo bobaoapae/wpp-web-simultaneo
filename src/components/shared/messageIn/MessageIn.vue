@@ -1,6 +1,26 @@
 <template>
     <div class="message-in">
-        <div class="message-in-container">
+        <div class="message-in-container" @mouseenter="showMenuIcon = true" @mouseleave="showMenuIcon = false">
+
+            <div class="msg-menu" v-show="showMenuIcon || menuAberto">
+                <b-dropdown
+                        variant="link"
+                        toggle-class="text-decoration-none p-0"
+                        no-caret
+                        lazy
+                        @show="handleShowMenu"
+                        @hide="handleHideMenu"
+                >
+                    <template v-slot:button-content>
+                        <img class="icon" src="@/assets/images/wpp-message-arrow-down.svg">
+                    </template>
+
+                    <b-dropdown-item @click="handleClickAnswer">Responder</b-dropdown-item>
+                    <b-dropdown-item>Apagar mensagem</b-dropdown-item>
+                </b-dropdown>
+            </div>
+
+
             <!-- Identificador de mensagens no grupo -->
             <div class="identify-msg-group p-2" v-if="activeChat.kind === 'group'">
                 <div v-if="msg.senderObj.name">
@@ -16,12 +36,14 @@
             <!-- Mensagem Encaminhada -->
             <ForwardedIndicator v-if="msg.isForwarded"/>
 
+            <QuotedMsg :quotedMsg="msg.quotedMsgObject" v-if="msg.quotedMsgObject"/>
+
             <MessageText :msg="msg" v-if="isChat"/>
             <MessagePhoto :msg="msg" v-else-if="isImage"/>
             <MessageSticker :msg="msg" v-else-if="isSticker"/>
             <MessageVideo :msg="msg" v-else-if="isVideo"/>
             <MessageDocument :msg="msg" v-else-if="isDocument"/>
-            <MessageAudio :msg="msg" v-else-if="isAudio" />
+            <MessageAudio :msg="msg" v-else-if="isAudio"/>
         </div>
     </div>
 </template>
@@ -35,10 +57,12 @@
     import MessageDocument from "@/components/shared/messageDocument/MessageDocument";
     import ForwardedIndicator from "@/components/shared/forwardedIndicator/ForwardedIndicator";
     import MessageAudio from "@/components/shared/messageAudio/MessageAudio";
+    import QuotedMsg from "../quotedMsg/QuotedMsg";
 
     export default {
         name: "MessageIn",
         components: {
+            QuotedMsg,
             MessageAudio,
             ForwardedIndicator,
             MessageText,
@@ -46,6 +70,12 @@
             MessageSticker,
             MessageVideo,
             MessageDocument
+        },
+        data() {
+            return {
+                showMenuIcon: false,
+                menuAberto: false
+            }
         },
         props: {
             msg: {
@@ -55,6 +85,7 @@
         },
         computed: {
             ...mapState(['activeChat']),
+
             isChat() {
                 return this.msg.type === "chat";
             },
@@ -73,18 +104,49 @@
             isAudio() {
                 return this.msg.type === 'ptt' || this.msg.type === 'audio'
             },
+        },
+        methods: {
+            handleShowMenu(evt) {
+                this.menuAberto = true;
+            },
+            handleHideMenu(evt) {
+                this.menuAberto = false;
+            },
+
+            handleClickAnswer(evt) {
+                this.activeChat.quotedMsg = this.msg;
+            }
         }
     };
 </script>
 
 <style scoped>
+    .msg-menu {
+        position: absolute;
+        top: 3px;
+        right: 3px;
+        border-top-right-radius: 5px;
+        display: block;
+        text-align: right;
+        background: linear-gradient(15deg,transparent,transparent 45%,rgba(0,0,0,.12) 70%,rgba(0,0,0,.33));
+        height: 40px;
+        max-width: 90%;
+        width: 156px;
+    }
+
+    .icon {
+        cursor: pointer;
+        margin-top: -15px;
+    }
+
+
     .identify-msg-group {
         font-size: 12px;
         font-weight: 500;
     }
 
     .name {
-        color: rgba(0,0,0,.4) !important;
+        color: rgba(0, 0, 0, .4) !important;
         margin-left: 8px;
     }
 

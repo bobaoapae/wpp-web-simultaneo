@@ -59,14 +59,11 @@
             ...mapActions(['addFullMediaInMsg']),
 
             getAudio() {
-                console.log('GET AUDIO');
-
                 this.srcLoading = true;
 
                 if (!this.msg.base64MediaFull) {
                     api.get(`/api/whatsApp/mediaMessage/${this.msg.id._serialized}/false`)
                         .then(r => {
-                            console.log(r);
                             this.srcAudio = r.data.base64;
                             this.srcLoading = false;
                             this.srcError = false;

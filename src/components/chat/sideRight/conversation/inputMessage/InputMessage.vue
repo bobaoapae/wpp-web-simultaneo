@@ -29,6 +29,16 @@
             />
         </b-collapse>
 
+        <b-collapse id="collapse-answer-msg" v-model="answerVisible">
+            <div class="box-answer">
+                <QuotedMsg class="flex-grow-1" v-if="answerVisible" :quotedMsg="activeChat.quotedMsg"/>
+
+                <div class="close-answer" @click="handleClickCloseAnswer">
+                    <img src="@/assets/images/wpp-icon-close-answer.svg">
+                </div>
+            </div>
+        </b-collapse>
+
         <div id="input-message">
             <div class="box-icon-emoji">
                 <b-img
@@ -66,26 +76,46 @@
 <script>
     import api from "@/api.js";
     import {Picker} from 'emoji-mart-vue-fast'
-    import {mapState} from "vuex";
+    import {mapState, mapActions} from "vuex";
     import {msg} from '@/helper.js'
     import {rageSave} from '@/rangeSelectionSaveRestore.js'
+    import QuotedMsg from "../../../../shared/quotedMsg/QuotedMsg";
 
     export default {
         name: "InputMessage",
         components: {
+            QuotedMsg,
             Picker
         },
         data() {
             return {
                 mensagem: "",
                 emojiIndex: msg.emojiIndex(),
-                restore: null
+                restore: null,
+                answerVisible: false
             };
+        },
+        watch: {
+            "activeChat.quotedMsg": function (val) {
+                if (val) {
+                    this.answerVisible = true;
+                } else {
+                    this.answerVisible = false;
+                }
+            },
+
         },
         computed: {
             ...mapState(["activeChat"])
         },
         methods: {
+            ...mapActions(["sendMsg"]),
+
+            handleClickCloseAnswer() {
+                this.answerVisible = false;
+                this.activeChat.quotedMsg = undefined;
+            },
+
             onPaste(evt) {
                 const textMsg = msg.processNativeEmojiToImage(evt.clipboardData.getData("text"));
                 document.execCommand("insertHTML", false, textMsg);
@@ -106,20 +136,28 @@
             },
             handleEnterPress(evt) {
                 this.mensagem = this.formatarEnviar(this.$refs.input);
-                console.log("ENVIAR MENSAGEM:", this.mensagem);
 
                 if (this.mensagem !== '') {
-                    this.sendMsg();
+                    this.handleSendMsg();
                     this.$refs.input.innerHTML = "";
                     this.mensagem = "";
-                    this.restore = null
+                    this.restore = null;
+
+                    this.activeChat.quotedMsg = undefined;
                 }
             },
-            sendMsg() {
-                const form = new FormData();
-                form.append("chatId", this.activeChat.id);
-                form.append("message", this.mensagem);
-                api.post('/api/whatsApp/sendMessage', form);
+            handleSendMsg() {
+                let msg = {
+                    chatId: this.activeChat.id,
+                    message: this.mensagem
+                };
+
+                if (this.activeChat.quotedMsg) {
+                    msg.quotedMsg = this.activeChat.quotedMsg.id._serialized;
+                }
+
+                this.sendMsg(msg);
+
             },
             capitalize(value) {
                 if (!value) return "";
@@ -130,11 +168,11 @@
                 let msg = "";
                 domElement.childNodes.forEach(function (e) {
                     let nodeName = e.nodeName;
-                    if (nodeName == "#text") {
+                    if (nodeName === "#text") {
                         msg += e.data;
-                    } else if (nodeName == "IMG") {
+                    } else if (nodeName === "IMG") {
                         msg += e.alt;
-                    } else if (nodeName == "BR") {
+                    } else if (nodeName === "BR") {
                         msg += "\n";
                     }
                 });
@@ -147,6 +185,21 @@
 </script>
 
 <style scoped>
+
+    .box-answer {
+        display: flex;
+        flex-direction: row;
+        background-color: #f0f0f0;
+    }
+
+    .close-answer {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 10px;
+        cursor: pointer;
+    }
+
     .emoji-mart {
         width: 100% !important;
     }

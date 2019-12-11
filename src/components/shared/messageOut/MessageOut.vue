@@ -1,9 +1,28 @@
 <template>
     <div class="message-out">
-        <div class="message-out-container">
+        <div class="message-out-container" @mouseenter="showMenuIcon = true" @mouseleave="showMenuIcon = false">
+            <div class="msg-menu" v-show="showMenuIcon || menuAberto">
+                <b-dropdown
+                        variant="link"
+                        toggle-class="text-decoration-none p-0"
+                        no-caret
+                        lazy
+                        @show="handleShowMenu"
+                        @hide="handleHideMenu"
+                >
+                    <template v-slot:button-content>
+                        <img class="icon" src="@/assets/images/wpp-message-arrow-down.svg">
+                    </template>
+
+                    <b-dropdown-item @click="handleClickAnswer">Responder</b-dropdown-item>
+                    <b-dropdown-item>Apagar mensagem</b-dropdown-item>
+                </b-dropdown>
+            </div>
+
+
             <!-- Mensagem Encaminhada -->
             <ForwardedIndicator v-if="msg.isForwarded"/>
-
+            <QuotedMsg :quotedMsg="msg.quotedMsgObject" v-if="msg.quotedMsgObject" />
             <MessageText :msg="msg" v-if=" isChat "/>
             <MessagePhoto :msg="msg" v-else-if="isImage"/>
             <MessageSticker :msg="msg" v-else-if="isSticker"/>
@@ -15,6 +34,7 @@
 </template>
 
 <script>
+    import {mapState} from 'vuex'
     import MessageText from "@/components/shared/messageText/MessageText.vue";
     import MessagePhoto from "@/components/shared/messagePhoto/MessagePhoto.vue";
     import MessageSticker from "@/components/shared/messageSticker/MessageSticker";
@@ -22,10 +42,12 @@
     import MessageDocument from "@/components/shared/messageDocument/MessageDocument";
     import ForwardedIndicator from "@/components/shared/forwardedIndicator/ForwardedIndicator";
     import MessageAudio from "@/components/shared/messageAudio/MessageAudio";
+    import QuotedMsg from "../quotedMsg/QuotedMsg";
 
     export default {
         name: "MessageOut",
         components: {
+            QuotedMsg,
             MessageAudio,
             ForwardedIndicator,
             MessageSticker,
@@ -34,6 +56,12 @@
             MessageVideo,
             MessageDocument
         },
+        data() {
+            return {
+                showMenuIcon: false,
+                menuAberto: false
+            }
+        },
         props: {
             msg: {
                 type: Object,
@@ -41,6 +69,8 @@
             }
         },
         computed: {
+            ...mapState(['activeChat']),
+
             isChat() {
                 return this.msg.type === "chat";
             },
@@ -59,11 +89,41 @@
             isAudio() {
                 return this.msg.type === 'ptt'
             },
+        },
+        methods: {
+            handleShowMenu(evt) {
+                this.menuAberto = true;
+            },
+            handleHideMenu(evt) {
+                this.menuAberto = false;
+            },
+
+            handleClickAnswer(evt) {
+                this.activeChat.quotedMsg = this.msg;
+            }
         }
     };
 </script>
 
 <style scoped>
+    .msg-menu {
+        position: absolute;
+        top: 3px;
+        right: 3px;
+        border-top-right-radius: 5px;
+        display: block;
+        text-align: right;
+        background: linear-gradient(15deg,transparent,transparent 45%,rgba(0,0,0,.12) 70%,rgba(0,0,0,.33));
+        height: 40px;
+        max-width: 90%;
+        width: 156px;
+    }
+
+    .icon {
+        cursor: pointer;
+        margin-top: -15px;
+    }
+
     .message-out {
         padding: 0 9%;
         margin-bottom: 8px;

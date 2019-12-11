@@ -12,10 +12,12 @@
     import {mapState, mapActions} from 'vuex';
     import MessageTime from '@/components/shared/messageTime/MessageTime.vue';
     import api from '@/api.js';
+    import LoadingMedia from "../loadingMedia/LoadingMedia";
 
     export default {
         name: 'MessageSticker',
         components: {
+            LoadingMedia,
             MessageTime
         },
         props: {
@@ -37,7 +39,7 @@
 
             getSticker() {
                 if (!this.msg.base64MediaFull) {
-                    console.log('GET STICKER');
+                    //console.log('GET STICKER');
                     api.get(`/api/whatsApp/mediaMessage/${this.msg.id._serialized}/false`)
                         .then(r => {
                             //console.log(r);

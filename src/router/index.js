@@ -12,14 +12,11 @@ const routes = [
         component: Wpp,
         beforeEnter: (to, from, next) => {
             const store = require('../store/index.js');
-            console.log('beforeEnter');
-            console.log(store.default.state.isLogged);
             console.log(sessionStorage.TOKEN);
 
             if (sessionStorage.TOKEN) {
                 next();
             } else {
-                console.log('ir para login');
                 router.push('/login')
             }
 

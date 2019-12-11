@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState, mapActions } from "vuex";
 import MessagesPrivate from "./messagesPrivate/MessagesPrivate.vue";
 import MessagesGroup from "./messagesGroup/MessagesGroup.vue";
 import api from "@/api";
@@ -37,13 +37,9 @@ export default {
         }
     },
     mounted() {
-        console.log('mounted');
         this.$el.scrollTop = Number.MAX_SAFE_INTEGER;
     },
     updated() {
-        console.log('updated');
-        console.log('updatedCount:', this.updatedCount);
-
         if (this.updatedCount === 0) {
             this.$el.scrollTop = Number.MAX_SAFE_INTEGER;
         } else {
@@ -62,18 +58,17 @@ export default {
             this.updatedCount = 0;
 
             if (this.activeChat.msgs.length <= 10) {
-                this.loadEarly();
+                this.handleloadEarly();
             }
         }
     },
     methods: {
-        scrollToBottom() {
-            console.log('scrollToBottom::');
-            const element = this.$el;
-            const maxScrollTop = element.scrollHeight - element.clientHeight - 150;
+        ...mapActions(["loadEarly"]),
 
-            console.log('maxScrollTop::',maxScrollTop);
-            console.log('element.scrollTop::',element.scrollTop);
+        scrollToBottom() {
+            const element = this.$el;
+            const maxScrollTop = element.scrollHeight - element.clientHeight - 200;
+
 
             if (element.scrollTop >= maxScrollTop) {
                 element.scrollTop = Number.MAX_SAFE_INTEGER;
@@ -81,17 +76,16 @@ export default {
         },
         handleScroll(e) {
             if (e.target.scrollTop === 0 && this.activeChat.noEarlierMsgs === false) {
-                this.loadEarly()
+                this.handleloadEarly()
             }
         },
-        loadEarly() {
+        handleloadEarly() {
             console.log('loadEarly::');
             this.loadingEarly = true;
 
-            api.post(`/api/whatsApp/loadEarly/${this.activeChat.id}`)
-                .then(() => {
-                    setTimeout(() => this.loadingEarly = false, 6000);
-                });
+            this.loadEarly({chatId: this.activeChat.id});
+
+            setTimeout(() => this.loadingEarly = false, 7000);
         }
     }
 };

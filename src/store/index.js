@@ -20,7 +20,8 @@ const store = new Vuex.Store({
             media: '',
             show: false,
             id: ''
-        }
+        },
+        ws: {}
     },
 
     mutations: {
@@ -83,31 +84,46 @@ const store = new Vuex.Store({
             state.chats[payload.indexChat].muteExpiration = payload.chat.muteExpiration;
             state.chats[payload.indexChat].name = payload.chat.name;
             state.chats[payload.indexChat].noEarlierMsgs = payload.chat.noEarlierMsgs;
-            state.chats[payload.indexChat].picture = payload.chat.picture;
             state.chats[payload.indexChat].pin = payload.chat.pin;
             state.chats[payload.indexChat].t = payload.chat.t;
             state.chats[payload.indexChat].unreadCount = payload.chat.unreadCount;
-        }
+            state.chats[payload.indexChat].shouldAppearInList = payload.chat.shouldAppearInList;
+        },
 
+        SET_WS(state, payload) {
+            state.ws = payload;
+        },
+
+        SET_PICTURE_CHAT(state, payload) {
+            state.chats[payload.chatId].picture = payload.picture;
+        },
+
+        ADD_NEW_CHAT(state, payload) {
+            state.chats.push(payload)
+        },
     },
 
     actions: {
         setNewEvent(context) {
-            const ws = new WebSocket(`${localStorage.baseURL.replace('http', 'ws')}/api/ws`);
+            context.commit("SET_WS", new WebSocket(`${localStorage.baseURL.replace('http', 'ws')}/api/ws`));
+
+            const ws = context.state.ws;
+
             ws.onopen = function (e) {
                 ws.send(`token, ${sessionStorage.TOKEN}`);
             };
             ws.onclose = function (e) {
+
                 window.location.reload();
             };
             ws.onerror = function (e) {
+
                 window.location.reload();
             };
 
 
             ws.onmessage = function (e) {
                 const response = e.data.split(/,(.+)/);
-                //console.log(response);
 
                 const responseType = response[0];
                 const responseData = response[1];
@@ -143,7 +159,7 @@ const store = new Vuex.Store({
                         const r = JSON.parse(responseData);
                         console.log('init', r);
 
-                        context.commit("SET_CHATS", r.chats);
+                        context.dispatch("handleChatProperties", {chats: r.chats});
                         context.commit("SET_SELF", r.self);
                         context.commit("SET_IS_LOADING_CHAT", false);
                         context.state.poolContext.forEach(func => func());
@@ -157,13 +173,21 @@ const store = new Vuex.Store({
                         const r = JSON.parse(responseData);
                         console.log('new-chat::', r);
 
+                        let funcao = () => {
+                            context.dispatch("newChat", r);
+                        };
+
+                        if (context.state.isLoadingChat) {
+                            context.state.poolContext.push(funcao);
+                        } else {
+                            funcao();
+                        }
 
                         break;
                     }
 
                     case 'chat-update': {
                         const r = JSON.parse(responseData);
-                        console.log('chat-update::', r);
 
                         let funcao = () => {
                             context.dispatch("updateChat", r);
@@ -180,7 +204,6 @@ const store = new Vuex.Store({
 
                     case 'new-msg': {
                         const r = JSON.parse(responseData);
-                        console.log('new-msg::', r);
 
                         let funcao = () => {
                             context.dispatch("addNewMsgInChat", r);
@@ -197,7 +220,6 @@ const store = new Vuex.Store({
 
                     case 'update-msg': {
                         const r = JSON.parse(responseData);
-                        console.log('update-msg::', r);
 
                         let funcao = () => {
                             context.dispatch("updateMsg", r);
@@ -211,6 +233,12 @@ const store = new Vuex.Store({
 
                         break;
                     }
+
+                    case 'chat-picture': {
+                        const r = JSON.parse(responseData);
+
+                        context.dispatch("updatePicture", r);
+                    }
                 }
                 return false;
             };
@@ -219,17 +247,41 @@ const store = new Vuex.Store({
         /*
             CHATS
         */
-        getChats(context) {
-            const TOKEN = sessionStorage.TOKEN;
-            api.get(`/api/chats?token=${TOKEN}`)
-                .then((r) => {
-                    const data = r.data;
 
-                    context.commit('SET_CHATS', data);
-                    context.dispatch("sortChatsByTime");
-                    context.commit('SET_IS_LOADING_CHAT', false);
-                });
+        newChat(context, payload) {
+            context.dispatch("setChatProperties", payload);
+            context.commit("ADD_NEW_CHAT", payload);
+            context.dispatch("sortChatsByTime");
+        },
 
+
+        getPicture(context, payload) {
+            context.state.ws.send(`updatePicture,${payload.chatId}`);
+        },
+
+        updatePicture(context, payload) {
+            const chatId = context.state.chats.findIndex((element) => {
+                return element.id === payload.id;
+            });
+
+            context.commit('SET_PICTURE_CHAT', {
+                chatId,
+                picture: payload.picture
+            });
+        },
+
+        setChatProperties(context, el) {
+            el.picture = "";
+            el.quotedMsg = undefined
+        },
+
+        handleChatProperties(context, payload) {
+
+            payload.chats.forEach(el => {
+                context.dispatch("setChatProperties", el);
+            });
+
+            context.commit("SET_CHATS", payload.chats);
         },
 
         updateChat(context, payload) {
@@ -237,16 +289,28 @@ const store = new Vuex.Store({
                 return element.id === payload.id;
             });
 
-            const data = {
-                indexChat,
-                chat: payload
-            };
+            if (indexChat >= 0) {
+                const data = {
+                    indexChat,
+                    chat: payload
+                };
 
-            context.commit('UPDATE_CHAT', data);
+                context.commit('UPDATE_CHAT', data);
+
+            } else {
+                if (payload.shouldAppearInList) {
+                    context.dispatch("setChatProperties", payload);
+                    payload.msgs = [];
+                    context.commit("ADD_NEW_CHAT", payload);
+                    context.dispatch("sortChatsByTime");
+                }
+
+            }
+
+
         },
 
         sortChatsByTime(context) {
-            //console.log('ORDENANDO CHATS...');
             const chats = context.state.chats;
 
             chats.sort(function (a, b) {
@@ -265,6 +329,7 @@ const store = new Vuex.Store({
                 }
                 return 0;
             });
+
             context.commit('SET_CHATS', chats);
         },
 
@@ -272,6 +337,18 @@ const store = new Vuex.Store({
         /*
             MESSAGES
         */
+        sendMsg(context, payload) {
+            context.state.ws.send(`sendMessage,${JSON.stringify(payload)}`);
+        },
+
+        seeChat(context, payload) {
+            context.state.ws.send(`seeChat,${payload.chatId}`);
+        },
+
+        loadEarly(context, payload) {
+            context.state.ws.send(`loadEarly,${payload.chatId}`);
+        },
+
         addNewMsgInChat(context, payload) {
 
             // pegar o indice do chat

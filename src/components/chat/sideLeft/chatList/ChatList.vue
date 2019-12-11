@@ -8,7 +8,7 @@
             <transition-group name="flip-list" tag="ul" class="list-group">
                 <li
                     class="list-group-item d-flex"
-                    v-for="chat in chats"
+                    v-for="chat in chatsFiltered"
                     :key="chat.id"
                     @click="handleClick(chat)"
                     :class="{ active : active_el === chat.id }"
@@ -39,7 +39,7 @@ import LastMsg from "./lastMsg/LastMsg.vue";
 import Icons from "./icons/Icons.vue";
 import NameChat from "./nameChat/NameChat.vue";
 
-import { mapState, mapMutations } from "vuex";
+import { mapState, mapMutations, mapActions } from "vuex";
 
 import api from '@/api.js';
 
@@ -58,13 +58,19 @@ export default {
         };
     },
     computed: {
-        ...mapState(["chats"])
+        ...mapState(["chats"]),
+
+        chatsFiltered() {
+            return this.chats.filter(chat => {
+                return chat.shouldAppearInList
+            });
+        }
     },
     methods: {
         ...mapMutations(["SET_ACTIVE_CHAT"]),
+        ...mapActions(["seeChat"]),
+
         handleClick(chat) {
-            console.log(chat);
-            // console.log("SET ACTIVE", chat);
             // seta o chat que sera visto
             this.SET_ACTIVE_CHAT(chat);
             // seta a cor do li do chat clicado
@@ -72,9 +78,9 @@ export default {
 
             this.visualizarMsgs(chat.id);
         },
+
         visualizarMsgs(id) {
-            api.post(`/api/whatsApp/sendSeenChat/${id}`);
-            console.log('visualizar msgs...')
+            this.seeChat({chatId: id});
         },
     }
 };

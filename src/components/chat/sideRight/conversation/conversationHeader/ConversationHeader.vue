@@ -16,7 +16,7 @@
             <img src="@/assets/images/wpp-icon-search.svg">
 
             <label for="file">
-                <img src="@/assets/images/wpp-icon-clip.svg" @click="handleClick">
+                <img src="@/assets/images/wpp-icon-clip.svg">
                 <input type="file" id="file" @change="onChange" />
             </label>
 
@@ -27,7 +27,7 @@
 </template>
 
 <script>
-    import {mapState} from 'vuex'
+    import {mapState, mapActions} from 'vuex'
     import api from '@/api.js';
     import ChatActivePhoto from './chatActivePhoto/ChatActivePhoto.vue'
     import {msg} from '@/helper.js'
@@ -44,6 +44,7 @@
         },
         computed: {
             ...mapState(['activeChat']),
+
             nameEmojify() {
                 if (this.activeChat.contact.name) {
                     return msg.processNativeEmojiToImage(this.activeChat.contact.name)
@@ -56,12 +57,9 @@
             console.log('activeChat', this.activeChat);
         },
         methods: {
-            handleClick() {
+            ...mapActions(["sendMsg"]),
 
-            },
             onChange(event) {
-                console.log(event.target.files[0]);
-
                 const toBase64 = (file) => new Promise((resolve, reject) => {
                     const reader = new FileReader();
                     reader.readAsDataURL(file);
@@ -72,16 +70,24 @@
                 (async () => {
                     const file = event.target.files[0];
                     this.file = (await toBase64(file));
-                    this.sendMsg(event.target.files[0].name)
+                    this.handleSendMsg(event.target.files[0].name);
+
+                    this.activeChat.quotedMsg = undefined;
                 })();
             },
-            sendMsg(name) {
-                const form = new FormData();
-                form.append('chatId', this.activeChat.id);
-                form.append('media', this.file);
-                form.append('fileName', name);
 
-                api.post('/api/whatsApp/sendMessage', form);
+            handleSendMsg(name) {
+                let msg = {
+                    chatId:this.activeChat.id,
+                    media:this.file,
+                    fileName:name
+                };
+
+                if (this.activeChat.quotedMsg) {
+                    msg.quotedMsg = this.activeChat.quotedMsg.id._serialized;
+                }
+
+                this.sendMsg(msg);
             }
         }
     };
