@@ -1,5 +1,6 @@
 <template>
-    <span class="time">{{timeConverted}} <MessageIconStatus :ack="msg.ack" v-if="msg.id.fromMe" /></span>
+    <span class="time"><span class="time-text">{{timeConverted}}</span> <MessageIconStatus :ack="msg.ack"
+                                                                                           v-if="msg.id.fromMe"/></span>
 </template>
 
 <script>
@@ -47,5 +48,6 @@
         position: absolute;
         right: 7px;
         bottom: 7px;
+        z-index: 1;
     }
 </style>
