@@ -1,6 +1,6 @@
 <template>
     <div class="last-msg flex-grow-1 d-flex align-items-center" :class="{unread : isUnread}" v-if="lastMsg">
-        <MessageIconStatus :ack="lastMsg.ack" class="icon-status"/>
+        <MessageIconStatus :ack="lastMsg.ack" class="icon-status" v-if="lastMsg.id.fromMe"/>
 
         <span v-if="isGroup && lastMsg.senderObj && !lastMsg.id.fromMe">
             {{senderFormated}}:
