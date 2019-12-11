@@ -57,10 +57,12 @@
         methods: {
             ...mapActions(['getPicture']),
 
-            handlePicture() {
-                this.getPicture({
-                    chatId: this.chat.id
-                })
+            handlePicture(visible) {
+                if (visible) {
+                    this.getPicture({
+                        chatId: this.chat.id
+                    })
+                }
             },
 
 
