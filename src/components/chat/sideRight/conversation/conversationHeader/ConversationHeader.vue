@@ -17,7 +17,7 @@
 
             <label for="file">
                 <img src="@/assets/images/wpp-icon-clip.svg">
-                <input type="file" id="file" @change="onChange" />
+                <input @change="onChange" id="file" type="file"/>
             </label>
 
             <img src="@/assets/images/wpp-icon-kebab-menu.svg">
@@ -53,9 +53,6 @@
                 }
             }
         },
-        created() {
-            console.log('activeChat', this.activeChat);
-        },
         methods: {
             ...mapActions(["sendMsg"]),
 
@@ -78,9 +75,9 @@
 
             handleSendMsg(name) {
                 let msg = {
-                    chatId:this.activeChat.id,
-                    media:this.file,
-                    fileName:name
+                    chatId: this.activeChat.id,
+                    media: this.file,
+                    fileName: name
                 };
 
                 if (this.activeChat.quotedMsg) {
