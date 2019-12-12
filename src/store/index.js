@@ -90,7 +90,7 @@ const store = new Vuex.Store({
             const ws = context.state.ws;
 
             ws.onopen = function (e) {
-                ws.send(`token, ${sessionStorage.TOKEN}`);
+                ws.send(`token,${sessionStorage.TOKEN}`);
             };
             ws.onclose = function (e) {
                 window.location.reload();
@@ -216,6 +216,21 @@ const store = new Vuex.Store({
                         const r = JSON.parse(responseData);
 
                         context.dispatch("updatePicture", r);
+
+                        break;
+                    }
+
+                    case 'token': {
+                        if (responseData === 'invalido') {
+                            sessionStorage.removeItem("TOKEN");
+                            window.location.reload();
+                        }
+                        break;
+                    }
+
+                    case 'ping': {
+                        console.log("delay::", (new Date().getTime() - responseData), "ms");
+                        break;
                     }
                 }
                 return false;
