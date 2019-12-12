@@ -110,10 +110,6 @@
 
             handleClickAnswer(evt) {
                 this.activeChat.quotedMsg = this.msg;
-            },
-
-            handleClickDropDown(evt) {
-                console.log("double click: ", evt);
             }
         }
     };

@@ -12,7 +12,6 @@ const routes = [
         component: Wpp,
         beforeEnter: (to, from, next) => {
             const store = require('../store/index.js');
-            console.log(sessionStorage.TOKEN);
 
             if (sessionStorage.TOKEN) {
                 next();

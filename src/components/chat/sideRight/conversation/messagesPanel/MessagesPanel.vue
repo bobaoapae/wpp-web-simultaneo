@@ -57,7 +57,7 @@ export default {
         "activeChat.id": function(val) {
             this.updatedCount = 0;
 
-            if (this.activeChat.msgs.length <= 10) {
+            if (!this.activeChat.noEarlierMsgs && this.activeChat.msgs.length <= 10) {
                 this.handleloadEarly();
             }
         }
@@ -80,7 +80,6 @@ export default {
             }
         },
         handleloadEarly() {
-            console.log('loadEarly::');
             this.loadingEarly = true;
 
             this.loadEarly({chatId: this.activeChat.id});

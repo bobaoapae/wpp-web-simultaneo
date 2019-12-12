@@ -115,7 +115,6 @@ const store = new Vuex.Store({
                     }
 
                     case 'update-estado': {
-                        console.log('update-estado', responseData);
 
                         if (responseData === 'QR_CODE_SCANNED') {
                             context.commit("SET_QR_CODE_LOGGED", true);
@@ -237,7 +236,6 @@ const store = new Vuex.Store({
 
         updateTitle(context) {
             let chatsUnread = context.state.chats.filter(e => e.unreadCount > 0).length;
-            console.log(chatsUnread);
             if (chatsUnread > 0) {
                 document.title = `(${chatsUnread}) WhatsApp`;
             } else {
