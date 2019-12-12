@@ -235,6 +235,16 @@ const store = new Vuex.Store({
             };
         },
 
+        updateTitle(context) {
+            let chatsUnread = context.state.chats.filter(e => e.unreadCount > 0).length;
+            console.log(chatsUnread);
+            if (chatsUnread > 0) {
+                document.title = `(${chatsUnread}) WhatsApp`;
+            } else {
+                document.title = `WhatsApp`;
+            }
+        },
+
         /*
             CHATS
         */
@@ -276,6 +286,7 @@ const store = new Vuex.Store({
             });
 
             context.commit("SET_CHATS", payload.chats);
+            context.dispatch("updateTitle");
         },
 
         updateChat(context, payload) {
@@ -285,6 +296,7 @@ const store = new Vuex.Store({
 
             if (chat) {
                 Object.assign(chat, payload);
+                context.dispatch("updateTitle");
             }
         },
 
@@ -318,6 +330,7 @@ const store = new Vuex.Store({
             });
 
             context.commit('SET_CHATS', chats);
+            context.dispatch("updateTitle");
         },
 
 
