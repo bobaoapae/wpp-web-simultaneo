@@ -98,6 +98,7 @@
         watch: {
             "activeChat.quotedMsg": function (val) {
                 if (val) {
+                    this.$refs.input.focus();
                     this.answerVisible = true;
                 } else {
                     this.answerVisible = false;
