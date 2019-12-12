@@ -2,7 +2,7 @@
     <div class="message-in">
         <div class="message-in-container" @mouseenter="showMenuIcon = true" @mouseleave="showMenuIcon = false">
 
-            <div :style="[isSameColor ? {background: 'linear-gradient(90deg,hsla(0,0%,100%,0) 0,#FFF 50%)', height: '25px'} : {}]"
+            <div :style="[isSameColor ? {background: 'linear-gradient(90deg,hsla(0,0%,100%,0) 0,#FFF 50%)', height: '25px', width: '48px'} : {}]"
                  class="msg-menu"
                  v-show="showMenuIcon || menuAberto">
                 <b-dropdown
@@ -141,6 +141,7 @@
         height: 40px;
         max-width: 90%;
         width: 156px;
+        z-index: 1;
     }
 
     .icon {

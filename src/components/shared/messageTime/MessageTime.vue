@@ -48,6 +48,5 @@
         position: absolute;
         right: 7px;
         bottom: 7px;
-        z-index: 1;
     }
 </style>

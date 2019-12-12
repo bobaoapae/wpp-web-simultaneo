@@ -109,7 +109,6 @@ const store = new Vuex.Store({
                 switch (responseType) {
 
                     case 'need-qrcode': {
-                        console.log('need-qrcode', responseData);
                         context.commit("SET_IMG_QRCODE", responseData);
 
                         break;
@@ -149,7 +148,6 @@ const store = new Vuex.Store({
 
                     case 'new-chat': {
                         const r = JSON.parse(responseData);
-                        console.log('new-chat::', r);
 
                         let funcao = () => {
                             context.dispatch("newChat", r);

@@ -1,7 +1,7 @@
 <template>
     <div class="message-out">
         <div class="message-out-container" @mouseenter="showMenuIcon = true" @mouseleave="showMenuIcon = false">
-            <div :style="[isSameColor ? {background: 'linear-gradient(90deg,hsla(0,0%,100%,0) 0,#DCF8C6 50%)', height: '25px'} : {}]"
+            <div :style="[isSameColor ? {background: 'linear-gradient(90deg,hsla(0,0%,100%,0) 0,#DCF8C6 50%)', height: '25px', width: '40px'} : {}]"
                  class="msg-menu"
                  v-show="showMenuIcon || menuAberto">
                 <b-dropdown
