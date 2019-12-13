@@ -1,7 +1,7 @@
 <template>
     <div class="sticker-container" v-b-visible.once="onVisible">
         <div class="box-sticker">
-            <img :src="this.sticker" alt="sticker" class="sticker"/>
+            <img :src="this.sticker" alt="sticker" class="sticker" ref="sticker"/>
         </div>
 
         <MessageTime :msg="msg"/>
@@ -25,6 +25,10 @@
                 type: Object,
                 required: true
             }
+        },
+        mounted() {
+            this.$refs.sticker.parentElement.parentElement.parentElement.style.backgroundColor = "transparent";
+            this.$refs.sticker.parentElement.parentElement.parentElement.style.boxShadow = "none";
         },
         data() {
             return {
