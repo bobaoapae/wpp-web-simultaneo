@@ -46,8 +46,8 @@
             ...mapState(['activeChat']),
 
             nameEmojify() {
-                if (this.activeChat.contact.name) {
-                    return msg.processNativeEmojiToImage(this.activeChat.contact.name)
+                if (this.activeChat.formattedTitle) {
+                    return msg.processNativeEmojiToImage(this.activeChat.formattedTitle)
                 } else {
                     return "+" + this.activeChat.id.replace('@c.us', '');
                 }

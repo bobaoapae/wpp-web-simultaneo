@@ -25,7 +25,7 @@
 
             <div class="box-range" v-show="srcLoading || srcError"></div>
 
-            <audio v-show="!srcLoading && !srcError && srcAudio" controls :src="srcAudio"></audio>
+            <audio :src="srcAudio" controls ref="playAudio" v-show="!srcLoading && !srcError && srcAudio"></audio>
 
             <MessageTime :msg="msg"/>
         </div>
@@ -48,6 +48,9 @@
                 required: true
             }
         },
+        mounted() {
+            this.$refs.playAudio.addEventListener("play", this.handleMarkPlayed);
+        },
         data() {
             return {
                 srcAudio: this.msg.base64MediaFull,
@@ -56,8 +59,13 @@
             }
         },
         methods: {
-            ...mapActions(['addFullMediaInMsg']),
+            ...mapActions(['addFullMediaInMsg', 'markPlayed']),
 
+            handleMarkPlayed() {
+                if (this.msg.ack !== 4) {
+                    this.markPlayed({msgId: this.msg.id._serialized})
+                }
+            },
             getAudio() {
                 this.srcLoading = true;
 

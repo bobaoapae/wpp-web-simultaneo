@@ -24,8 +24,8 @@
                 return this.chat.unreadCount > 0;
             },
             nameEmojify() {
-                if (this.chat.contact.name) {
-                    return msg.processNativeEmojiToImage(this.chat.contact.name);
+                if (this.chat.formattedTitle) {
+                    return msg.processNativeEmojiToImage(this.chat.formattedTitle);
                 } else {
                     return "+" + this.chat.id.replace('@c.us', '');
                 }

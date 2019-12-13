@@ -347,6 +347,10 @@ const store = new Vuex.Store({
             context.state.ws.send(`loadEarly,${payload.chatId}`);
         },
 
+        markPlayed(context, payload) {
+            context.state.ws.send(`markPlayed,${payload.msgId}`);
+        },
+
         addNewMsgInChat(context, payload) {
 
             const chat = context.state.chats.find((element) => {
