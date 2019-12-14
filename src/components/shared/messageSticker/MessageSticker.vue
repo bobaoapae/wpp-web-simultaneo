@@ -27,8 +27,10 @@
             }
         },
         mounted() {
-            this.$refs.sticker.parentElement.parentElement.parentElement.style.backgroundColor = "transparent";
-            this.$refs.sticker.parentElement.parentElement.parentElement.style.boxShadow = "none";
+            if (!this.msg.quotedMsg) {
+                this.$refs.sticker.parentElement.parentElement.parentElement.style.backgroundColor = "transparent";
+                this.$refs.sticker.parentElement.parentElement.parentElement.style.boxShadow = "none";
+            }
         },
         data() {
             return {
