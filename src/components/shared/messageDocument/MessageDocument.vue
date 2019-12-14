@@ -18,7 +18,7 @@
                 <div class="box-file-name">
                     <span class="file-name">{{msg.filename}}</span>
                 </div>
-                
+
                 <div class="box-download-button">
                     <span role="button">
                         <img src="@/assets/images/wpp-icon-document-download.svg" alt="">
@@ -34,7 +34,7 @@
             <span class="dot">•</span>
             <span>{{fileSize}}</span>
 
-            <MessageTime :msg="msg" />
+            <MessageTime :msg="msg"/>
         </div>
     </div>
 </template>
@@ -42,6 +42,8 @@
 <script>
     import MessageTime from "../messageTime/MessageTime";
     import api from '@/api.js';
+    import {mapActions} from "vuex";
+
     export default {
         name: "MessageDocument",
         components: {
@@ -59,7 +61,7 @@
             },
             fileType() {
                 const splt = this.msg.filename.split('.');
-                return splt[splt.length -1].toLocaleUpperCase();
+                return splt[splt.length - 1].toLocaleUpperCase();
             },
             srcFormated() {
                 return "data:image/jpeg;base64," + this.msg.body;
@@ -78,31 +80,32 @@
                 } else {
                     tamanhoArquivo = (tamanhoArquivo / 1024).toFixed(0) + ' mB';
                 }
-                
+
                 return tamanhoArquivo;
             },
             showPages() {
                 return this.fileType === 'PDF' ||
-                        this.fileSize === 'DOCX' ||
-                        this.fileSize === 'XLSX'
+                    this.fileSize === 'DOCX' ||
+                    this.fileSize === 'XLSX'
             }
 
         },
         methods: {
+            ...mapActions(['sendWsMessage']),
+
             downloadDocument() {
-                api.get(`/api/whatsApp/mediaMessage/${this.msg.id._serialized}/false`)
-                    .then(r => {
-                        const element = document.createElement('a');
-                        element.setAttribute('href', r.data.base64);
-                        element.setAttribute('download', r.data.fileName);
+                this.sendWsMessage({msg: `downloadMedia,${this.msg.id._serialized}`}).then(e => {
+                    const element = document.createElement('a');
+                    element.setAttribute('href', e.base64);
+                    element.setAttribute('download', e.fileName);
 
-                        element.style.display = 'none';
-                        document.body.appendChild(element);
+                    element.style.display = 'none';
+                    document.body.appendChild(element);
 
-                        element.click();
+                    element.click();
 
-                        document.body.removeChild(element);
-                    })
+                    document.body.removeChild(element);
+                });
             }
         }
     }
@@ -126,7 +129,7 @@
     .document-container {
         /*rgba(0,0,0,0.1)
         #cfe9ba*/
-        background: rgba(0,0,0,0.06);
+        background: rgba(0, 0, 0, 0.06);
         cursor: pointer;
         padding: 13px 19px;
         border-radius: 6px;
@@ -157,7 +160,7 @@
 
     .info span {
         font-size: 11px;
-        color: rgba(0,0,0,0.45);
+        color: rgba(0, 0, 0, 0.45);
     }
 
 

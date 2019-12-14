@@ -59,7 +59,7 @@
             }
         },
         methods: {
-            ...mapActions(['addFullMediaInMsg', 'markPlayed']),
+            ...mapActions(['addFullMediaInMsg', 'markPlayed', 'sendWsMessage']),
 
             handleMarkPlayed() {
                 if (this.msg.ack !== 4) {
@@ -70,17 +70,15 @@
                 this.srcLoading = true;
 
                 if (!this.msg.base64MediaFull) {
-                    api.get(`/api/whatsApp/mediaMessage/${this.msg.id._serialized}/false`)
-                        .then(r => {
-                            this.srcAudio = r.data.base64;
-                            this.srcLoading = false;
-                            this.srcError = false;
-                            this.saveInCache(r.data.base64);
-                        })
-                        .catch(e => {
-                            this.srcLoading = false;
-                            this.srcError = true;
-                        })
+                    this.sendWsMessage({msg: `downloadMedia,${this.msg.id._serialized}`}).then(e => {
+                        this.srcAudio = e.base64;
+                        this.srcLoading = false;
+                        this.srcError = false;
+                        this.saveInCache(this.srcAudio);
+                    }).catch(e => {
+                        this.srcLoading = false;
+                        this.srcError = true;
+                    });
                 } else {
                     this.srcAudio = this.msg.base64MediaFull;
                     this.srcLoading = false;

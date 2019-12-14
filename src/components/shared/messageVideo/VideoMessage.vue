@@ -56,16 +56,15 @@
             },
         },
         methods: {
-            ...mapActions(['addFullMediaInMsg']),
+            ...mapActions(['addFullMediaInMsg', 'sendWsMessage']),
             ...mapMutations(['SET_MODAL']),
 
             getVideo() {
                 if (!this.msg.base64MediaFull) {
-                    api.get(`/api/whatsApp/mediaMessage/${this.msg.id._serialized}/false`)
-                        .then(r => {
-                            this.srcVideo = r.data.base64;
-                            this.saveInCache(r.data.base64)
-                        })
+                    this.sendWsMessage({msg: `downloadMedia,${this.msg.id._serialized}`}).then(e => {
+                        this.srcVideo = e.base64;
+                        this.saveInCache(this.srcVideo);
+                    });
                 } else {
                     this.srcVideo = this.msg.base64MediaFull;
                 }

@@ -39,27 +39,26 @@
             ...mapState(['activeChat'])
         },
         methods: {
-            ...mapActions(['addFullMediaInMsg']),
+            ...mapActions(['addFullMediaInMsg', 'sendWsMessage']),
 
             getSticker() {
                 if (!this.msg.base64MediaFull) {
-                    api.get(`/api/whatsApp/mediaMessage/${this.msg.id._serialized}/false`)
-                        .then(r => {
-                            this.sticker = r.data.base64;
+                    this.sendWsMessage({msg: `downloadMedia,${this.msg.id._serialized}`}).then(e => {
+                        this.sticker = e.base64;
 
-                            let idChat;
-                            if (this.msg.id.fromMe) {
-                                idChat = this.msg.to;
-                            } else {
-                                idChat = this.msg.from;
-                            }
+                        let idChat;
+                        if (this.msg.id.fromMe) {
+                            idChat = this.msg.to;
+                        } else {
+                            idChat = this.msg.from;
+                        }
 
-                            this.addFullMediaInMsg({
-                                idChat: idChat,
-                                idMsg: this.msg.id,
-                                media: r.data.base64,
-                            })
+                        this.addFullMediaInMsg({
+                            idChat: idChat,
+                            idMsg: this.msg.id,
+                            media: this.sticker,
                         })
+                    });
                 } else {
                     this.sticker = this.msg.base64MediaFull;
                 }

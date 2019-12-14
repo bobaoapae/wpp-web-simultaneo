@@ -21,7 +21,8 @@ const store = new Vuex.Store({
             show: false,
             id: ''
         },
-        ws: {}
+        ws: {},
+        wsEvents: {}
     },
 
     mutations: {
@@ -81,6 +82,32 @@ const store = new Vuex.Store({
         ADD_NEW_CHAT(state, payload) {
             state.chats.push(payload)
         },
+
+        ADD_NEW_LISTENNER(state, payload) {
+            console.log("ADD_NEW_LISTENNER::", payload);
+            state.wsEvents[payload.tag] = {
+                resolve: (e) => {
+                    payload.resolve(e);
+                    delete state.wsEvents[payload.tag];
+                },
+                reject: (e) => {
+                    payload.reject(e);
+                    delete state.wsEvents[payload.tag];
+                }
+            };
+        },
+
+        NEW_MSG_WS(state, payload) {
+            console.log("NEW_MSG_WS::", payload);
+            if (state.wsEvents[payload.tag]) {
+                let webSocketResponse = JSON.parse(payload.data);
+                if (webSocketResponse.status === 200 || webSocketResponse.status === 201) {
+                    state.wsEvents[payload.tag].resolve(webSocketResponse.response);
+                } else {
+                    state.wsEvents[payload.tag].reject(webSocketResponse);
+                }
+            }
+        }
     },
 
     actions: {
@@ -105,7 +132,6 @@ const store = new Vuex.Store({
 
                 const responseType = response[0];
                 const responseData = response[1];
-
                 switch (responseType) {
 
                     case 'need-qrcode': {
@@ -229,9 +255,21 @@ const store = new Vuex.Store({
                         console.log("delay::", (new Date().getTime() - responseData), "ms");
                         break;
                     }
+
+                    default: {
+                        context.commit("NEW_MSG_WS", {tag: responseType, data: responseData});
+                    }
                 }
                 return false;
             };
+        },
+
+        sendWsMessage(context, payload) {
+            return new Promise((resolve, reject) => {
+                payload.tag = performance.now();
+                context.commit("ADD_NEW_LISTENNER", {tag: payload.tag, resolve: resolve, reject: reject});
+                context.state.ws.send(`${payload.tag},${payload.msg}`);
+            });
         },
 
         updateTitle(context) {

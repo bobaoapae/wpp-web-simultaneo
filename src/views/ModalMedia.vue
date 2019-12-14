@@ -1,9 +1,9 @@
 <template>
     <div class="my-modal" v-if="modal.show">
         <div class="modal-header">
-            <a :href="formatedHref" download>
+            <span @click="download">
                 <img class="icon-download" src="@/assets/images/wpp-icon-donwload-modal.svg">
-            </a>
+            </span>
 
             <img class="icon-close" src="@/assets/images/wpp-icon-close-modal.svg" @click="closeModal">
         </div>
@@ -21,7 +21,7 @@
 </template>
 
 <script>
-    import {mapState, mapMutations} from 'vuex'
+    import {mapState, mapMutations, mapActions} from 'vuex'
 
     export default {
         name: "ModalMedia",
@@ -32,20 +32,18 @@
         },
         computed: {
             ...mapState(["modal"]),
-            formatedHref() {
-                return `${localStorage.baseURL}/api/whatsApp/mediaMessage/${this.modal.id}/true?token=${sessionStorage.TOKEN}`
-            }
         },
         updated() {
             this.handleModalKeydown();
         },
         methods: {
             ...mapMutations(['SET_MODAL']),
+            ...mapActions(['sendWsMessage']),
 
             handleModalKeydown() {
                 if (this.modal.show) {
                     this.listener = (event) => {
-                        if(event.key === "Escape") {
+                        if (event.key === "Escape") {
                             this.closeModal();
                         }
                     };
@@ -65,17 +63,20 @@
                     this.closeModal();
                 }
             },
+
             download() {
-                const element = document.createElement('a');
-                element.setAttribute('href', this.modal.media);
-                element.setAttribute('download', this.modal.media);
+                this.sendWsMessage({msg: `downloadMedia,${this.modal.id}`}).then(e => {
+                    const element = document.createElement('a');
+                    element.setAttribute('href', e.base64);
+                    element.setAttribute('download', e.fileName);
 
-                element.style.display = 'none';
-                document.body.appendChild(element);
+                    element.style.display = 'none';
+                    document.body.appendChild(element);
 
-                element.click();
+                    element.click();
 
-                document.body.removeChild(element);
+                    document.body.removeChild(element);
+                });
             }
         }
     }

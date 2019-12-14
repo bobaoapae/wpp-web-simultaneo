@@ -1,7 +1,7 @@
 <template>
     <div class="message-photo" v-b-visible.once="onVisible">
-        <div class="photo-container" >
-            <div class="box-image" >
+        <div class="photo-container">
+            <div class="box-image">
                 <img
                         class="imageFull"
                         :src="imageFull"
@@ -66,27 +66,26 @@
         },
         methods: {
             ...mapMutations(['SET_MODAL']),
-            ...mapActions(['addFullMediaInMsg']),
+            ...mapActions(['addFullMediaInMsg', 'sendWsMessage']),
 
             getFullImage() {
                 if (!this.msg.base64MediaFull) {
-                    api.get(`/api/whatsApp/mediaMessage/${this.msg.id._serialized}/false`)
-                        .then(r => {
-                            this.imageFull = r.data.base64;
+                    this.sendWsMessage({msg: `downloadMedia,${this.msg.id._serialized}`}).then(e => {
+                        this.imageFull = e.base64;
 
-                            let idChat;
-                            if (this.msg.id.fromMe) {
-                                idChat = this.msg.to;
-                            } else {
-                                idChat = this.msg.from;
-                            }
+                        let idChat;
+                        if (this.msg.id.fromMe) {
+                            idChat = this.msg.to;
+                        } else {
+                            idChat = this.msg.from;
+                        }
 
-                            this.addFullMediaInMsg({
-                                idChat: idChat,
-                                idMsg: this.msg.id,
-                                media: r.data.base64,
-                            })
+                        this.addFullMediaInMsg({
+                            idChat: idChat,
+                            idMsg: this.msg.id,
+                            media: this.imageFull,
                         })
+                    });
                 } else {
                     this.imageFull = this.msg.base64MediaFull;
                 }
