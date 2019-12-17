@@ -178,7 +178,7 @@
                     }
                 });
                 domElement.innerHTML = "";
-                return msg;
+                return this.capitalize(msg);
             }
         }
     }

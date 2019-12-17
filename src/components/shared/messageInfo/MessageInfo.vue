@@ -74,7 +74,7 @@
                         const el = this.contacts.find(el => el.id === e);
 
                         if (el) {
-                            return el.formattedName
+                            return el.formattedName;
                         } else {
                             return "+" + (e.split("@")[0]);
                         }
@@ -85,7 +85,7 @@
                         const el = this.contacts.find(el => el.id === e);
 
                         if (el) {
-                            return el.formattedName
+                            return el.formattedName;
                         } else {
                             return "+" + (e.split("@")[0]);
                         }
@@ -95,8 +95,8 @@
                 } else {
                     const el = this.contacts.find(el => el.id === this.msg.recipients[0]);
 
-                    if (el) {
-                        return el.formattedName
+                    if (el && el.formattedName) {
+                        return el.formattedName;
                     } else {
                         return "+" + this.msg.recipients[0].replace("@c.us", "");
                     }

@@ -14,6 +14,7 @@ const store = new Vuex.Store({
         self: null,
         contacts: null,
         chats: null,
+        timeOutChats: -1,
         activeChat: null,
         poolContext: [],
         modal: {
@@ -88,8 +89,11 @@ const store = new Vuex.Store({
             state.chats.push(payload)
         },
 
+        REMOVE_CHAT(state, payload) {
+            state.chats = state.chats.filter(e => e.id !== payload.id);
+        },
+
         ADD_NEW_LISTENNER(state, payload) {
-            //console.log("ADD_NEW_LISTENNER::", payload);
             state.wsEvents[payload.tag] = {
                 resolve: (e) => {
                     payload.resolve(e);
@@ -103,7 +107,6 @@ const store = new Vuex.Store({
         },
 
         NEW_MSG_WS(state, payload) {
-            //console.log("NEW_MSG_WS::", payload);
             if (state.wsEvents[payload.tag]) {
                 let webSocketResponse = JSON.parse(payload.data);
                 if (webSocketResponse.status === 200 || webSocketResponse.status === 201) {
@@ -112,6 +115,10 @@ const store = new Vuex.Store({
                     state.wsEvents[payload.tag].reject(webSocketResponse);
                 }
             }
+        },
+
+        SET_TIMEOUT_CHATS(state, payload) {
+            state.timeOutChats = payload;
         }
     },
 
@@ -210,12 +217,34 @@ const store = new Vuex.Store({
                     }
 
                     case 'remove-chat': {
-                        console.log("remove-chat ->");
-                      break;
+                        const r = JSON.parse(responseData);
+
+                        let funcao = () => {
+                            context.commit("REMOVE_CHAT", r);
+                        };
+
+                        if (context.state.isLoadingChat) {
+                            context.state.poolContext.push(funcao);
+                        } else {
+                            funcao();
+                        }
+
+                        break;
                     }
 
                     case 'remove-msg': {
-                        console.log("remove-msg ->");
+                        const r = JSON.parse(responseData);
+
+                        let funcao = () => {
+                            context.dispatch("removeMsgFromChat", r)
+                        };
+
+                        if (context.state.isLoadingChat) {
+                            context.state.poolContext.push(funcao);
+                        } else {
+                            funcao();
+                        }
+
                         break;
                     }
 
@@ -352,37 +381,47 @@ const store = new Vuex.Store({
             }
         },
 
+        clearTimeoutChats(context) {
+            if (context.state.timeOutChats !== -1) {
+                clearTimeout(context.state.timeOutChats);
+            }
+        },
+
         sortChatsByTime(context) {
-            const chats = context.state.chats;
+            context.dispatch("clearTimeoutChats");
+            context.commit('SET_TIMEOUT_CHATS', setTimeout(() => {
+                const chats = context.state.chats;
 
-            chats.sort(function (a, b) {
-                var n = a.pin || 0
-                    , r = b.pin || 0;
-                if (n || r)
-                    return n !== r ? n > r ? -1 : 1 : a.id._serialized < b.id._serialized ? -1 : 1;
+                chats.sort(function (a, b) {
+                    var n = a.pin || 0
+                        , r = b.pin || 0;
+                    if (n || r)
+                        return n !== r ? n > r ? -1 : 1 : a.id._serialized < b.id._serialized ? -1 : 1;
 
-                let aMsgsFiltered = a.msgs.filter(e => e.type !== 'e2e_notification');
-                let bMsgsFiltered = b.msgs.filter(e => e.type !== 'e2e_notification');
-                if (aMsgsFiltered[aMsgsFiltered.length - 1] === undefined && bMsgsFiltered[bMsgsFiltered.length - 1] === undefined) {
+                    let aMsgsFiltered = a.msgs.filter(e => e.type !== 'e2e_notification' && e.type !== 'gp2');
+                    let bMsgsFiltered = b.msgs.filter(e => e.type !== 'e2e_notification' && e.type !== 'gp2');
+                    if (aMsgsFiltered[aMsgsFiltered.length - 1] === undefined && bMsgsFiltered[bMsgsFiltered.length - 1] === undefined) {
+                        return 0;
+                    }
+                    if (aMsgsFiltered[aMsgsFiltered.length - 1] !== undefined && bMsgsFiltered[bMsgsFiltered.length - 1] === undefined) {
+                        return -1;
+                    }
+                    if (aMsgsFiltered[aMsgsFiltered.length - 1] === undefined && bMsgsFiltered[bMsgsFiltered.length - 1] !== undefined) {
+                        return 1;
+                    }
+                    if (aMsgsFiltered[aMsgsFiltered.length - 1].t < bMsgsFiltered[bMsgsFiltered.length - 1].t) {
+                        return 1;
+                    }
+                    if (aMsgsFiltered[aMsgsFiltered.length - 1].t > bMsgsFiltered[bMsgsFiltered.length - 1].t) {
+                        return -1;
+                    }
                     return 0;
-                }
-                if (aMsgsFiltered[aMsgsFiltered.length - 1] !== undefined && bMsgsFiltered[bMsgsFiltered.length - 1] === undefined) {
-                    return -1;
-                }
-                if (aMsgsFiltered[aMsgsFiltered.length - 1] === undefined && bMsgsFiltered[bMsgsFiltered.length - 1] !== undefined) {
-                    return 1;
-                }
-                if (aMsgsFiltered[aMsgsFiltered.length - 1].t < bMsgsFiltered[bMsgsFiltered.length - 1].t) {
-                    return 1;
-                }
-                if (aMsgsFiltered[aMsgsFiltered.length - 1].t > bMsgsFiltered[bMsgsFiltered.length - 1].t) {
-                    return -1;
-                }
-                return 0;
-            });
+                });
 
-            context.commit('SET_CHATS', chats);
-            context.dispatch("updateTitle");
+                context.dispatch("CLEAR_TIMEOUT_CHATS");
+                context.commit('SET_CHATS', chats);
+                context.dispatch("updateTitle");
+            }, 100));
         },
 
 
@@ -435,6 +474,21 @@ const store = new Vuex.Store({
 
                     context.dispatch("sortChatsByTime");
                 }
+            }
+        },
+
+        removeMsgFromChat(context, payload) {
+            const chat = context.state.chats.find((element) => {
+                if (payload.id.fromMe) {
+                    return element.id === payload.to;
+                } else {
+                    return element.id === payload.from;
+                }
+            });
+
+            if (chat) {
+                chat.msgs = chat.msgs.filter(e => e.id.id !== payload.id.id);
+                context.dispatch("sortChatsByTime");
             }
         },
 
