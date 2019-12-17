@@ -376,8 +376,12 @@ const store = new Vuex.Store({
             });
 
             if (chat) {
+                let sortChats = chat.pin !== payload.pin;
                 Object.assign(chat, payload);
                 context.dispatch("updateTitle");
+                if (sortChats) {
+                    context.dispatch("sortChatsByTime");
+                }
             }
         },
 
