@@ -12,6 +12,7 @@ const store = new Vuex.Store({
         imgQrCode: '',
         QrCodeStatus: '',
         self: null,
+        contacts: null,
         chats: null,
         activeChat: null,
         poolContext: [],
@@ -53,6 +54,10 @@ const store = new Vuex.Store({
             state.self = payload;
         },
 
+        SET_CONTACTS(state, payload) {
+            state.contacts = payload.contacts;
+        },
+
         // define a lista com todos os chats
         SET_CHATS(state, payload) {
             state.chats = payload;
@@ -84,7 +89,7 @@ const store = new Vuex.Store({
         },
 
         ADD_NEW_LISTENNER(state, payload) {
-            console.log("ADD_NEW_LISTENNER::", payload);
+            //console.log("ADD_NEW_LISTENNER::", payload);
             state.wsEvents[payload.tag] = {
                 resolve: (e) => {
                     payload.resolve(e);
@@ -98,7 +103,7 @@ const store = new Vuex.Store({
         },
 
         NEW_MSG_WS(state, payload) {
-            console.log("NEW_MSG_WS::", payload);
+            //console.log("NEW_MSG_WS::", payload);
             if (state.wsEvents[payload.tag]) {
                 let webSocketResponse = JSON.parse(payload.data);
                 if (webSocketResponse.status === 200 || webSocketResponse.status === 201) {
@@ -163,6 +168,7 @@ const store = new Vuex.Store({
 
                         context.dispatch("handleChatProperties", {chats: r.chats});
                         context.commit("SET_SELF", r.self);
+                        context.commit("SET_CONTACTS", {contacts: r.contacts});
                         context.commit("SET_IS_LOADING_CHAT", false);
                         context.state.poolContext.forEach(func => func());
                         context.state.poolContext = [];
@@ -187,7 +193,7 @@ const store = new Vuex.Store({
                         break;
                     }
 
-                    case 'chat-update': {
+                    case 'update-chat': {
                         const r = JSON.parse(responseData);
 
                         let funcao = () => {
@@ -200,6 +206,16 @@ const store = new Vuex.Store({
                             funcao();
                         }
 
+                        break;
+                    }
+
+                    case 'remove-chat': {
+                        console.log("remove-chat ->");
+                      break;
+                    }
+
+                    case 'remove-msg': {
+                        console.log("remove-msg ->");
                         break;
                     }
 

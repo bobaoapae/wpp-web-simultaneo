@@ -161,6 +161,7 @@
     }
 
     .message-in {
+        max-width: 65%;
         padding: 0 9%;
         margin-bottom: 8px;
         display: flex;

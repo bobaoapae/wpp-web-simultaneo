@@ -22,7 +22,6 @@
                 </b-dropdown>
             </div>
 
-
             <!-- Mensagem Encaminhada -->
             <ForwardedIndicator v-if="msg.isForwarded"/>
             <QuotedMsg :quotedMsg="msg.quotedMsgObject" v-if="hasQuotedMsg"/>
@@ -148,4 +147,5 @@
         background-color: #DCF8C6;
         border-radius: 7.5px;
     }
+
 </style>
