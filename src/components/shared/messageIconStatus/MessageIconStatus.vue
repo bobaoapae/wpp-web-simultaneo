@@ -10,15 +10,15 @@
 </template>
 
 <script>
-    export default {
-        name: 'MessageIconStatus',
-        props: {
-            ack: {
-                type: Number,
-                required: true
-            }
-        }
+export default {
+  name: 'MessageIconStatus',
+  props: {
+    ack: {
+      type: Number,
+      required: true
     }
+  }
+};
 </script>
 
 <style scoped>

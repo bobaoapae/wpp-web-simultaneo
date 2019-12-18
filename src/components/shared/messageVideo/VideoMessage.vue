@@ -1,155 +1,153 @@
 <template>
-    <div class="message-video" v-b-visible.once="onVisible">
-        <div class="video-container" @click="handleClick">
-            <div class="box-preview blur">
-                <img :src=" 'data:image/jpeg;base64,'+ msg.body" alt="body">
-            </div>
+   <div class="message-video" v-b-visible.once="onVisible">
+      <div @click="handleClick" class="video-container">
+         <div class="box-preview blur">
+            <img :src=" 'data:image/jpeg;base64,'+ msg.body" alt="body">
+         </div>
 
-            <LoadingMedia v-if="!srcVideo"/>
-            <PlayMedia v-else/>
-        </div>
+         <LoadingMedia v-if="!srcVideo"/>
+         <PlayMedia v-else/>
+      </div>
 
-        <div class="box-caption" v-if="msg.caption">
-            <span v-html="captionFormated"></span>
-        </div>
+      <div class="box-caption" v-if="msg.caption">
+         <span v-html="captionFormated"></span>
+      </div>
 
-        <MessageTime :msg="msg" :class="{'no-caption' : !haveCaption}"/>
-    </div>
+      <MessageTime :class="{'no-caption' : !haveCaption}" :msg="msg"/>
+   </div>
 </template>
 
 <script>
-    import api from '@/api.js'
-    import {mapActions, mapMutations} from 'vuex'
-    import {msg} from '@/helper.js';
-    import LoadingMedia from "../loadingMedia/LoadingMedia.vue";
-    import MessageTime from '../messageTime/MessageTime.vue';
-    import PlayMedia from "../playMedia/PlayMedia";
+import { mapActions, mapMutations } from 'vuex';
+import { msg } from '@/helper.js';
+import LoadingMedia from '../loadingMedia/LoadingMedia.vue';
+import MessageTime from '../messageTime/MessageTime.vue';
+import PlayMedia from '../playMedia/PlayMedia';
 
-    export default {
-        name: "VideoMessage",
-        components: {
-            PlayMedia,
-            LoadingMedia,
-            MessageTime
-        },
-        props: {
-            msg: {
-                type: Object,
-                required: true
-            }
-        },
-        data() {
-            return {
-                srcVideo: this.msg.base64MediaFull,
-            }
-        },
-        computed: {
-            captionFormated() {
-                if (this.msg.caption) {
-                    return msg.formatMsg(this.msg.caption);
-                } else {
-                    return '';
-                }
-            },
-            haveCaption() {
-                return this.msg.caption !== undefined;
-            },
-        },
-        methods: {
-            ...mapActions(['addFullMediaInMsg', 'sendWsMessage']),
-            ...mapMutations(['SET_MODAL']),
-
-            getVideo() {
-                if (!this.msg.base64MediaFull) {
-                    this.sendWsMessage({msg: `downloadMedia,${this.msg.id._serialized}`}).then(e => {
-                        this.srcVideo = e.base64;
-                        this.saveInCache(this.srcVideo);
-                    });
-                } else {
-                    this.srcVideo = this.msg.base64MediaFull;
-                }
-            },
-            saveInCache(media) {
-                let idChat;
-                if (this.msg.id.fromMe) {
-                    idChat = this.msg.to;
-                } else {
-                    idChat = this.msg.from;
-                }
-
-                this.addFullMediaInMsg({
-                    idChat: idChat,
-                    idMsg: this.msg.id,
-                    media: media,
-                })
-            },
-            handleClick() {
-                if (this.srcVideo) {
-                    this.SET_MODAL({
-                        show: true,
-                        type: 'video',
-                        media: this.srcVideo,
-                        id: this.msg.id._serialized
-                    });
-                }
-
-            },
-            onVisible(visible) {
-                if (visible && !this.srcVideo) {
-                    this.getVideo();
-                }
-            }
-        }
+export default {
+  name: 'VideoMessage',
+  components: {
+    PlayMedia,
+    LoadingMedia,
+    MessageTime
+  },
+  props: {
+    msg: {
+      type: Object,
+      required: true
     }
+  },
+  data () {
+    return {
+      srcVideo: this.msg.base64MediaFull
+    };
+  },
+  computed: {
+    captionFormated () {
+      if (this.msg.caption) {
+        return msg.formatMsg(this.msg.caption);
+      } else {
+        return '';
+      }
+    },
+    haveCaption () {
+      return this.msg.caption !== undefined;
+    }
+  },
+  methods: {
+    ...mapActions(['addFullMediaInMsg', 'sendWsMessage']),
+    ...mapMutations(['SET_MODAL']),
+
+    getVideo () {
+      if (!this.msg.base64MediaFull) {
+        this.sendWsMessage({ msg: `downloadMedia,${this.msg.id._serialized}` }).then(e => {
+          this.srcVideo = e.base64;
+          this.saveInCache(this.srcVideo);
+        });
+      } else {
+        this.srcVideo = this.msg.base64MediaFull;
+      }
+    },
+    saveInCache (media) {
+      let idChat;
+      if (this.msg.id.fromMe) {
+        idChat = this.msg.to;
+      } else {
+        idChat = this.msg.from;
+      }
+
+      this.addFullMediaInMsg({
+        idChat: idChat,
+        idMsg: this.msg.id,
+        media: media
+      });
+    },
+    handleClick () {
+      if (this.srcVideo) {
+        this.SET_MODAL({
+          show: true,
+          type: 'video',
+          media: this.srcVideo,
+          id: this.msg.id._serialized
+        });
+      }
+    },
+    onVisible (visible) {
+      if (visible && !this.srcVideo) {
+        this.getVideo();
+      }
+    }
+  }
+};
 </script>
 
 <style scoped>
-    .message-video {
-        padding: 3px;
-    }
+   .message-video {
+      padding: 3px;
+   }
 
-    .video-container {
-        max-width: 220px;
-        min-width: 220px;
+   .video-container {
+      max-width: 220px;
+      min-width: 220px;
 
-        max-height: 160px;
-        min-height: 160px;
+      max-height: 160px;
+      min-height: 160px;
 
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 6px;
-    }
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+   }
 
-    .box-caption {
-        max-width: 220px;
-        min-width: 220px;
-    }
+   .box-caption {
+      max-width: 220px;
+      min-width: 220px;
+   }
 
-    .box-preview {
-        min-width: 100%;
-        min-height: 100%;
-    }
+   .box-preview {
+      min-width: 100%;
+      min-height: 100%;
+   }
 
-    .blur {
-        filter: blur(8px);
-    }
+   .blur {
+      filter: blur(8px);
+   }
 
-    img {
-        width: 100%;
-        height: 100%;
-    }
+   img {
+      width: 100%;
+      height: 100%;
+   }
 
-    .no-caption {
-        color: #FFF;
-        background: rgba(0, 0, 0, 0.3);
-        padding: 0 5px;
-        border-radius: 3px;
-    }
+   .no-caption {
+      color: #FFF;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 0 5px;
+      border-radius: 3px;
+   }
 
-    .box-caption span {
-        font-size: 14.2px;
-        color: #262626;
-    }
+   .box-caption span {
+      font-size: 14.2px;
+      color: #262626;
+   }
 </style>

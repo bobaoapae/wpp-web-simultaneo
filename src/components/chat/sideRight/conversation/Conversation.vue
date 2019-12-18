@@ -1,33 +1,33 @@
 <template>
-    <div id="conversation">
-        <ConversationHeader/>
+   <div id="conversation">
+      <ConversationHeader/>
 
-        <MessagesPanel />
+      <MessagesPanel/>
 
-        <InputMessage />
-    </div>
+      <InputMessage/>
+   </div>
 </template>
 
 <script>
-import ConversationHeader from "./conversationHeader/ConversationHeader.vue";
+import ConversationHeader from './conversationHeader/ConversationHeader.vue';
 import MessagesPanel from './messagesPanel/MessagesPanel.vue';
-import InputMessage from "./inputMessage/InputMessage";
+import InputMessage from './inputMessage/InputMessage';
 
 export default {
-    name: "Conversation",
-    components: {
-        InputMessage,
-        ConversationHeader,
-        MessagesPanel
-    }
+  name: 'Conversation',
+  components: {
+    InputMessage,
+    ConversationHeader,
+    MessagesPanel
+  }
 };
 </script>
 
 <style scoped>
-#conversation {
-    height: 100%;
-    background: #fff;
-    display: flex;
-    flex-direction: column;
-}
+   #conversation {
+      height: 100%;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+   }
 </style>
