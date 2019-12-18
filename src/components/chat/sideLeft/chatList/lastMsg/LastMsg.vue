@@ -2,7 +2,7 @@
     <div class="last-msg flex-grow-1 d-flex align-items-center" :class="{unread : isUnread}" v-if="lastMsg">
         <MessageIconStatus :ack="lastMsg.ack" class="icon-status" v-if="lastMsg.id.fromMe"/>
 
-        <span v-if="isGroup && lastMsg.senderObj && !lastMsg.id.fromMe">
+        <span v-if="isGroup && lastMsg && lastMsg.senderObj && !lastMsg.id.fromMe">
             {{senderFormated}}:
         </span>
 
@@ -35,6 +35,7 @@
 
     import MessageBody from './messageBody/MessageBody.vue';
     import MessageIconStatus from "@/components/shared/messageIconStatus/MessageIconStatus.vue";
+    import {mapActions} from "vuex";
     import {msg} from '@/helper.js'
 
     export default {
@@ -50,16 +51,12 @@
             }
         },
         data() {
-            return {
-
-            }
+            return {}
         },
         created() {
 
         },
-        watch: {
-
-        },
+        watch: {},
         computed: {
             isUnread() {
                 return this.chat.unreadCount > 0;
@@ -68,22 +65,25 @@
                 return this.chat.kind === 'group';
             },
             lastMsg() {
-                const msgsFiltered = this.chat.msgs.filter((element) => {
-                    return element.ack !== undefined;
-                });
-
-                return msgsFiltered[msgsFiltered.length - 1];
-            },
-            senderFormated() {
-                if (this.lastMsg.senderObj.shortName) {
-                    return msg.processNativeEmojiToImage(this.lastMsg.senderObj.shortName);
-                } else {
-                    return '+' + this.lastMsg.senderObj.id.replace('@c.us', '');
+                return this.chat.lastMsg;
+            }
+        },
+        asyncComputed: {
+            senderFormated: {
+                async get() {
+                    if (this.lastMsg && this.lastMsg.senderObj) {
+                        return msg.processNativeEmojiToImage(await this.findFormattedNameFromId({id: this.lastMsg.senderObj.id}))
+                    }
+                },
+                default() {
+                    if (this.lastMsg && this.lastMsg.senderObj) {
+                        return "+" + this.lastMsg.senderObj.id.split("@")[0];
+                    }
                 }
             }
         },
         methods: {
-
+            ...mapActions(["findFormattedNameFromId"])
         }
     };
 </script>

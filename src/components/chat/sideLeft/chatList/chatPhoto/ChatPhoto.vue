@@ -1,5 +1,5 @@
 <template>
-    <div class="box-photo-chat" v-b-visible.once="handlePicture">
+    <div class="box-photo-chat" v-b-visible.once="handleChatVisible">
         <transition name="component-fade" mode="out-in">
             <img key="user" src="@/assets/images/wpp-photo-user.svg" v-if="isChat && !chat.picture"/>
 
@@ -55,10 +55,11 @@
             }
         },
         methods: {
-            ...mapActions(['getPicture']),
+            ...mapActions(['getPicture', 'subscribePresence']),
 
-            handlePicture(visible) {
+            handleChatVisible(visible) {
                 if (visible) {
+                    this.subscribePresence({chatId: this.chat.id});
                     this.getPicture({
                         chatId: this.chat.id
                     })

@@ -8,7 +8,15 @@
             <div class="nome" v-html="nameEmojify"></div>
 
             <div class="info">
+                <div v-if="isChat">
+                    <span v-if="isOffline && hasLastTimeAvailable">{{this.lastTimeAvailable}}</span>
+                    <span v-else-if="isOnline">online</span>
+                    <span v-else-if="isComposing">escrevendo...</span>
+                    <span v-else-if="isRecording">gravando áudio...</span>
+                </div>
+                <div v-else>
 
+                </div>
             </div>
         </div>
 
@@ -51,10 +59,77 @@
                 } else {
                     return "+" + this.activeChat.id.replace('@c.us', '');
                 }
-            }
+            },
+
+            isChat() {
+                return this.activeChat.kind === "chat";
+            },
+
+            isOffline() {
+                return this.activeChat.presenceType === 'unavailable';
+            },
+
+            isOnline() {
+                return this.activeChat.presenceType === 'available';
+            },
+
+            isComposing() {
+                return this.activeChat.presenceType === 'composing';
+            },
+
+            isRecording() {
+                return this.activeChat.presenceType === 'recording';
+            },
+
+            hasLastTimeAvailable() {
+                return this.activeChat.lastPresenceAvailableTime && this.activeChat.lastPresenceAvailableTime > 0;
+            },
+
+            lastTimeAvailable() {
+                return this.timeConverter(this.activeChat.lastPresenceAvailableTime);
+            },
         },
         methods: {
             ...mapActions(["sendMsg"]),
+
+            timeConverter(UNIX_timestamp) {
+                var a = new Date(UNIX_timestamp * 1000);
+                var year = a.getFullYear();
+                var mes = a.getMonth();
+                var date = a.getDate();
+                var hour = a.getHours();
+                var min = a.getMinutes();
+                var time;
+
+                mes++;
+
+                var complete_date = `
+                    ${date >= 10 ? date : "0" + date}/${mes >= 10 ? mes : "0" + mes}/${year}
+                `;
+
+                if (min < 10) {
+                    min = '0' + min;
+                }
+
+                if (hour < 10) {
+                    hour = '0' + hour
+                }
+
+                time = hour + ":" + min;
+
+                const hoje = new Date();
+                const hoje_dia = hoje.getDate();
+                const hoje_mes = hoje.getMonth() + 1;
+
+                const inicioFrase = "visto por último ";
+                if (hoje_dia === date && hoje_mes === mes) {
+                    return inicioFrase + "hoje às " + time;
+                } else if (hoje_dia - date === 1 && hoje_mes === mes) {
+                    return inicioFrase + "ontem às " + time;
+                } else {
+                    return inicioFrase + "em " + complete_date;
+                }
+            },
 
             onChange(event) {
                 const toBase64 = (file) => new Promise((resolve, reject) => {

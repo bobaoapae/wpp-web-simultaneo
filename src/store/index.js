@@ -326,6 +326,16 @@ const store = new Vuex.Store({
             }
         },
 
+        findFormattedNameFromId(context, payload) {
+            const el = context.state.contacts.find(el => el.id === payload.id);
+
+            if (el && el.formattedName) {
+                return el.formattedName;
+            } else {
+                return "+" + (payload.id.split("@")[0]);
+            }
+        },
+
         /*
             CHATS
         */
@@ -357,7 +367,19 @@ const store = new Vuex.Store({
 
         setChatProperties(context, el) {
             el.picture = "";
-            el.quotedMsg = undefined
+            el.quotedMsg = undefined;
+            Object.defineProperty(el, "lastMsg", {
+                get() {
+                    let array = this.msgs.filter(e => e.type !== 'e2e_notification' && e.type !== 'gp2').slice(-1);
+                    if (array.length > 0) {
+                        return array[0];
+                    } else {
+                        return undefined;
+                    }
+                },
+                set(v) {
+                }
+            });
         },
 
         handleChatProperties(context, payload) {
@@ -402,27 +424,25 @@ const store = new Vuex.Store({
                     if (n || r)
                         return n !== r ? n > r ? -1 : 1 : a.id._serialized < b.id._serialized ? -1 : 1;
 
-                    let aMsgsFiltered = a.msgs.filter(e => e.type !== 'e2e_notification' && e.type !== 'gp2');
-                    let bMsgsFiltered = b.msgs.filter(e => e.type !== 'e2e_notification' && e.type !== 'gp2');
-                    if (aMsgsFiltered[aMsgsFiltered.length - 1] === undefined && bMsgsFiltered[bMsgsFiltered.length - 1] === undefined) {
+                    if (a.lastMsg === undefined && b.lastMsg === undefined) {
                         return 0;
                     }
-                    if (aMsgsFiltered[aMsgsFiltered.length - 1] !== undefined && bMsgsFiltered[bMsgsFiltered.length - 1] === undefined) {
+                    if (a.lastMsg !== undefined && b.lastMsg === undefined) {
                         return -1;
                     }
-                    if (aMsgsFiltered[aMsgsFiltered.length - 1] === undefined && bMsgsFiltered[bMsgsFiltered.length - 1] !== undefined) {
+                    if (a.lastMsg === undefined && b.lastMsg !== undefined) {
                         return 1;
                     }
-                    if (aMsgsFiltered[aMsgsFiltered.length - 1].t < bMsgsFiltered[bMsgsFiltered.length - 1].t) {
+                    if (a.lastMsg.t < b.lastMsg.t) {
                         return 1;
                     }
-                    if (aMsgsFiltered[aMsgsFiltered.length - 1].t > bMsgsFiltered[bMsgsFiltered.length - 1].t) {
+                    if (a.lastMsg.t > b.lastMsg.t) {
                         return -1;
                     }
                     return 0;
                 });
 
-                context.dispatch("CLEAR_TIMEOUT_CHATS");
+                context.dispatch("clearTimeoutChats");
                 context.commit('SET_CHATS', chats);
                 context.dispatch("updateTitle");
             }, 100));
@@ -438,6 +458,10 @@ const store = new Vuex.Store({
 
         seeChat(context, payload) {
             context.state.ws.send(`seeChat,${payload.chatId}`);
+        },
+
+        subscribePresence(context, payload) {
+            context.state.ws.send(`subscribePresence,${payload.chatId}`);
         },
 
         loadEarly(context, payload) {
