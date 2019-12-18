@@ -8,10 +8,10 @@
 import LoadginSpinner from '@/components/shared/loadingSpinner/LoadingSpinner';
 
 export default {
-  name: 'Loading',
-  components: {
-    LoadginSpinner
-  }
+    name: 'Loading',
+    components: {
+        LoadginSpinner
+    }
 };
 </script>
 

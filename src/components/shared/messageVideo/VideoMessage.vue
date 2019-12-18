@@ -25,79 +25,78 @@ import MessageTime from '../messageTime/MessageTime.vue';
 import PlayMedia from '../playMedia/PlayMedia';
 
 export default {
-  name: 'VideoMessage',
-  components: {
-    PlayMedia,
-    LoadingMedia,
-    MessageTime
-  },
-  props: {
-    msg: {
-      type: Object,
-      required: true
-    }
-  },
-  data () {
-    return {
-      srcVideo: this.msg.base64MediaFull
-    };
-  },
-  computed: {
-    captionFormated () {
-      if (this.msg.caption) {
-        return msg.formatMsg(this.msg.caption);
-      } else {
-        return '';
-      }
+    name: 'VideoMessage',
+    components: {
+        PlayMedia,
+        LoadingMedia,
+        MessageTime
     },
-    haveCaption () {
-      return this.msg.caption !== undefined;
-    }
-  },
-  methods: {
-    ...mapActions(['addFullMediaInMsg', 'sendWsMessage']),
-    ...mapMutations(['SET_MODAL']),
+    props: {
+        msg: {
+            type: Object,
+            required: true
+        }
+    },
+    data () {
+        return {
+            srcVideo: this.msg.base64MediaFull
+        };
+    },
+    computed: {
+        captionFormated () {
+            if (this.msg.caption) {
+                return msg.formatMsg(this.msg.caption);
+            }
+            return '';
+        },
+        haveCaption () {
+            return this.msg.caption !== undefined;
+        }
+    },
+    methods: {
+        ...mapActions(['addFullMediaInMsg', 'sendWsMessage']),
+        ...mapMutations(['SET_MODAL']),
 
-    getVideo () {
-      if (!this.msg.base64MediaFull) {
-        this.sendWsMessage({ msg: `downloadMedia,${this.msg.id._serialized}` }).then(e => {
-          this.srcVideo = e.base64;
-          this.saveInCache(this.srcVideo);
-        });
-      } else {
-        this.srcVideo = this.msg.base64MediaFull;
-      }
-    },
-    saveInCache (media) {
-      let idChat;
-      if (this.msg.id.fromMe) {
-        idChat = this.msg.to;
-      } else {
-        idChat = this.msg.from;
-      }
+        getVideo () {
+            if (!this.msg.base64MediaFull) {
+                this.sendWsMessage({ msg: `downloadMedia,${this.msg.id._serialized}` }).then(e => {
+                    this.srcVideo = e.base64;
+                    this.saveInCache(this.srcVideo);
+                });
+            } else {
+                this.srcVideo = this.msg.base64MediaFull;
+            }
+        },
+        saveInCache (media) {
+            let idChat;
+            if (this.msg.id.fromMe) {
+                idChat = this.msg.to;
+            } else {
+                idChat = this.msg.from;
+            }
 
-      this.addFullMediaInMsg({
-        idChat: idChat,
-        idMsg: this.msg.id,
-        media: media
-      });
-    },
-    handleClick () {
-      if (this.srcVideo) {
-        this.SET_MODAL({
-          show: true,
-          type: 'video',
-          media: this.srcVideo,
-          id: this.msg.id._serialized
-        });
-      }
-    },
-    onVisible (visible) {
-      if (visible && !this.srcVideo) {
-        this.getVideo();
-      }
+            this.addFullMediaInMsg({
+                idChat: idChat,
+                idMsg: this.msg.id,
+                media: media
+            });
+        },
+        handleClick () {
+            if (this.srcVideo) {
+                this.SET_MODAL({
+                    show: true,
+                    type: 'video',
+                    media: this.srcVideo,
+                    id: this.msg.id._serialized
+                });
+            }
+        },
+        onVisible (visible) {
+            if (visible && !this.srcVideo) {
+                this.getVideo();
+            }
+        }
     }
-  }
 };
 </script>
 

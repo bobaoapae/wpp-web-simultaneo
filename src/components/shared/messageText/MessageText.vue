@@ -16,21 +16,21 @@ import MessageTime from '../messageTime/MessageTime';
 import { msg } from '@/helper.js';
 
 export default {
-  name: 'MessageText',
-  components: {
-    MessageTime
-  },
-  props: {
-    msg: {
-      type: Object,
-      required: true
+    name: 'MessageText',
+    components: {
+        MessageTime
+    },
+    props: {
+        msg: {
+            type: Object,
+            required: true
+        }
+    },
+    computed: {
+        msgFormated () {
+            return msg.processNativeEmojiToImage(msg.formatMsg(this.msg.body));
+        }
     }
-  },
-  computed: {
-    msgFormated () {
-      return msg.processNativeEmojiToImage(msg.formatMsg(this.msg.body));
-    }
-  }
 };
 </script>
 

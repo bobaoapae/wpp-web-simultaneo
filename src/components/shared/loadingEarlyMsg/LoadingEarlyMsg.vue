@@ -24,7 +24,7 @@
 
 <script>
 export default {
-  name: 'LoadingEarlyMsg'
+    name: 'LoadingEarlyMsg'
 };
 </script>
 

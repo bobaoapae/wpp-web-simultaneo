@@ -28,10 +28,10 @@
 import { mapState } from 'vuex';
 
 export default {
-  name: 'LeftHeader',
-  computed: {
-    ...mapState(['self'])
-  }
+    name: 'LeftHeader',
+    computed: {
+        ...mapState(['self'])
+    }
 };
 </script>
 

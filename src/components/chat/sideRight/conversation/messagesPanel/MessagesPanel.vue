@@ -14,77 +14,77 @@ import MessagesGroup from './messagesGroup/MessagesGroup.vue';
 import LoadingEarlyMsg from '@/components/shared/loadingEarlyMsg/LoadingEarlyMsg';
 
 export default {
-  name: 'MessagesPanel',
-  components: {
-    LoadingEarlyMsg,
-    MessagesPrivate,
-    MessagesGroup
-  },
-  data () {
-    return {
-      updatedCount: 0,
-      loadingEarly: false
-    };
-  },
-  computed: {
-    ...mapState(['activeChat']),
-    isChat () {
-      return this.activeChat.kind === 'chat';
+    name: 'MessagesPanel',
+    components: {
+        LoadingEarlyMsg,
+        MessagesPrivate,
+        MessagesGroup
     },
-    isGroup () {
-      return this.activeChat.kind === 'group';
-    }
-  },
-  mounted () {
-    this.$el.scrollTop = Number.MAX_SAFE_INTEGER;
-  },
-  updated () {
-    if (this.updatedCount === 0) {
-      this.$el.scrollTop = Number.MAX_SAFE_INTEGER;
-    } else {
-      this.scrollToBottom();
-    }
-
-    this.updatedCount++;
-  },
-  watch: {
-    'activeChat.msgs': function (val) {
-      // alert("Musou");
-      // this.scrollToBottom();
-      // this.scrollToBottom();
+    data () {
+        return {
+            updatedCount: 0,
+            loadingEarly: false
+        };
     },
-    'activeChat.id': function (val) {
-      this.updatedCount = 0;
-
-      if (!this.activeChat.noEarlierMsgs && this.activeChat.msgs.length <= 10) {
-        this.handleloadEarly();
-      }
-    }
-  },
-  methods: {
-    ...mapActions(['loadEarly']),
-
-    scrollToBottom () {
-      const element = this.$el;
-      const maxScrollTop = element.scrollHeight - element.clientHeight - 200;
-
-      if (element.scrollTop >= maxScrollTop) {
-        element.scrollTop = Number.MAX_SAFE_INTEGER;
-      }
+    computed: {
+        ...mapState(['activeChat']),
+        isChat () {
+            return this.activeChat.kind === 'chat';
+        },
+        isGroup () {
+            return this.activeChat.kind === 'group';
+        }
     },
-    handleScroll (e) {
-      if (e.target.scrollTop === 0 && this.activeChat.noEarlierMsgs === false) {
-        this.handleloadEarly();
-      }
+    mounted () {
+        this.$el.scrollTop = Number.MAX_SAFE_INTEGER;
     },
-    handleloadEarly () {
-      this.loadingEarly = true;
+    updated () {
+        if (this.updatedCount === 0) {
+            this.$el.scrollTop = Number.MAX_SAFE_INTEGER;
+        } else {
+            this.scrollToBottom();
+        }
 
-      this.loadEarly({ chatId: this.activeChat.id });
+        this.updatedCount++;
+    },
+    watch: {
+        'activeChat.msgs': function (val) {
+            // alert("Musou");
+            // this.scrollToBottom();
+            // this.scrollToBottom();
+        },
+        'activeChat.id': function (val) {
+            this.updatedCount = 0;
 
-      setTimeout(() => { this.loadingEarly = false; }, 7000);
+            if (!this.activeChat.noEarlierMsgs && this.activeChat.msgs.length <= 10) {
+                this.handleLoadEarly();
+            }
+        }
+    },
+    methods: {
+        ...mapActions(['loadEarly']),
+
+        scrollToBottom () {
+            const element = this.$el;
+            const maxScrollTop = element.scrollHeight - element.clientHeight - 200;
+
+            if (element.scrollTop >= maxScrollTop) {
+                element.scrollTop = Number.MAX_SAFE_INTEGER;
+            }
+        },
+        handleScroll (e) {
+            if (e.target.scrollTop === 0 && this.activeChat.noEarlierMsgs === false) {
+                this.handleLoadEarly();
+            }
+        },
+        handleLoadEarly () {
+            this.loadingEarly = true;
+
+            this.loadEarly({ chatId: this.activeChat.id });
+
+            setTimeout(() => { this.loadingEarly = false; }, 7000);
+        }
     }
-  }
 };
 </script>
 

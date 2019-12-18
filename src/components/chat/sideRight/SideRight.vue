@@ -12,14 +12,14 @@ import ChatIntro from './chatIntro/ChatIntro.vue';
 import Conversation from './conversation/Conversation.vue';
 
 export default {
-  name: 'SideRight',
-  components: {
-    ChatIntro,
-    Conversation
-  },
-  computed: {
-    ...mapState(['activeChat'])
-  }
+    name: 'SideRight',
+    components: {
+        ChatIntro,
+        Conversation
+    },
+    computed: {
+        ...mapState(['activeChat'])
+    }
 };
 </script>
 

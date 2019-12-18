@@ -19,41 +19,38 @@ import QuotedMsgContent from './quotedMsgContent/quotedMsgContent';
 import QuotedMedia from './quotedMedia/QuotedMedia';
 
 export default {
-  name: 'QuotedMsg',
-  components: { QuotedMedia, QuotedMsgContent, Author },
-  props: {
-    quotedMsg: {
-      required: true,
-      type: Object
-    }
-  },
-  computed: {
-    ...mapState(['self']),
-
-    color () {
-      if (this.quotedMsg.senderObj.id !== this.self.id) {
-        return '#74cff8';
-      } else {
-        return '#35cd96';
-      }
+    name: 'QuotedMsg',
+    components: { QuotedMedia, QuotedMsgContent, Author },
+    props: {
+        quotedMsg: {
+            required: true,
+            type: Object
+        }
     },
+    computed: {
+        ...mapState(['self']),
 
-    captionFormated () {
-      if (this.quotedMsg.caption) {
-        return msg.processNativeEmojiToImage(this.quotedMsg.caption);
-      } else {
-        return '';
-      }
-    },
+        color () {
+            if (this.quotedMsg.senderObj.id !== this.self.id) {
+                return '#74cff8';
+            }
+            return '#35cd96';
+        },
 
-    bodyformated () {
-      if (this.quotedMsg.body) {
-        return msg.processNativeEmojiToImage(this.quotedMsg.body);
-      } else {
-        return '';
-      }
+        captionFormated () {
+            if (this.quotedMsg.caption) {
+                return msg.processNativeEmojiToImage(this.quotedMsg.caption);
+            }
+            return '';
+        },
+
+        bodyformated () {
+            if (this.quotedMsg.body) {
+                return msg.processNativeEmojiToImage(this.quotedMsg.body);
+            }
+            return '';
+        }
     }
-  }
 };
 </script>
 

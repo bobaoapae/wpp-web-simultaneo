@@ -12,25 +12,24 @@
 import { msg } from '@/helper.js';
 
 export default {
-  name: 'NameChat',
-  props: {
-    chat: {
-      type: Object,
-      required: true
-    }
-  },
-  computed: {
-    isUnread () {
-      return this.chat.unreadCount > 0;
+    name: 'NameChat',
+    props: {
+        chat: {
+            type: Object,
+            required: true
+        }
     },
-    nameEmojify () {
-      if (this.chat.formattedTitle) {
-        return msg.processNativeEmojiToImage(this.chat.formattedTitle);
-      } else {
-        return '+' + this.chat.id.replace('@c.us', '');
-      }
+    computed: {
+        isUnread () {
+            return this.chat.unreadCount > 0;
+        },
+        nameEmojify () {
+            if (this.chat.formattedTitle) {
+                return msg.processNativeEmojiToImage(this.chat.formattedTitle);
+            }
+            return '+' + this.chat.id.replace('@c.us', '');
+        }
     }
-  }
 };
 </script>
 

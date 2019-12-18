@@ -11,11 +11,11 @@ import LeftHeader from './leftHeader/LeftHeader.vue';
 import ChatList from './chatList/ChatList.vue';
 
 export default {
-  name: 'SideLeft',
-  components: {
-    LeftHeader,
-    ChatList
-  }
+    name: 'SideLeft',
+    components: {
+        LeftHeader,
+        ChatList
+    }
 };
 </script>
 

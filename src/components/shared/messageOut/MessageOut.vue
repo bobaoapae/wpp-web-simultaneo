@@ -48,70 +48,70 @@ import MessageAudio from '@/components/shared/messageAudio/MessageAudio';
 import QuotedMsg from '../quotedMsg/QuotedMsg';
 
 export default {
-  name: 'MessageOut',
-  components: {
-    QuotedMsg,
-    MessageAudio,
-    ForwardedIndicator,
-    MessageSticker,
-    MessageText,
-    MessagePhoto,
-    MessageVideo,
-    MessageDocument
-  },
-  data () {
-    return {
-      showMenuIcon: false,
-      menuAberto: false
-    };
-  },
-  props: {
-    msg: {
-      type: Object,
-      required: true
-    }
-  },
-  computed: {
-    ...mapState(['activeChat']),
+    name: 'MessageOut',
+    components: {
+        QuotedMsg,
+        MessageAudio,
+        ForwardedIndicator,
+        MessageSticker,
+        MessageText,
+        MessagePhoto,
+        MessageVideo,
+        MessageDocument
+    },
+    data () {
+        return {
+            showMenuIcon: false,
+            menuAberto: false
+        };
+    },
+    props: {
+        msg: {
+            type: Object,
+            required: true
+        }
+    },
+    computed: {
+        ...mapState(['activeChat']),
 
-    isSameColor () {
-      return this.isChat && !this.hasQuotedMsg;
+        isSameColor () {
+            return this.isChat && !this.hasQuotedMsg;
+        },
+        hasQuotedMsg () {
+            return !!this.msg.quotedMsg;
+        },
+        isChat () {
+            return this.msg.type === 'chat';
+        },
+        isImage () {
+            return this.msg.type === 'image';
+        },
+        isSticker () {
+            return this.msg.type === 'sticker';
+        },
+        isVideo () {
+            return this.msg.type === 'video';
+        },
+        isDocument () {
+            return this.msg.type === 'document';
+        },
+        isAudio () {
+            return this.msg.type === 'ptt';
+        }
     },
-    hasQuotedMsg () {
-      return !!this.msg.quotedMsg;
-    },
-    isChat () {
-      return this.msg.type === 'chat';
-    },
-    isImage () {
-      return this.msg.type === 'image';
-    },
-    isSticker () {
-      return this.msg.type === 'sticker';
-    },
-    isVideo () {
-      return this.msg.type === 'video';
-    },
-    isDocument () {
-      return this.msg.type === 'document';
-    },
-    isAudio () {
-      return this.msg.type === 'ptt';
-    }
-  },
-  methods: {
-    handleShowMenu (evt) {
-      this.menuAberto = true;
-    },
+    methods: {
+        handleShowMenu (evt) {
+            this.menuAberto = true;
+        },
 
-    handleHideMenu (evt) {
-      this.menuAberto = false;
-    },
+        handleHideMenu (evt) {
+            this.menuAberto = false;
+        },
 
-    handleClickAnswer (evt) {
-      this.activeChat.quotedMsg = this.msg;
+        handleClickAnswer (evt) {
+            this.activeChat.quotedMsg = this.msg;
+        }
     }
-  }
 };
 </script>
 

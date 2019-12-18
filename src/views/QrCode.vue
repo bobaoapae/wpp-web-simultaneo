@@ -108,17 +108,17 @@ import { mapState, mapActions } from 'vuex';
 import LoadginSpinner from '../components/shared/loadingSpinner/LoadingSpinner';
 
 export default {
-  name: 'QrCode',
-  components: { LoadginSpinner },
-  created () {
-    this.setNewEvent();
-  },
-  computed: {
-    ...mapState(['imgQrCode', 'isQrCodeLogged'])
-  },
-  methods: {
-    ...mapActions(['setNewEvent'])
-  }
+    name: 'QrCode',
+    components: { LoadginSpinner },
+    created () {
+        this.setNewEvent();
+    },
+    computed: {
+        ...mapState(['imgQrCode', 'isQrCodeLogged'])
+    },
+    methods: {
+        ...mapActions(['setNewEvent'])
+    }
 };
 </script>
 

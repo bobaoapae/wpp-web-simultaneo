@@ -14,13 +14,13 @@
 
 <script>
 export default {
-  name: 'MsgSymbol',
-  props: {
-    type: {
-      required: true,
-      type: String
+    name: 'MsgSymbol',
+    props: {
+        type: {
+            required: true,
+            type: String
+        }
     }
-  }
 };
 </script>
 

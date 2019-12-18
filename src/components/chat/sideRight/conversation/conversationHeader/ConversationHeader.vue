@@ -40,127 +40,125 @@ import ChatActivePhoto from './chatActivePhoto/ChatActivePhoto.vue';
 import { msg } from '@/helper.js';
 
 export default {
-  name: 'ConversationHeader',
-  components: {
-    ChatActivePhoto
-  },
-  data () {
-    return {
-      file: ''
-    };
-  },
-  computed: {
-    ...mapState(['activeChat']),
-
-    nameEmojify () {
-      if (this.activeChat.formattedTitle) {
-        return msg.processNativeEmojiToImage(this.activeChat.formattedTitle);
-      } else {
-        return '+' + this.activeChat.id.replace('@c.us', '');
-      }
+    name: 'ConversationHeader',
+    components: {
+        ChatActivePhoto
     },
-
-    isChat () {
-      return this.activeChat.kind === 'chat';
+    data () {
+        return {
+            file: ''
+        };
     },
+    computed: {
+        ...mapState(['activeChat']),
 
-    isOffline () {
-      return this.activeChat.presenceType === 'unavailable';
+        nameEmojify () {
+            if (this.activeChat.formattedTitle) {
+                return msg.processNativeEmojiToImage(this.activeChat.formattedTitle);
+            }
+            return '+' + this.activeChat.id.replace('@c.us', '');
+        },
+
+        isChat () {
+            return this.activeChat.kind === 'chat';
+        },
+
+        isOffline () {
+            return this.activeChat.presenceType === 'unavailable';
+        },
+
+        isOnline () {
+            return this.activeChat.presenceType === 'available';
+        },
+
+        isComposing () {
+            return this.activeChat.presenceType === 'composing';
+        },
+
+        isRecording () {
+            return this.activeChat.presenceType === 'recording';
+        },
+
+        hasLastTimeAvailable () {
+            return this.activeChat.lastPresenceAvailableTime && this.activeChat.lastPresenceAvailableTime > 0;
+        },
+
+        lastTimeAvailable () {
+            return this.timeConverter(this.activeChat.lastPresenceAvailableTime);
+        }
     },
+    methods: {
+        ...mapActions(['sendMsg']),
 
-    isOnline () {
-      return this.activeChat.presenceType === 'available';
-    },
+        timeConverter (unixTimeStamp) {
+            let a = new Date(unixTimeStamp * 1000);
+            let year = a.getFullYear();
+            let mes = a.getMonth();
+            let date = a.getDate();
+            let hour = a.getHours();
+            let min = a.getMinutes();
+            let time;
 
-    isComposing () {
-      return this.activeChat.presenceType === 'composing';
-    },
+            mes++;
 
-    isRecording () {
-      return this.activeChat.presenceType === 'recording';
-    },
-
-    hasLastTimeAvailable () {
-      return this.activeChat.lastPresenceAvailableTime && this.activeChat.lastPresenceAvailableTime > 0;
-    },
-
-    lastTimeAvailable () {
-      return this.timeConverter(this.activeChat.lastPresenceAvailableTime);
-    }
-  },
-  methods: {
-    ...mapActions(['sendMsg']),
-
-    timeConverter (unixTimeStamp) {
-      var a = new Date(unixTimeStamp * 1000);
-      var year = a.getFullYear();
-      var mes = a.getMonth();
-      var date = a.getDate();
-      var hour = a.getHours();
-      var min = a.getMinutes();
-      var time;
-
-      mes++;
-
-      var completeDate = `
+            let completeDate = `
                     ${date >= 10 ? date : '0' + date}/${mes >= 10 ? mes : '0' + mes}/${year}
                 `;
 
-      if (min < 10) {
-        min = '0' + min;
-      }
+            if (min < 10) {
+                min = '0' + min;
+            }
 
-      if (hour < 10) {
-        hour = '0' + hour;
-      }
+            if (hour < 10) {
+                hour = '0' + hour;
+            }
 
-      time = hour + ':' + min;
+            time = hour + ':' + min;
 
-      const hoje = new Date();
-      const hojeDia = hoje.getDate();
-      const hojeMes = hoje.getMonth() + 1;
+            const hoje = new Date();
+            const hojeDia = hoje.getDate();
+            const hojeMes = hoje.getMonth() + 1;
 
-      const inicioFrase = 'visto por último ';
-      if (hojeDia === date && hojeMes === mes) {
-        return inicioFrase + 'hoje às ' + time;
-      } else if (hojeDia - date === 1 && hojeMes === mes) {
-        return inicioFrase + 'ontem às ' + time;
-      } else {
-        return inicioFrase + 'em ' + completeDate;
-      }
-    },
+            const inicioFrase = 'visto por último ';
+            if (hojeDia === date && hojeMes === mes) {
+                return inicioFrase + 'hoje às ' + time;
+            } else if (hojeDia - date === 1 && hojeMes === mes) {
+                return inicioFrase + 'ontem às ' + time;
+            }
+            return inicioFrase + 'em ' + completeDate;
+        },
 
-    onChange (event) {
-      const toBase64 = (file) => new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
-      });
+        onChange (event) {
+            const toBase64 = (file) => new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
 
-      (async () => {
-        const file = event.target.files[0];
-        this.file = (await toBase64(file));
-        this.handleSendMsg(event.target.files[0].name);
+            (async () => {
+                const file = event.target.files[0];
+                this.file = (await toBase64(file));
+                this.handleSendMsg(event.target.files[0].name);
 
-        this.activeChat.quotedMsg = undefined;
-      })();
-    },
+                this.activeChat.quotedMsg = undefined;
+            })();
+        },
 
-    handleSendMsg (name) {
-      let msg = {
-        chatId: this.activeChat.id,
-        media: this.file,
-        fileName: name
-      };
+        handleSendMsg (name) {
+            let msg = {
+                chatId: this.activeChat.id,
+                media: this.file,
+                fileName: name
+            };
 
-      if (this.activeChat.quotedMsg) {
-        msg.quotedMsg = this.activeChat.quotedMsg.id._serialized;
-      }
+            if (this.activeChat.quotedMsg) {
+                msg.quotedMsg = this.activeChat.quotedMsg.id._serialized;
+            }
 
-      this.sendMsg(msg);
+            this.sendMsg(msg);
+        }
     }
-  }
 };
 </script>
 

@@ -24,61 +24,61 @@
 import { mapState, mapMutations, mapActions } from 'vuex';
 
 export default {
-  name: 'ModalMedia',
-  data () {
-    return {
-      listener: {}
-    };
-  },
-  computed: {
-    ...mapState(['modal'])
-  },
-  updated () {
-    this.handleModalKeydown();
-  },
-  methods: {
-    ...mapMutations(['SET_MODAL']),
-    ...mapActions(['sendWsMessage']),
-
-    handleModalKeydown () {
-      if (this.modal.show) {
-        this.listener = (event) => {
-          if (event.key === 'Escape') {
-            this.closeModal();
-          }
+    name: 'ModalMedia',
+    data () {
+        return {
+            listener: {}
         };
-
-        document.addEventListener('keydown', this.listener, false);
-      } else {
-        document.removeEventListener('keydown', this.listener, false);
-      }
     },
-    closeModal () {
-      this.SET_MODAL({
-        show: false
-      });
+    computed: {
+        ...mapState(['modal'])
     },
-    handleClick (evt) {
-      if (evt.toElement.className === 'content') {
-        this.closeModal();
-      }
+    updated () {
+        this.handleModalKeydown();
     },
+    methods: {
+        ...mapMutations(['SET_MODAL']),
+        ...mapActions(['sendWsMessage']),
 
-    download () {
-      this.sendWsMessage({ msg: `downloadMedia,${this.modal.id}` }).then(e => {
-        const element = document.createElement('a');
-        element.setAttribute('href', e.base64);
-        element.setAttribute('download', e.fileName);
+        handleModalKeydown () {
+            if (this.modal.show) {
+                this.listener = (event) => {
+                    if (event.key === 'Escape') {
+                        this.closeModal();
+                    }
+                };
 
-        element.style.display = 'none';
-        document.body.appendChild(element);
+                document.addEventListener('keydown', this.listener, false);
+            } else {
+                document.removeEventListener('keydown', this.listener, false);
+            }
+        },
+        closeModal () {
+            this.SET_MODAL({
+                show: false
+            });
+        },
+        handleClick (evt) {
+            if (evt.toElement.className === 'content') {
+                this.closeModal();
+            }
+        },
 
-        element.click();
+        download () {
+            this.sendWsMessage({ msg: `downloadMedia,${this.modal.id}` }).then(e => {
+                const element = document.createElement('a');
+                element.setAttribute('href', e.base64);
+                element.setAttribute('download', e.fileName);
 
-        document.body.removeChild(element);
-      });
+                element.style.display = 'none';
+                document.body.appendChild(element);
+
+                element.click();
+
+                document.body.removeChild(element);
+            });
+        }
     }
-  }
 };
 </script>
 

@@ -8,41 +8,41 @@
 import { mapState } from 'vuex';
 
 export default {
-  name: 'ChatActivePhoto',
-  data () {
-    return {
-      imgOrigial: true,
-      imgUser: false,
-      imgGroup: false
-    };
-  },
-  computed: {
-    ...mapState(['activeChat'])
-  },
-  watch: {
-    'activeChat.picture': function () {
-      this.resetState();
-      // this.handleError();
-    }
-  },
-  methods: {
-    handleError () {
-      this.imgOrigial = false;
-
-      if (this.activeChat.kind === 'group') {
-        this.imgUser = false;
-        this.imgGroup = true;
-      } else {
-        this.imgUser = true;
-        this.imgGroup = false;
-      }
+    name: 'ChatActivePhoto',
+    data () {
+        return {
+            imgOrigial: true,
+            imgUser: false,
+            imgGroup: false
+        };
     },
-    resetState () {
-      this.imgOrigial = true;
-      this.imgUser = false;
-      this.imgGroup = false;
+    computed: {
+        ...mapState(['activeChat'])
+    },
+    watch: {
+        'activeChat.picture': function () {
+            this.resetState();
+            // this.handleError();
+        }
+    },
+    methods: {
+        handleError () {
+            this.imgOrigial = false;
+
+            if (this.activeChat.kind === 'group') {
+                this.imgUser = false;
+                this.imgGroup = true;
+            } else {
+                this.imgUser = true;
+                this.imgGroup = false;
+            }
+        },
+        resetState () {
+            this.imgOrigial = true;
+            this.imgUser = false;
+            this.imgGroup = false;
+        }
     }
-  }
 };
 </script>
 

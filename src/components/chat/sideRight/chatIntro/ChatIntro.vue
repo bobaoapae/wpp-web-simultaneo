@@ -17,7 +17,7 @@
 
 <script>
 export default {
-  name: 'ChatIntro'
+    name: 'ChatIntro'
 };
 </script>
 

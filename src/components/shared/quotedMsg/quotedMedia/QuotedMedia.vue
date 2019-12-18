@@ -6,12 +6,12 @@
 
 <script>
 export default {
-  name: 'QuotedMedia',
-  props: {
-    body: {
-      required: true
+    name: 'QuotedMedia',
+    props: {
+        body: {
+            required: true
+        }
     }
-  }
 };
 </script>
 

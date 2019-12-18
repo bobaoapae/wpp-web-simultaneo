@@ -20,21 +20,21 @@ import SideRight from '@/components/chat/sideRight/SideRight.vue';
 import ModalMedia from './ModalMedia';
 
 export default {
-  name: 'Chat',
-  components: {
-    ModalMedia,
-    SideLeft,
-    SideRight
-  },
-  data () {
-    return {};
-  },
-  created () {
+    name: 'Chat',
+    components: {
+        ModalMedia,
+        SideLeft,
+        SideRight
+    },
+    data () {
+        return {};
+    },
+    created () {
     // this.getChats();
-  },
-  methods: {
-    ...mapActions(['setNewMsgEvent', 'getChats'])
-  }
+    },
+    methods: {
+        ...mapActions(['setNewMsgEvent', 'getChats'])
+    }
 };
 </script>
 

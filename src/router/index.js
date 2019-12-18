@@ -6,29 +6,29 @@ import Wpp from '@/views/Wpp';
 Vue.use(VueRouter);
 
 const routes = [
-  {
-    path: '/',
-    name: 'wpp',
-    component: Wpp,
-    beforeEnter: (to, from, next) => {
-      if (sessionStorage.TOKEN) {
-        next();
-      } else {
-        router.push('/login');
-      }
+    {
+        path: '/',
+        name: 'wpp',
+        component: Wpp,
+        beforeEnter: (to, from, next) => {
+            if (sessionStorage.TOKEN) {
+                next();
+            } else {
+                router.push('/login');
+            }
+        }
+    },
+    {
+        path: '/login',
+        name: 'login',
+        component: Login
     }
-  },
-  {
-    path: '/login',
-    name: 'login',
-    component: Login
-  }
 ];
 
 const router = new VueRouter({
-  // mode: 'history',
-  base: process.env.BASE_URL,
-  routes
+    // mode: 'history',
+    base: process.env.BASE_URL,
+    routes
 });
 
 export default router;

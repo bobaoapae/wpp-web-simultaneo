@@ -37,73 +37,73 @@ import { mapActions } from 'vuex';
 import MessageTime from '../messageTime/MessageTime';
 
 export default {
-  name: 'MessageAudio',
-  components: {
-    MessageTime
-  },
-  props: {
-    msg: {
-      type: Object,
-      required: true
+    name: 'MessageAudio',
+    components: {
+        MessageTime
+    },
+    props: {
+        msg: {
+            type: Object,
+            required: true
+        }
+    },
+    mounted () {
+        this.$refs.playAudio.addEventListener('play', this.handleMarkPlayed);
+    },
+    data () {
+        return {
+            srcAudio: this.msg.base64MediaFull,
+            srcLoading: false,
+            srcError: false
+        };
+    },
+    methods: {
+        ...mapActions(['addFullMediaInMsg', 'markPlayed', 'sendWsMessage']),
+
+        handleMarkPlayed () {
+            if (this.msg.ack !== 4) {
+                this.markPlayed({ msgId: this.msg.id._serialized });
+            }
+        },
+        getAudio () {
+            this.srcLoading = true;
+
+            if (!this.msg.base64MediaFull) {
+                this.sendWsMessage({ msg: `downloadMedia,${this.msg.id._serialized}` }).then(e => {
+                    this.srcAudio = e.base64;
+                    this.srcLoading = false;
+                    this.srcError = false;
+                    this.saveInCache(this.srcAudio);
+                }).catch(e => {
+                    this.srcLoading = false;
+                    this.srcError = true;
+                });
+            } else {
+                this.srcAudio = this.msg.base64MediaFull;
+                this.srcLoading = false;
+                this.srcError = false;
+            }
+        },
+        saveInCache (media) {
+            let idChat;
+            if (this.msg.id.fromMe) {
+                idChat = this.msg.to;
+            } else {
+                idChat = this.msg.from;
+            }
+
+            this.addFullMediaInMsg({
+                idChat: idChat,
+                idMsg: this.msg.id,
+                media: media
+            });
+        },
+        onVisible (visible) {
+            if (visible && !this.srcAudio) {
+                this.getAudio();
+            }
+        }
     }
-  },
-  mounted () {
-    this.$refs.playAudio.addEventListener('play', this.handleMarkPlayed);
-  },
-  data () {
-    return {
-      srcAudio: this.msg.base64MediaFull,
-      srcLoading: false,
-      srcError: false
-    };
-  },
-  methods: {
-    ...mapActions(['addFullMediaInMsg', 'markPlayed', 'sendWsMessage']),
-
-    handleMarkPlayed () {
-      if (this.msg.ack !== 4) {
-        this.markPlayed({ msgId: this.msg.id._serialized });
-      }
-    },
-    getAudio () {
-      this.srcLoading = true;
-
-      if (!this.msg.base64MediaFull) {
-        this.sendWsMessage({ msg: `downloadMedia,${this.msg.id._serialized}` }).then(e => {
-          this.srcAudio = e.base64;
-          this.srcLoading = false;
-          this.srcError = false;
-          this.saveInCache(this.srcAudio);
-        }).catch(e => {
-          this.srcLoading = false;
-          this.srcError = true;
-        });
-      } else {
-        this.srcAudio = this.msg.base64MediaFull;
-        this.srcLoading = false;
-        this.srcError = false;
-      }
-    },
-    saveInCache (media) {
-      let idChat;
-      if (this.msg.id.fromMe) {
-        idChat = this.msg.to;
-      } else {
-        idChat = this.msg.from;
-      }
-
-      this.addFullMediaInMsg({
-        idChat: idChat,
-        idMsg: this.msg.id,
-        media: media
-      });
-    },
-    onVisible (visible) {
-      if (visible && !this.srcAudio) {
-        this.getAudio();
-      }
-    }
-  }
 };
 </script>
 

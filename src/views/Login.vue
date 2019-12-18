@@ -39,51 +39,51 @@ import api from '@/api';
 import { mapMutations } from 'vuex';
 
 export default {
-  name: 'Login',
-  data () {
-    return {
-      form: {
-        user: '',
-        pass: ''
-      },
-      btn: {
-        label: 'ENTRAR',
-        loading: false
-      },
-      error: {
-        active: false
-      },
-      showPass: false
-    };
-  },
-  methods: {
-    ...mapMutations(['SET_IS_LOGGED']),
-    handleLogin () {
-      this.btn.label = 'ENTRANDO...';
-      this.btn.loading = true;
+    name: 'Login',
+    data () {
+        return {
+            form: {
+                user: '',
+                pass: ''
+            },
+            btn: {
+                label: 'ENTRAR',
+                loading: false
+            },
+            error: {
+                active: false
+            },
+            showPass: false
+        };
+    },
+    methods: {
+        ...mapMutations(['SET_IS_LOGGED']),
+        handleLogin () {
+            this.btn.label = 'ENTRANDO...';
+            this.btn.loading = true;
 
-      const f = new FormData();
-      f.append('login', this.form.user);
-      f.append('senha', this.form.pass);
+            const f = new FormData();
+            f.append('login', this.form.user);
+            f.append('senha', this.form.pass);
 
-      api.post('/api/auth/login', f)
-        .then((r) => {
-          this.btn.label = 'ENTRAR';
-          this.btn.loading = false;
-          sessionStorage.TOKEN = r.data.token;
-          api.defaults.headers['Authorization'] = 'Bearer ' + sessionStorage.TOKEN;
+            api.post('/api/auth/login', f)
+                .then((r) => {
+                    this.btn.label = 'ENTRAR';
+                    this.btn.loading = false;
+                    sessionStorage.TOKEN = r.data.token;
+                    api.defaults.headers['Authorization'] = 'Bearer ' + sessionStorage.TOKEN;
 
-          this.SET_IS_LOGGED(true);
-          this.$router.push('/');
-        })
-        .catch(r => {
-          this.btn.label = 'ENTRAR';
-          this.btn.loading = false;
+                    this.SET_IS_LOGGED(true);
+                    this.$router.push('/');
+                })
+                .catch(r => {
+                    this.btn.label = 'ENTRAR';
+                    this.btn.loading = false;
 
-          this.error.active = true;
-        });
+                    this.error.active = true;
+                });
+        }
     }
-  }
 };
 </script>
 

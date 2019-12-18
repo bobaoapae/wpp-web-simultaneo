@@ -6,66 +6,65 @@
 
 <script>
 export default {
-  name: 'TimeMsg',
-  props: {
-    chat: {
-      type: Object,
-      required: true
-    }
-  },
-  computed: {
-    time () {
-      const t = this.chat.msgs.length;
-      const lastMsg = this.chat.msgs[t - 1];
-
-      if (lastMsg === undefined) {
-        return '';
-      }
-      return this.timeConverter(lastMsg.t);
+    name: 'TimeMsg',
+    props: {
+        chat: {
+            type: Object,
+            required: true
+        }
     },
-    isUnread () {
-      return this.chat.unreadCount > 0;
-    }
-  },
-  methods: {
-    timeConverter (unixTimeStamp) {
-      var a = new Date(unixTimeStamp * 1000);
-      var year = a.getFullYear();
-      var mes = a.getMonth();
-      var date = a.getDate();
-      var hour = a.getHours();
-      var min = a.getMinutes();
-      var time;
+    computed: {
+        time () {
+            const t = this.chat.msgs.length;
+            const lastMsg = this.chat.msgs[t - 1];
 
-      mes++;
+            if (lastMsg === undefined) {
+                return '';
+            }
+            return this.timeConverter(lastMsg.t);
+        },
+        isUnread () {
+            return this.chat.unreadCount > 0;
+        }
+    },
+    methods: {
+        timeConverter (unixTimeStamp) {
+            let a = new Date(unixTimeStamp * 1000);
+            let year = a.getFullYear();
+            let mes = a.getMonth();
+            let date = a.getDate();
+            let hour = a.getHours();
+            let min = a.getMinutes();
+            let time;
 
-      var completeDate = `
+            mes++;
+
+            let completeDate = `
                     ${date >= 10 ? date : '0' + date}/${mes >= 10 ? mes : '0' + mes}/${year}
                 `;
 
-      if (min < 10) {
-        min = '0' + min;
-      }
+            if (min < 10) {
+                min = '0' + min;
+            }
 
-      if (hour < 10) {
-        hour = '0' + hour;
-      }
+            if (hour < 10) {
+                hour = '0' + hour;
+            }
 
-      time = hour + ':' + min;
+            time = hour + ':' + min;
 
-      const hoje = new Date();
-      const hojeDia = hoje.getDate();
-      const hojeMes = hoje.getMonth() + 1;
+            const hoje = new Date();
+            const hojeDia = hoje.getDate();
+            const hojeMes = hoje.getMonth() + 1;
 
-      if (hojeDia === date && hojeMes === mes) {
-        return time;
-      } else if (hojeDia - date === 1 && hojeMes === mes) {
-        return 'Ontem';
-      } else {
-        return completeDate;
-      }
+            if (hojeDia === date && hojeMes === mes) {
+                return time;
+            } else if (hojeDia - date === 1 && hojeMes === mes) {
+                return 'Ontem';
+            }
+            return completeDate;
+        }
     }
-  }
 };
 </script>
 

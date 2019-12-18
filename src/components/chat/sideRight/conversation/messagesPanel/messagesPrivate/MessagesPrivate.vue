@@ -14,29 +14,28 @@ import MessageIn from '@/components/shared/messageIn/MessageIn.vue';
 import MessageInfo from '@/components/shared/messageInfo/MessageInfo.vue';
 
 export default {
-  name: 'MessagesPrivate',
-  components: {
-    MessageOut,
-    MessageIn,
-    MessageInfo
-  },
-  props: {
-    msgs: {
-      type: Array,
-      required: true
+    name: 'MessagesPrivate',
+    components: {
+        MessageOut,
+        MessageIn,
+        MessageInfo
+    },
+    props: {
+        msgs: {
+            type: Array,
+            required: true
+        }
+    },
+    methods: {
+        isNotification (type) {
+            if (type === 'gp2') {
+                return true;
+            } else if (type === 'e2e_notification') {
+                return true;
+            }
+            return false;
+        }
     }
-  },
-  methods: {
-    isNotification (type) {
-      if (type === 'gp2') {
-        return true;
-      } else if (type === 'e2e_notification') {
-        return true;
-      } else {
-        return false;
-      }
-    }
-  }
 };
 </script>
 

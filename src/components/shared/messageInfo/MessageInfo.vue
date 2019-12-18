@@ -44,86 +44,81 @@
 import { mapState } from 'vuex';
 
 export default {
-  name: 'MessageInfo',
-  props: {
-    msg: {
-      type: Object,
-      required: true
-    }
-  },
-  computed: {
-    ...mapState(['activeChat', 'self', 'contacts']),
-
-    isMe () {
-      if (this.msg.senderObj && this.msg.senderObj.id === this.self.id) {
-        return 'Você';
-      } else if (this.msg.senderObj && this.msg.senderObj.name) {
-        return this.msg.senderObj.name;
-      } else if (this.msg.senderObj) {
-        return '+' + this.msg.senderObj.id.replace('@c.us', '');
-      } else {
-        return 'Você';
-      }
-    },
-
-    formatedNumbers () {
-      if (this.msg.recipients.length > 1) {
-        return this.msg.recipients.map(e => {
-          const el = this.contacts.find(el => el.id === e);
-
-          if (el) {
-            return el.formattedName;
-          } else {
-            return '+' + (e.split('@')[0]);
-          }
-        })
-          .slice(0, -1)
-          .join(', ') + ' e ' + this.msg.recipients.map(e => {
-          const el = this.contacts.find(el => el.id === e);
-
-          if (el) {
-            return el.formattedName;
-          } else {
-            return '+' + (e.split('@')[0]);
-          }
-        })
-          .slice(-1);
-      } else {
-        const el = this.contacts.find(el => el.id === this.msg.recipients[0]);
-
-        if (el && el.formattedName) {
-          return el.formattedName;
-        } else {
-          return '+' + this.msg.recipients[0].replace('@c.us', '');
+    name: 'MessageInfo',
+    props: {
+        msg: {
+            type: Object,
+            required: true
         }
-      }
     },
+    computed: {
+        ...mapState(['activeChat', 'self', 'contacts']),
 
-    isEncrypt () {
-      return this.msg.type === 'e2e_notification' && this.msg.subtype === 'encrypt';
-    },
-    isIdentity () {
-      return this.msg.type === 'e2e_notification' && this.msg.subtype === 'identity';
-    },
-    isCreate () {
-      return this.msg.type === 'gp2' && this.msg.subtype === 'create';
-    },
-    isAdd () {
-      return this.msg.type === 'gp2' && this.msg.subtype === 'add';
-    },
-    isRemove () {
-      return this.msg.type === 'gp2' && this.msg.subtype === 'remove';
-    },
-    isPromote () {
-      return this.msg.type === 'gp2' && this.msg.subtype === 'promote';
-    },
-    isDemote () {
-      return this.msg.type === 'gp2' && this.msg.subtype === 'demote';
-    },
-    isLeave () {
-      return this.msg.type === 'gp2' && this.msg.subtype === 'leave';
+        isMe () {
+            if (this.msg.senderObj && this.msg.senderObj.id === this.self.id) {
+                return 'Você';
+            } else if (this.msg.senderObj && this.msg.senderObj.name) {
+                return this.msg.senderObj.name;
+            } else if (this.msg.senderObj) {
+                return '+' + this.msg.senderObj.id.replace('@c.us', '');
+            }
+            return 'Você';
+        },
+
+        formatedNumbers () {
+            if (this.msg.recipients.length > 1) {
+                return this.msg.recipients.map(e => {
+                    const el = this.contacts.find(el => el.id === e);
+
+                    if (el) {
+                        return el.formattedName;
+                    }
+                    return '+' + (e.split('@')[0]);
+                })
+                    .slice(0, -1)
+                    .join(', ') + ' e ' + this.msg.recipients.map(e => {
+                    const el = this.contacts.find(el => el.id === e);
+
+                    if (el) {
+                        return el.formattedName;
+                    }
+                    return '+' + (e.split('@')[0]);
+                })
+                    .slice(-1);
+            }
+            const el = this.contacts.find(el => el.id === this.msg.recipients[0]);
+
+            if (el && el.formattedName) {
+                return el.formattedName;
+            }
+            return '+' + this.msg.recipients[0].replace('@c.us', '');
+        },
+
+        isEncrypt () {
+            return this.msg.type === 'e2e_notification' && this.msg.subtype === 'encrypt';
+        },
+        isIdentity () {
+            return this.msg.type === 'e2e_notification' && this.msg.subtype === 'identity';
+        },
+        isCreate () {
+            return this.msg.type === 'gp2' && this.msg.subtype === 'create';
+        },
+        isAdd () {
+            return this.msg.type === 'gp2' && this.msg.subtype === 'add';
+        },
+        isRemove () {
+            return this.msg.type === 'gp2' && this.msg.subtype === 'remove';
+        },
+        isPromote () {
+            return this.msg.type === 'gp2' && this.msg.subtype === 'promote';
+        },
+        isDemote () {
+            return this.msg.type === 'gp2' && this.msg.subtype === 'demote';
+        },
+        isLeave () {
+            return this.msg.type === 'gp2' && this.msg.subtype === 'leave';
+        }
     }
-  }
 };
 </script>
 

@@ -15,56 +15,56 @@ import { mapActions } from 'vuex';
 
 export default {
 
-  name: 'ChatPhoto',
-  data () {
-    return {
-      imgOriginal: true,
-      imgGroup: false,
-      imgUser: false
-    };
-  },
-  props: {
-    chat: {
-      type: Object,
-      required: true
-    }
-  },
-
-  watch: {
-    'chat.picture': function (val) {
-      if (val === '') {
-        if (this.chat.kind === 'group') {
-          this.imgGroup = true;
-          this.imgUser = false;
-        } else {
-          this.imgGroup = false;
-          this.imgUser = true;
+    name: 'ChatPhoto',
+    data () {
+        return {
+            imgOriginal: true,
+            imgGroup: false,
+            imgUser: false
+        };
+    },
+    props: {
+        chat: {
+            type: Object,
+            required: true
         }
-      }
-    }
-  },
-  computed: {
-    isGroup () {
-      return this.chat.kind === 'group';
     },
 
-    isChat () {
-      return this.chat.kind === 'chat';
-    }
-  },
-  methods: {
-    ...mapActions(['getPicture', 'subscribePresence']),
+    watch: {
+        'chat.picture': function (val) {
+            if (val === '') {
+                if (this.chat.kind === 'group') {
+                    this.imgGroup = true;
+                    this.imgUser = false;
+                } else {
+                    this.imgGroup = false;
+                    this.imgUser = true;
+                }
+            }
+        }
+    },
+    computed: {
+        isGroup () {
+            return this.chat.kind === 'group';
+        },
 
-    handleChatVisible (visible) {
-      if (visible) {
-        this.subscribePresence({ chatId: this.chat.id });
-        this.getPicture({
-          chatId: this.chat.id
-        });
-      }
-    }
+        isChat () {
+            return this.chat.kind === 'chat';
+        }
+    },
+    methods: {
+        ...mapActions(['getPicture', 'subscribePresence']),
 
-  }
+        handleChatVisible (visible) {
+            if (visible) {
+                this.subscribePresence({ chatId: this.chat.id });
+                this.getPicture({
+                    chatId: this.chat.id
+                });
+            }
+        }
+
+    }
 };
 </script>
 

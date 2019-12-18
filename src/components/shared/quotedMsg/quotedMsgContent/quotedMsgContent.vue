@@ -15,20 +15,20 @@ import MsgSymbol from './msgSymbol/MsgSymbol';
 import MsgType from './msgType/MsgType';
 
 export default {
-  name: 'quotedMsgContent',
-  components: { MsgType, MsgSymbol },
-  props: {
-    body: {
-      required: true
-    },
-    type: {
-      type: String,
-      required: true
-    },
-    caption: {
-      required: true
+    name: 'quotedMsgContent',
+    components: { MsgType, MsgSymbol },
+    props: {
+        body: {
+            required: true
+        },
+        type: {
+            type: String,
+            required: true
+        },
+        caption: {
+            required: true
+        }
     }
-  }
 };
 </script>
 

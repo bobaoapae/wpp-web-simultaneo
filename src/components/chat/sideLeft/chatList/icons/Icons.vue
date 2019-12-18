@@ -16,17 +16,17 @@
 
 <script>
 export default {
-  name: 'Icons',
-  props: {
-    chat: {
-      type: Object,
-      required: true
-    }
-  },
-  data () {
-    return {};
-  },
-  computed: {}
+    name: 'Icons',
+    props: {
+        chat: {
+            type: Object,
+            required: true
+        }
+    },
+    data () {
+        return {};
+    },
+    computed: {}
 };
 </script>
 

@@ -15,62 +15,62 @@ import MessageTime from '@/components/shared/messageTime/MessageTime.vue';
 import LoadingMedia from '../loadingMedia/LoadingMedia';
 
 export default {
-  name: 'MessageSticker',
-  components: {
-    LoadingMedia,
-    MessageTime
-  },
-  props: {
-    msg: {
-      type: Object,
-      required: true
-    }
-  },
-  mounted () {
-    if (!this.msg.quotedMsg) {
-      this.$refs.stickerContainer.parentElement.style.backgroundColor = 'transparent';
-      this.$refs.stickerContainer.parentElement.style.boxShadow = 'none';
-    }
-  },
-  data () {
-    return {
-      sticker: this.msg.base64MediaFull
-    };
-  },
-  computed: {
-    ...mapState(['activeChat'])
-  },
-  methods: {
-    ...mapActions(['addFullMediaInMsg', 'sendWsMessage']),
-
-    getSticker () {
-      if (!this.msg.base64MediaFull) {
-        this.sendWsMessage({ msg: `downloadMedia,${this.msg.id._serialized}` }).then(e => {
-          this.sticker = e.base64;
-
-          let idChat;
-          if (this.msg.id.fromMe) {
-            idChat = this.msg.to;
-          } else {
-            idChat = this.msg.from;
-          }
-
-          this.addFullMediaInMsg({
-            idChat: idChat,
-            idMsg: this.msg.id,
-            media: this.sticker
-          });
-        });
-      } else {
-        this.sticker = this.msg.base64MediaFull;
-      }
+    name: 'MessageSticker',
+    components: {
+        LoadingMedia,
+        MessageTime
     },
-    onVisible (visible) {
-      if (visible && !this.sticker) {
-        this.getSticker();
-      }
+    props: {
+        msg: {
+            type: Object,
+            required: true
+        }
+    },
+    mounted () {
+        if (!this.msg.quotedMsg) {
+            this.$refs.stickerContainer.parentElement.style.backgroundColor = 'transparent';
+            this.$refs.stickerContainer.parentElement.style.boxShadow = 'none';
+        }
+    },
+    data () {
+        return {
+            sticker: this.msg.base64MediaFull
+        };
+    },
+    computed: {
+        ...mapState(['activeChat'])
+    },
+    methods: {
+        ...mapActions(['addFullMediaInMsg', 'sendWsMessage']),
+
+        getSticker () {
+            if (!this.msg.base64MediaFull) {
+                this.sendWsMessage({ msg: `downloadMedia,${this.msg.id._serialized}` }).then(e => {
+                    this.sticker = e.base64;
+
+                    let idChat;
+                    if (this.msg.id.fromMe) {
+                        idChat = this.msg.to;
+                    } else {
+                        idChat = this.msg.from;
+                    }
+
+                    this.addFullMediaInMsg({
+                        idChat: idChat,
+                        idMsg: this.msg.id,
+                        media: this.sticker
+                    });
+                });
+            } else {
+                this.sticker = this.msg.base64MediaFull;
+            }
+        },
+        onVisible (visible) {
+            if (visible && !this.sticker) {
+                this.getSticker();
+            }
+        }
     }
-  }
 };
 </script>
 

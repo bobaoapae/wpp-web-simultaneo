@@ -44,67 +44,67 @@ import MessageTime from '../messageTime/MessageTime';
 import { mapActions } from 'vuex';
 
 export default {
-  name: 'MessageDocument',
-  components: {
-    MessageTime
-  },
-  props: {
-    msg: {
-      type: Object,
-      required: true
-    }
-  },
-  computed: {
-    formatedTitle () {
-      return `baixar "${this.msg.filename}"`;
+    name: 'MessageDocument',
+    components: {
+        MessageTime
     },
-    fileType () {
-      const splt = this.msg.filename.split('.');
-      return splt[splt.length - 1].toLocaleUpperCase();
+    props: {
+        msg: {
+            type: Object,
+            required: true
+        }
     },
-    srcFormated () {
-      return 'data:image/jpeg;base64,' + this.msg.body;
-    },
-    fileSize () {
-      // return this.msg.size;
+    computed: {
+        formatedTitle () {
+            return `baixar "${this.msg.filename}"`;
+        },
+        fileType () {
+            const splt = this.msg.filename.split('.');
+            return splt[splt.length - 1].toLocaleUpperCase();
+        },
+        srcFormated () {
+            return 'data:image/jpeg;base64,' + this.msg.body;
+        },
+        fileSize () {
+            // return this.msg.size;
 
-      let tamanhoArquivo = this.msg.size / 1024;
+            let tamanhoArquivo = this.msg.size / 1024;
 
-      if (tamanhoArquivo < 1) {
-        tamanhoArquivo = tamanhoArquivo.toFixed(0) + ' B';
-      } else if (tamanhoArquivo <= 1024) {
-        tamanhoArquivo = tamanhoArquivo.toFixed(0) + ' kB';
-      } else {
-        tamanhoArquivo = (tamanhoArquivo / 1024).toFixed(0) + ' mB';
-      }
+            if (tamanhoArquivo < 1) {
+                tamanhoArquivo = tamanhoArquivo.toFixed(0) + ' B';
+            } else if (tamanhoArquivo <= 1024) {
+                tamanhoArquivo = tamanhoArquivo.toFixed(0) + ' kB';
+            } else {
+                tamanhoArquivo = (tamanhoArquivo / 1024).toFixed(0) + ' mB';
+            }
 
-      return tamanhoArquivo;
-    },
-    showPages () {
-      return this.fileType === 'PDF' ||
+            return tamanhoArquivo;
+        },
+        showPages () {
+            return this.fileType === 'PDF' ||
                this.fileSize === 'DOCX' ||
                this.fileSize === 'XLSX';
+        }
+
+    },
+    methods: {
+        ...mapActions(['sendWsMessage']),
+
+        downloadDocument () {
+            this.sendWsMessage({ msg: `downloadMedia,${this.msg.id._serialized}` }).then(e => {
+                const element = document.createElement('a');
+                element.setAttribute('href', e.base64);
+                element.setAttribute('download', e.fileName);
+
+                element.style.display = 'none';
+                document.body.appendChild(element);
+
+                element.click();
+
+                document.body.removeChild(element);
+            });
+        }
     }
-
-  },
-  methods: {
-    ...mapActions(['sendWsMessage']),
-
-    downloadDocument () {
-      this.sendWsMessage({ msg: `downloadMedia,${this.msg.id._serialized}` }).then(e => {
-        const element = document.createElement('a');
-        element.setAttribute('href', e.base64);
-        element.setAttribute('download', e.fileName);
-
-        element.style.display = 'none';
-        document.body.appendChild(element);
-
-        element.click();
-
-        document.body.removeChild(element);
-      });
-    }
-  }
 };
 </script>
 

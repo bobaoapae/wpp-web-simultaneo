@@ -81,104 +81,104 @@ import { rageSave } from '@/rangeSelectionSaveRestore.js';
 import QuotedMsg from '../../../../shared/quotedMsg/QuotedMsg';
 
 export default {
-  name: 'InputMessage',
-  components: {
-    QuotedMsg,
-    Picker
-  },
-  data () {
-    return {
-      mensagem: '',
-      emojiIndex: msg.emojiIndex(),
-      restore: null,
-      answerVisible: false
-    };
-  },
-  watch: {
-    'activeChat.quotedMsg': function (val) {
-      if (val) {
-        this.$refs.input.focus();
-        this.answerVisible = true;
-      } else {
-        this.answerVisible = false;
-      }
-    }
-
-  },
-  computed: {
-    ...mapState(['activeChat'])
-  },
-  methods: {
-    ...mapActions(['sendMsg']),
-
-    handleClickCloseAnswer () {
-      this.answerVisible = false;
-      this.activeChat.quotedMsg = undefined;
+    name: 'InputMessage',
+    components: {
+        QuotedMsg,
+        Picker
     },
-
-    onPaste (evt) {
-      const textMsg = msg.processNativeEmojiToImage(evt.clipboardData.getData('text'));
-      document.execCommand('insertHTML', false, textMsg);
+    data () {
+        return {
+            mensagem: '',
+            emojiIndex: msg.emojiIndex(),
+            restore: null,
+            answerVisible: false
+        };
     },
-    restorePosition (evt) {
-      if (this.restore) {
-        rageSave.restoreSelection(this.restore);
-        this.restore = null;
-      }
-    },
-    savePosition (evt) {
-      this.restore = rageSave.saveSelection();
-    },
-    addEmoji (emoji) {
-      this.$refs.input.focus();
-      emoji = emoji.native;
-      document.execCommand('insertHTML', false, msg.processNativeEmojiToImage(emoji));
-    },
-    handleEnterPress (evt) {
-      this.mensagem = this.formatarEnviar(this.$refs.input);
-
-      if (this.mensagem !== '') {
-        this.handleSendMsg();
-        this.$refs.input.innerHTML = '';
-        this.mensagem = '';
-        this.restore = null;
-
-        this.activeChat.quotedMsg = undefined;
-      }
-    },
-    handleSendMsg () {
-      let msg = {
-        chatId: this.activeChat.id,
-        message: this.mensagem
-      };
-
-      if (this.activeChat.quotedMsg) {
-        msg.quotedMsg = this.activeChat.quotedMsg.id._serialized;
-      }
-
-      this.sendMsg(msg);
-    },
-    capitalize (value) {
-      if (!value) return '';
-      value = value.toString();
-      return value.charAt(0).toUpperCase() + value.slice(1);
-    },
-    formatarEnviar (domElement) {
-      let msg = '';
-      domElement.childNodes.forEach(function (e) {
-        let nodeName = e.nodeName;
-        if (nodeName === '#text') {
-          msg += e.data;
-        } else if (nodeName === 'IMG') {
-          msg += e.alt;
-        } else if (nodeName === 'BR') {
-          msg += '\n';
+    watch: {
+        'activeChat.quotedMsg': function (val) {
+            if (val) {
+                this.$refs.input.focus();
+                this.answerVisible = true;
+            } else {
+                this.answerVisible = false;
+            }
         }
-      });
-      domElement.innerHTML = '';
-      return this.capitalize(msg);
+
+    },
+    computed: {
+        ...mapState(['activeChat'])
+    },
+    methods: {
+        ...mapActions(['sendMsg']),
+
+        handleClickCloseAnswer () {
+            this.answerVisible = false;
+            this.activeChat.quotedMsg = undefined;
+        },
+
+        onPaste (evt) {
+            const textMsg = msg.processNativeEmojiToImage(evt.clipboardData.getData('text'));
+            document.execCommand('insertHTML', false, textMsg);
+        },
+        restorePosition (evt) {
+            if (this.restore) {
+                rageSave.restoreSelection(this.restore);
+                this.restore = null;
+            }
+        },
+        savePosition (evt) {
+            this.restore = rageSave.saveSelection();
+        },
+        addEmoji (emoji) {
+            this.$refs.input.focus();
+            emoji = emoji.native;
+            document.execCommand('insertHTML', false, msg.processNativeEmojiToImage(emoji));
+        },
+        handleEnterPress (evt) {
+            this.mensagem = this.formatarEnviar(this.$refs.input);
+
+            if (this.mensagem !== '') {
+                this.handleSendMsg();
+                this.$refs.input.innerHTML = '';
+                this.mensagem = '';
+                this.restore = null;
+
+                this.activeChat.quotedMsg = undefined;
+            }
+        },
+        handleSendMsg () {
+            let msg = {
+                chatId: this.activeChat.id,
+                message: this.mensagem
+            };
+
+            if (this.activeChat.quotedMsg) {
+                msg.quotedMsg = this.activeChat.quotedMsg.id._serialized;
+            }
+
+            this.sendMsg(msg);
+        },
+        capitalize (value) {
+            if (!value) return '';
+            value = value.toString();
+            return value.charAt(0).toUpperCase() + value.slice(1);
+        },
+        formatarEnviar (domElement) {
+            let msg = '';
+            domElement.childNodes.forEach(function (e) {
+                let nodeName = e.nodeName;
+                if (nodeName === '#text') {
+                    msg += e.data;
+                } else if (nodeName === 'IMG') {
+                    msg += e.alt;
+                } else if (nodeName === 'BR') {
+                    msg += '\n';
+                }
+            });
+            domElement.innerHTML = '';
+            return this.capitalize(msg);
+        }
     }
-  }
 };
 
 </script>

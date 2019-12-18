@@ -14,12 +14,12 @@
 
 <script>
 export default {
-  name: 'PlayMedia',
-  data () {
-    return {
-      modal: false
-    };
-  }
+    name: 'PlayMedia',
+    data () {
+        return {
+            modal: false
+        };
+    }
 };
 </script>
 

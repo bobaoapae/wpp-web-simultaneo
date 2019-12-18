@@ -18,25 +18,25 @@ import QrCode from '@/views/QrCode.vue';
 import Chat from '@/views/Chat.vue';
 
 export default {
-  name: 'Wpp',
-  components: {
-    Loading,
-    QrCode,
-    Chat
-  },
-  data () {
-    return {};
-  },
-  computed: {
-    ...mapState(['isQrCodeLogged', 'isLoadingChat'])
-  },
-  created () {
+    name: 'Wpp',
+    components: {
+        Loading,
+        QrCode,
+        Chat
+    },
+    data () {
+        return {};
+    },
+    computed: {
+        ...mapState(['isQrCodeLogged', 'isLoadingChat'])
+    },
+    created () {
     // this.getChats();
-  },
+    },
 
-  methods: {
-    ...mapActions(['getChats'])
-  }
+    methods: {
+        ...mapActions(['getChats'])
+    }
 };
 </script>
 

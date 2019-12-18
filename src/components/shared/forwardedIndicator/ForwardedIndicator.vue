@@ -10,7 +10,7 @@
 
 <script>
 export default {
-  name: 'ForwardedIndicator'
+    name: 'ForwardedIndicator'
 };
 </script>
 

@@ -38,52 +38,52 @@ import { mapActions } from 'vuex';
 import { msg } from '@/helper.js';
 
 export default {
-  name: 'LastMsg',
-  components: {
-    MessageIconStatus,
-    MessageBody
-  },
-  props: {
-    chat: {
-      type: Object,
-      required: true
-    }
-  },
-  data () {
-    return {};
-  },
-  created () {
+    name: 'LastMsg',
+    components: {
+        MessageIconStatus,
+        MessageBody
+    },
+    props: {
+        chat: {
+            type: Object,
+            required: true
+        }
+    },
+    data () {
+        return {};
+    },
+    created () {
 
-  },
-  watch: {},
-  computed: {
-    isUnread () {
-      return this.chat.unreadCount > 0;
     },
-    isGroup () {
-      return this.chat.kind === 'group';
+    watch: {},
+    computed: {
+        isUnread () {
+            return this.chat.unreadCount > 0;
+        },
+        isGroup () {
+            return this.chat.kind === 'group';
+        },
+        lastMsg () {
+            return this.chat.lastMsg;
+        }
     },
-    lastMsg () {
-      return this.chat.lastMsg;
-    }
-  },
-  asyncComputed: {
-    senderFormated: {
-      async get () {
-        if (this.lastMsg && this.lastMsg.senderObj) {
-          return msg.processNativeEmojiToImage(await this.findFormattedNameFromId({ id: this.lastMsg.senderObj.id }));
+    asyncComputed: {
+        senderFormated: {
+            async get () {
+                if (this.lastMsg && this.lastMsg.senderObj) {
+                    return msg.processNativeEmojiToImage(await this.findFormattedNameFromId({ id: this.lastMsg.senderObj.id }));
+                }
+            },
+            default () {
+                if (this.lastMsg && this.lastMsg.senderObj) {
+                    return '+' + this.lastMsg.senderObj.id.split('@')[0];
+                }
+            }
         }
-      },
-      default () {
-        if (this.lastMsg && this.lastMsg.senderObj) {
-          return '+' + this.lastMsg.senderObj.id.split('@')[0];
-        }
-      }
+    },
+    methods: {
+        ...mapActions(['findFormattedNameFromId'])
     }
-  },
-  methods: {
-    ...mapActions(['findFormattedNameFromId'])
-  }
 };
 </script>
 

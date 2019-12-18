@@ -12,12 +12,12 @@
 
 <script>
 export default {
-  name: 'MsgType',
-  props: {
-    type: {
-      required: true
+    name: 'MsgType',
+    props: {
+        type: {
+            required: true
+        }
     }
-  }
 };
 </script>
 

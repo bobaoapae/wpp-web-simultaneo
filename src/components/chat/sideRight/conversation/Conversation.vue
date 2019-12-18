@@ -14,12 +14,12 @@ import MessagesPanel from './messagesPanel/MessagesPanel.vue';
 import InputMessage from './inputMessage/InputMessage';
 
 export default {
-  name: 'Conversation',
-  components: {
-    InputMessage,
-    ConversationHeader,
-    MessagesPanel
-  }
+    name: 'Conversation',
+    components: {
+        InputMessage,
+        ConversationHeader,
+        MessagesPanel
+    }
 };
 </script>
 

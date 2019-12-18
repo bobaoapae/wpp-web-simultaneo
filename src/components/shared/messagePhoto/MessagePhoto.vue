@@ -30,77 +30,76 @@ import { msg } from '@/helper.js';
 import { mapActions, mapMutations } from 'vuex';
 
 export default {
-  name: 'MessagePhoto',
-  components: {
-    LoadingMedia,
-    MessageTime
-  },
-  props: {
-    msg: {
-      type: Object,
-      required: true
-    }
-  },
-  data () {
-    return {
-      imageFull: this.msg.base64MediaFull
-    };
-  },
-  computed: {
-    preview () {
-      return 'data:image/jpeg;base64,' + this.msg.body;
+    name: 'MessagePhoto',
+    components: {
+        LoadingMedia,
+        MessageTime
     },
-    haveCaption () {
-      return this.msg.caption !== undefined;
+    props: {
+        msg: {
+            type: Object,
+            required: true
+        }
     },
-    captionFormated () {
-      if (this.msg.caption) {
-        return msg.processNativeEmojiToImage(msg.formatMsg(this.msg.caption));
-      } else {
-        return '';
-      }
-    }
-  },
-  methods: {
-    ...mapMutations(['SET_MODAL']),
-    ...mapActions(['addFullMediaInMsg', 'sendWsMessage']),
+    data () {
+        return {
+            imageFull: this.msg.base64MediaFull
+        };
+    },
+    computed: {
+        preview () {
+            return 'data:image/jpeg;base64,' + this.msg.body;
+        },
+        haveCaption () {
+            return this.msg.caption !== undefined;
+        },
+        captionFormated () {
+            if (this.msg.caption) {
+                return msg.processNativeEmojiToImage(msg.formatMsg(this.msg.caption));
+            }
+            return '';
+        }
+    },
+    methods: {
+        ...mapMutations(['SET_MODAL']),
+        ...mapActions(['addFullMediaInMsg', 'sendWsMessage']),
 
-    getFullImage () {
-      if (!this.msg.base64MediaFull) {
-        this.sendWsMessage({ msg: `downloadMedia,${this.msg.id._serialized}` }).then(e => {
-          this.imageFull = e.base64;
+        getFullImage () {
+            if (!this.msg.base64MediaFull) {
+                this.sendWsMessage({ msg: `downloadMedia,${this.msg.id._serialized}` }).then(e => {
+                    this.imageFull = e.base64;
 
-          let idChat;
-          if (this.msg.id.fromMe) {
-            idChat = this.msg.to;
-          } else {
-            idChat = this.msg.from;
-          }
+                    let idChat;
+                    if (this.msg.id.fromMe) {
+                        idChat = this.msg.to;
+                    } else {
+                        idChat = this.msg.from;
+                    }
 
-          this.addFullMediaInMsg({
-            idChat: idChat,
-            idMsg: this.msg.id,
-            media: this.imageFull
-          });
-        });
-      } else {
-        this.imageFull = this.msg.base64MediaFull;
-      }
-    },
-    handleClick () {
-      this.SET_MODAL({
-        show: true,
-        media: this.imageFull,
-        type: 'img',
-        id: this.msg.id._serialized
-      });
-    },
-    onVisible (visible) {
-      if (visible && !this.imageFull) {
-        this.getFullImage();
-      }
+                    this.addFullMediaInMsg({
+                        idChat: idChat,
+                        idMsg: this.msg.id,
+                        media: this.imageFull
+                    });
+                });
+            } else {
+                this.imageFull = this.msg.base64MediaFull;
+            }
+        },
+        handleClick () {
+            this.SET_MODAL({
+                show: true,
+                media: this.imageFull,
+                type: 'img',
+                id: this.msg.id._serialized
+            });
+        },
+        onVisible (visible) {
+            if (visible && !this.imageFull) {
+                this.getFullImage();
+            }
+        }
     }
-  }
 };
 </script>
 

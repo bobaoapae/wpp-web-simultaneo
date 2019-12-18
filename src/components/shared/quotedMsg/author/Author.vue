@@ -8,30 +8,29 @@
 import { mapState } from 'vuex';
 
 export default {
-  name: 'Author',
-  props: {
-    senderObj: {
-      type: Object,
-      required: true
+    name: 'Author',
+    props: {
+        senderObj: {
+            type: Object,
+            required: true
+        },
+        color: {
+            type: String,
+            required: true
+        }
     },
-    color: {
-      type: String,
-      required: true
-    }
-  },
-  computed: {
-    ...mapState(['self']),
+    computed: {
+        ...mapState(['self']),
 
-    autor () {
-      if (this.senderObj.name) {
-        return this.senderObj.name;
-      } else if (this.senderObj.id === this.self.id) {
-        return 'Você';
-      } else {
-        return '+' + this.senderObj.id.replace('@c.us', '');
-      }
+        autor () {
+            if (this.senderObj.name) {
+                return this.senderObj.name;
+            } else if (this.senderObj.id === this.self.id) {
+                return 'Você';
+            }
+            return '+' + this.senderObj.id.replace('@c.us', '');
+        }
     }
-  }
 };
 </script>
 
