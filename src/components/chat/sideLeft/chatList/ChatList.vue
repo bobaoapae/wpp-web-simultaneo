@@ -78,7 +78,9 @@ export default {
             // seta a cor do li do chat clicado
             this.active_el = chat.id;
 
-            this.visualizarMsgs(chat.id);
+            if (chat.unreadCount > 0) {
+                this.visualizarMsgs(chat.id);
+            }
         },
 
         visualizarMsgs (id) {

@@ -1,6 +1,6 @@
 <template>
    <div class="messages-group">
-      <div :key="item.id.id" v-for="item in msgs">
+      <div :key="item.id.id" v-for="item in msgs" :id="encodedMsgId(item)">
          <MessageInfo :msg="item" v-if="isNotification(item.type)"/>
          <MessageOut :msg="item" v-else-if="item.id.fromMe"/>
          <MessageIn :msg="item" v-else/>
@@ -34,6 +34,10 @@ export default {
                 return true;
             }
             return false;
+        },
+
+        encodedMsgId (msg) {
+            return msg.id._serialized.replace(/[^\w\s]/gi, '').replace(/[_]/gi, '');
         }
     }
 };

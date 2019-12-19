@@ -1,5 +1,16 @@
 <template>
-   <div :style="{borderColor: color}" class="quoted-msg">
+   <div :style="{borderColor: color}" class="quoted-msg" v-scroll-to="{
+     el: `#${encodedQuotedMsgId}`,
+     container: '#messages-panel',
+     duration: 500,
+     easing: 'linear',
+     offset: -200,
+     force: true,
+     cancelable: true,
+     onDone: onDone,
+     x: false,
+     y: true
+ }">
       <div class="box-content">
          <Author :color="color" :senderObj="quotedMsg.senderObj"/>
          <QuotedMsgContent :body="bodyformated" :caption="captionFormated" :type="quotedMsg.type"/>
@@ -49,6 +60,15 @@ export default {
                 return msg.processNativeEmojiToImage(this.quotedMsg.body);
             }
             return '';
+        },
+
+        encodedQuotedMsgId () {
+            return this.quotedMsg.id._serialized.replace(/[^\w\s]/gi, '').replace(/[_]/gi, '');
+        }
+    },
+    methods: {
+        onDone (element) {
+            // fazer piscar
         }
     }
 };
