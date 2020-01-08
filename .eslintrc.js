@@ -24,7 +24,8 @@ module.exports = {
         'semi': [
             'error',
             'always'
-        ]
+        ],
+        'import/no-webpack-loader-syntax': 'off'
     },
     parserOptions: {
         parser: 'babel-eslint'

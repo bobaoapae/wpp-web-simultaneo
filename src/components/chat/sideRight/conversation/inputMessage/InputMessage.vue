@@ -1,11 +1,11 @@
 <template>
-   <div>
-      <b-collapse id="collapse-emoji">
-         <picker
-            :color="'#009688'"
-            :data="emojiIndex"
-            :emojiSize="32"
-            :i18n="{search: 'Buscar emoji',
+    <div>
+        <b-collapse id="collapse-emoji">
+            <picker
+                :color="'#009688'"
+                :data="emojiIndex"
+                :emojiSize="32"
+                :i18n="{search: 'Buscar emoji',
                             notfound: '',
                             categories: {
                               search: '',
@@ -20,57 +20,66 @@
                               flags: 'Bandeiras',
                               custom: 'Custom',
                             }}"
-            :perLine="21"
-            :recent="[]"
-            :showPreview="false"
-            :style="{ height:'320px', backgroundColor:'#f0f0f0 !important', fontSize:'14px'}"
-            @select="addEmoji"
-            set="apple"
-         />
-      </b-collapse>
-
-      <b-collapse id="collapse-answer-msg" v-model="answerVisible">
-         <div class="box-answer">
-            <QuotedMsg :quotedMsg="activeChat.quotedMsg" class="flex-grow-1" v-if="answerVisible"/>
-
-            <div @click="handleClickCloseAnswer" class="close-answer">
-               <img src="@/assets/images/wpp-icon-close-answer.svg">
-            </div>
-         </div>
-      </b-collapse>
-
-      <div id="input-message">
-         <div class="box-icon-emoji">
-            <b-img
-               @mousedown.prevent
-               alt="Button emoji"
-               class="btn-emoji-open"
-               role="button"
-               src="@/assets/images/wpp-icon-emoji.svg"
-               v-b-toggle.collapse-emoji
+                :perLine="21"
+                :recent="[]"
+                :showPreview="false"
+                :style="{ height:'320px', backgroundColor:'#f0f0f0 !important', fontSize:'14px'}"
+                @select="addEmoji"
+                set="apple"
             />
-         </div>
+        </b-collapse>
 
-         <div class="box-input">
-            <div
-               @focusin="restorePosition"
-               @input="savePosition"
-               @keypress.enter.exact.prevent="handleEnterPress"
-               @keyup="savePosition"
-               @mouseup="savePosition"
-               @paste.prevent="onPaste"
-               class="input"
-               contenteditable="true"
-               data-text="Digite uma mensagem"
-               ref="input"
-            ></div>
-         </div>
+        <b-collapse id="collapse-answer-msg" v-model="answerVisible">
+            <div class="box-answer">
+                <QuotedMsg :quotedMsg="activeChat.quotedMsg" class="flex-grow-1" v-if="answerVisible"/>
 
-         <div class="box-icon-send">
-            <img src="@/assets/images/wpp-icon-send.svg"/>
-         </div>
-      </div>
-   </div>
+                <div @click="handleClickCloseAnswer" class="close-answer">
+                    <img src="@/assets/images/wpp-icon-close-answer.svg">
+                </div>
+            </div>
+        </b-collapse>
+
+        <div id="input-message">
+            <div class="box-icon-emoji">
+                <b-img
+                    @mousedown.prevent
+                    alt="Button emoji"
+                    class="btn-emoji-open"
+                    role="button"
+                    src="@/assets/images/wpp-icon-emoji.svg"
+                    v-b-toggle.collapse-emoji
+                />
+            </div>
+
+            <div class="box-input">
+                <div
+                    @focusin="restorePosition"
+                    @input="onInput"
+                    @keypress.enter.exact.prevent="handleEnterPress"
+                    @keyup="savePosition"
+                    @mouseup="savePosition"
+                    @paste.prevent="onPaste"
+                    class="input"
+                    contenteditable="true"
+                    data-text="Digite uma mensagem"
+                    ref="input"
+                ></div>
+            </div>
+
+            <div class="box-icon-send">
+                <div>
+                    <img src="@/assets/images/wpp-icon-send.svg" v-if="mensagem" @click="handleSendMsg" />
+                    <img src="@/assets/images/wpp-icon-mic.svg" v-else-if="!gravando" @click="startRecording" />
+                </div>
+
+                <div v-if="gravando">
+                    <img src="@/assets/images/wpp-icon-cancel-ptt-outline.svg" @click="stopRecording" />
+                    <span class="recorder-time">{{timeConverter}}</span>
+                    <img src="@/assets/images/wpp-icon-send-ptt-outline.svg"  @click="sendPtt" />
+                </div>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script>
@@ -91,7 +100,13 @@ export default {
             mensagem: '',
             emojiIndex: msg.emojiIndex(),
             restore: null,
-            answerVisible: false
+            answerVisible: false,
+            recorder: {},
+            gumStream: {},
+            gravando: false,
+            ignoreRecording: false,
+            time: 0,
+            interval: null
         };
     },
     watch: {
@@ -106,27 +121,120 @@ export default {
 
     },
     computed: {
-        ...mapState(['activeChat'])
+        ...mapState(['activeChat']),
+
+        timeConverter () {
+            let a = new Date(this.time * 1000);
+            let sec = a.getSeconds();
+            let min = a.getMinutes();
+
+            let time;
+
+            if (min < 10) {
+                min = '0' + min;
+            }
+            if (sec < 10) {
+                sec = '0' + sec;
+            }
+
+            time = min + ':' + sec;
+            return time;
+        }
     },
     methods: {
         ...mapActions(['sendMsg']),
 
+        toggleRecording () {
+            this.gravando = !this.gravando;
+
+            if (this.recorder && this.recorder.state === 'recording') {
+                this.recorder.stop();
+                this.gumStream.getAudioTracks()[0].stop();
+                clearInterval(this.interval);
+                this.time = 0;
+            } else {
+                navigator.mediaDevices.getUserMedia({
+                    audio: true
+                })
+                    .then((stream) => {
+                        this.interval = setInterval(() => { this.time++; }, 1000);
+
+                        this.gumStream = stream;
+                        this.recorder = new MediaRecorder(stream);
+                        this.recorder.ondataavailable = (e) => {
+                            if (!this.ignoreRecording) {
+                                this.handleSendPtt(e.data);
+                            }
+                        };
+                        this.recorder.start();
+                    });
+            }
+        },
+
+        startRecording () {
+            this.toggleRecording();
+        },
+
+        stopRecording () {
+            this.ignoreRecording = true;
+            this.toggleRecording();
+        },
+
+        sendPtt () {
+            this.ignoreRecording = false;
+            this.toggleRecording();
+        },
+
+        handleSendPtt (data) {
+            const toBase64 = (file) => new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+
+            (async () => {
+                let file = (await toBase64(data));
+
+                file = file.replace('data:audio/webm', 'data:audio/ogg');
+
+                console.log(file);
+
+                this.activeChat.quotedMsg = undefined;
+
+                let msg = {
+                    chatId: this.activeChat.id,
+                    media: file,
+                    fileName: new Date().getTime() + '.ptt'
+                };
+
+                if (this.activeChat.quotedMsg) {
+                    msg.quotedMsg = this.activeChat.quotedMsg.id._serialized;
+                }
+
+                this.sendMsg(msg);
+            })();
+        },
+
+        onInput (evt) {
+            this.savePosition();
+            this.mensagem = this.formatar(this.$refs.input);
+        },
         handleClickCloseAnswer () {
             this.answerVisible = false;
             this.activeChat.quotedMsg = undefined;
         },
-
         onPaste (evt) {
             const textMsg = msg.processNativeEmojiToImage(evt.clipboardData.getData('text'));
             document.execCommand('insertHTML', false, textMsg);
         },
-        restorePosition (evt) {
+        restorePosition () {
             if (this.restore) {
                 rageSave.restoreSelection(this.restore);
                 this.restore = null;
             }
         },
-        savePosition (evt) {
+        savePosition () {
             this.restore = rageSave.saveSelection();
         },
         addEmoji (emoji) {
@@ -134,16 +242,9 @@ export default {
             emoji = emoji.native;
             document.execCommand('insertHTML', false, msg.processNativeEmojiToImage(emoji));
         },
-        handleEnterPress (evt) {
-            this.mensagem = this.formatarEnviar(this.$refs.input);
-
+        handleEnterPress () {
             if (this.mensagem !== '') {
                 this.handleSendMsg();
-                this.$refs.input.innerHTML = '';
-                this.mensagem = '';
-                this.restore = null;
-
-                this.activeChat.quotedMsg = undefined;
             }
         },
         handleSendMsg () {
@@ -157,13 +258,14 @@ export default {
             }
 
             this.sendMsg(msg);
+            this.clearInput();
         },
         capitalize (value) {
             if (!value) return '';
             value = value.toString();
             return value.charAt(0).toUpperCase() + value.slice(1);
         },
-        formatarEnviar (domElement) {
+        formatar (domElement) {
             let msg = '';
             domElement.childNodes.forEach(function (e) {
                 let nodeName = e.nodeName;
@@ -175,8 +277,14 @@ export default {
                     msg += '\n';
                 }
             });
-            domElement.innerHTML = '';
+
             return this.capitalize(msg);
+        },
+        clearInput () {
+            this.$refs.input.innerHTML = '';
+            this.mensagem = '';
+            this.restore = null;
+            this.activeChat.quotedMsg = undefined;
         }
     }
 };
@@ -185,87 +293,94 @@ export default {
 
 <style scoped>
 
-   .box-answer {
-      display: flex;
-      flex-direction: row;
-      background-color: #f0f0f0;
-   }
+    .recorder-time {
+        margin-right: 40px;
+        margin-left: 40px;
+        font-size: 23px;
+        color: rgba(0, 0, 0, 0.45);
+    }
 
-   .close-answer {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 10px;
-      cursor: pointer;
-   }
+    .box-answer {
+        display: flex;
+        flex-direction: row;
+        background-color: #f0f0f0;
+    }
 
-   .emoji-mart {
-      width: 100% !important;
-   }
+    .close-answer {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 10px;
+        cursor: pointer;
+    }
 
-   [contentEditable="true"]:empty:before {
-      content: attr(data-text);
-      color: #a0a0a0;
-      cursor: text;
-   }
+    .emoji-mart {
+        width: 100% !important;
+    }
 
-   .label {
-      display: none;
-      position: absolute;
-      color: #a0a0a0;
-      visibility: visible;
-   }
+    [contentEditable="true"]:empty:before {
+        content: attr(data-text);
+        color: #a0a0a0;
+        cursor: text;
+    }
 
-   #input-message {
-      display: flex;
-      background: #efefef;
-      padding: 5px 10px;
-   }
+    .label {
+        display: none;
+        position: absolute;
+        color: #a0a0a0;
+        visibility: visible;
+    }
 
-   .box-icon-send {
-      padding: 5px 10px;
-      cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-   }
+    #input-message {
+        display: flex;
+        background: #efefef;
+        padding: 5px 10px;
+    }
 
-   .box-input {
-      box-sizing: border-box;
-      flex: 1 1 auto;
-      font-size: 15px;
-      font-weight: 400;
-      line-height: 20px;
-      min-height: 20px;
-      min-width: 0;
-      outline: none;
-      width: inherit;
-      will-change: width;
-      background-color: #fff;
-      border: 1px solid #fff;
-      border-radius: 21px;
-      padding: 9px 12px 11px;
-      margin: 5px 10px;
-   }
+    .box-icon-send {
+        padding: 5px 10px;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 
-   .box-input .input {
-      font-size: 15px;
-      font-weight: 400;
-      max-height: 100px;
-      min-height: 20px;
-      outline: none;
-      overflow-x: hidden;
-      overflow-y: auto;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      z-index: 1;
-   }
+    .box-input {
+        box-sizing: border-box;
+        flex: 1 1 auto;
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 20px;
+        min-height: 20px;
+        min-width: 0;
+        outline: none;
+        width: inherit;
+        will-change: width;
+        background-color: #fff;
+        border: 1px solid #fff;
+        border-radius: 21px;
+        padding: 9px 12px 11px;
+        margin: 5px 10px;
+    }
 
-   .box-icon-emoji {
-      padding: 5px 10px;
-      cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-   }
+    .box-input .input {
+        font-size: 15px;
+        font-weight: 400;
+        max-height: 100px;
+        min-height: 20px;
+        outline: none;
+        overflow-x: hidden;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        z-index: 1;
+    }
+
+    .box-icon-emoji {
+        padding: 5px 10px;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 </style>
