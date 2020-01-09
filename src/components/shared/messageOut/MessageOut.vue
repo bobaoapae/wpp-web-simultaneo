@@ -19,7 +19,7 @@
                </template>
 
                <b-dropdown-item @click="handleClickAnswer">Responder</b-dropdown-item>
-               <b-dropdown-item>Apagar mensagem</b-dropdown-item>
+               <b-dropdown-item @click="handleClickDelete">Apagar mensagem</b-dropdown-item>
             </b-dropdown>
          </div>
 
@@ -110,6 +110,10 @@ export default {
 
         handleClickAnswer (evt) {
             this.activeChat.quotedMsg = this.msg;
+        },
+
+        handleClickDelete () {
+            this.$root.$emit('showModalDelteMsg', this.msg.id);
         }
     }
 };

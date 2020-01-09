@@ -10,6 +10,7 @@
       </div>
 
       <ModalMedia/>
+       <ModalDeleteMsg/>
    </div>
 </template>
 
@@ -18,10 +19,12 @@ import { mapActions } from 'vuex';
 import SideLeft from '@/components/chat/sideLeft/SideLeft.vue';
 import SideRight from '@/components/chat/sideRight/SideRight.vue';
 import ModalMedia from './ModalMedia';
+import ModalDeleteMsg from './ModalDeleteMsg';
 
 export default {
     name: 'Chat',
     components: {
+        ModalDeleteMsg,
         ModalMedia,
         SideLeft,
         SideRight

@@ -18,7 +18,7 @@
 
       <div class="box-icons">
          <img src="@/assets/images/wpp-icon-status.svg"/>
-         <img src="@/assets/images/wpp-icon-message.svg"/>
+         <img src="@/assets/images/wpp-icon-message.svg" @click="handleClick"/>
          <img src="@/assets/images/wpp-icon-kebab-menu.svg"/>
       </div>
    </header>
@@ -31,6 +31,11 @@ export default {
     name: 'LeftHeader',
     computed: {
         ...mapState(['self'])
+    },
+    methods: {
+        handleClick () {
+            this.$root.$emit('showNewChat', true);
+        }
     }
 };
 </script>

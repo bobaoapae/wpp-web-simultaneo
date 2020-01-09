@@ -472,6 +472,10 @@ const store = new Vuex.Store({
         /*
               MESSAGES
           */
+        deleteMsg (context, payload) {
+            context.state.ws.send(`deleteMessage,${JSON.stringify(payload)}`);
+        },
+
         sendMsg (context, payload) {
             context.state.ws.send(`sendMessage,${JSON.stringify(payload)}`);
         },
