@@ -29,7 +29,6 @@ export default {
    #side-left {
       height: 100%;
       /* padding: 0; */
-      background: red;
       display: flex;
       flex-direction: column;
    }
