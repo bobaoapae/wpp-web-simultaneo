@@ -1,7 +1,7 @@
 <template>
   <div id="chat-list">
     <div class="box-input-search">
-      <input disabled placeholder="Procurar ou começar uma nova conversa" type="text"/>
+      <input placeholder="Procurar ou começar uma nova conversa" type="text" v-model="inputFilter"/>
     </div>
 
     <div class="box-list-group">
@@ -56,15 +56,25 @@ export default {
     },
     data () {
         return {
-            active_el: null
+            active_el: null,
+            inputFilter: ''
         };
     },
     computed: {
         ...mapState(['chats']),
 
         chatsFiltered () {
-            return this.chats.filter(chat => {
+            const chatVisible = this.chats.filter(chat => {
                 return chat.shouldAppearInList;
+            });
+
+            if (this.inputFilter === '') {
+                return chatVisible;
+            }
+
+            return chatVisible.filter(chat => {
+                return chat.formattedTitle.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(this.inputFilter.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')) ||
+                    chat.id.replace('@c.us', '').includes(this.inputFilter.toLowerCase());
             });
         }
     },

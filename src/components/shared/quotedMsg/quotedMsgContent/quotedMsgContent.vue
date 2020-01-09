@@ -62,5 +62,7 @@ export default {
       overflow-y: hidden;
       text-overflow: ellipsis;
 
+       max-width: 200px;
+
    }
 </style>

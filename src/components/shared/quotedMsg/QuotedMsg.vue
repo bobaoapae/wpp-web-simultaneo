@@ -82,6 +82,9 @@ export default {
       border-radius: 5px;
       border-left: 4px solid #35cd96;
       margin: 3px;
+       max-width: 500px;
+       overflow-x: hidden;
+
    }
 
    .box-content {
@@ -91,5 +94,7 @@ export default {
       flex-direction: column;
 
       padding: 4px 12px 8px 8px;
+       overflow-x: hidden;
+       text-overflow: ellipsis;
    }
 </style>

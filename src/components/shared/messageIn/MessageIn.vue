@@ -138,7 +138,7 @@ export default {
       display: block;
       text-align: right;
       background: linear-gradient(15deg, transparent, transparent 45%, rgba(0, 0, 0, .12) 70%, rgba(0, 0, 0, .33));
-      height: 40px;
+      height: 25px;
       max-width: 90%;
       width: 156px;
       z-index: 1;
