@@ -389,7 +389,6 @@ const store = new Vuex.Store({
         },
 
         setChatProperties (context, el) {
-            el.picture = '';
             el.quotedMsg = undefined;
             el.msgsGrouped = {};
             Object.defineProperty(el, 'lastMsg', {
@@ -402,9 +401,6 @@ const store = new Vuex.Store({
                 },
                 set (v) {
                 }
-            });
-            context.dispatch('findPictureFromId', { id: el.id }).then(value => {
-                el.picture = value;
             });
         },
 
@@ -575,6 +571,7 @@ const store = new Vuex.Store({
 
         updateMsg (context, payload) {
             let chatId;
+
             if (payload.id.fromMe) {
                 chatId = payload.to;
             } else {
@@ -586,12 +583,17 @@ const store = new Vuex.Store({
             });
 
             if (chat) {
+                console.log('CHAT OK');
+
                 const msg = chat.msgs.find((element) => {
                     return element.id.id === payload.id.id;
                 });
 
                 if (msg) {
+                    console.log('ANTES', msg.type);
                     msg.ack = payload.ack;
+                    msg.type = payload.type;
+                    console.log('DEPOIS', msg.type);
                 }
             }
         },

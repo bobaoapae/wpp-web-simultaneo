@@ -32,6 +32,7 @@
          <MessageVideo :msg="msg" v-else-if="isVideo"/>
          <MessageDocument :msg="msg" v-else-if="isDocument"/>
          <MessageAudio :msg="msg" v-else-if="isAudio"/>
+          <MessageRevoked :msg="msg" v-else-if="isRevoked"/>
       </div>
    </div>
 </template>
@@ -46,6 +47,7 @@ import MessageDocument from '@/components/shared/messageDocument/MessageDocument
 import ForwardedIndicator from '@/components/shared/forwardedIndicator/ForwardedIndicator';
 import MessageAudio from '@/components/shared/messageAudio/MessageAudio';
 import QuotedMsg from '../quotedMsg/QuotedMsg';
+import MessageRevoked from '../messageRevoked/MessageRevoked';
 
 export default {
     name: 'MessageOut',
@@ -57,7 +59,8 @@ export default {
         MessageText,
         MessagePhoto,
         MessageVideo,
-        MessageDocument
+        MessageDocument,
+        MessageRevoked
     },
     data () {
         return {
@@ -96,7 +99,10 @@ export default {
             return this.msg.type === 'document';
         },
         isAudio () {
-            return this.msg.type === 'ptt';
+            return this.msg.type === 'ptt' || this.msg.type === 'audio';
+        },
+        isRevoked () {
+            return this.msg.type === 'revoked';
         }
     },
     methods: {
@@ -113,7 +119,7 @@ export default {
         },
 
         handleClickDelete () {
-            this.$root.$emit('showModalDelteMsg', this.msg.id);
+            this.$root.$emit('showModalDelteMsg', this.msg);
         }
     }
 };

@@ -8,8 +8,12 @@
                         Cancelar
                     </div>
 
-                    <div class="apagar" @click="handleClick">
+                    <div class="apagar" @click="handleClick(false)">
                         Apagar para mim
+                    </div>
+
+                    <div class="apagar" @click="handleClick(true)" v-if="msg.canBeRevoke">
+                        Apagar para todos
                     </div>
                 </div>
             </div>
@@ -24,22 +28,22 @@ export default {
     data () {
         return {
             show: false,
-            msgId: ''
+            msg: {}
         };
     },
     mounted () {
         this.$root.$on('showModalDelteMsg', data => {
             this.show = true;
-            this.msgId = data;
+            this.msg = data;
         });
     },
     methods: {
         ...mapActions(['deleteMsg']),
 
-        handleClick () {
+        handleClick (fromAll) {
             this.deleteMsg({
-                msgId: this.msgId._serialized,
-                fromAll: false
+                msgId: this.msg.id._serialized,
+                fromAll: fromAll
             });
 
             this.show = false;

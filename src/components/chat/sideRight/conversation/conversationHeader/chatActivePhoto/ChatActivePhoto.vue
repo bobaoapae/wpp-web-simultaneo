@@ -1,46 +1,56 @@
 <template>
-   <img :src="activeChat.picture" @error="handleError" alt="Photo Profile" v-if="imgOrigial"/>
-   <img alt="Photo Profile" src="@/assets/images/wpp-photo-user.svg" v-else-if="imgUser"/>
-   <img alt="Photo Profile" src="@/assets/images/wpp-photo-group.svg" v-else-if="imgGroup"/>
+    <transition mode="out-in" name="component-fade">
+        <img key="user" src="@/assets/images/wpp-photo-user.svg" v-if="imgUser && picture === '' "/>
+
+        <img key="group" src="@/assets/images/wpp-photo-group.svg" v-else-if="imgGroup && picture === '' "/>
+
+        <img key="original" :src="picture" v-else/>
+    </transition>
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 
 export default {
     name: 'ChatActivePhoto',
     data () {
         return {
-            imgOrigial: true,
             imgUser: false,
-            imgGroup: false
+            imgGroup: false,
+            picture: ''
         };
     },
     computed: {
         ...mapState(['activeChat'])
     },
     watch: {
-        'activeChat.picture': function () {
-            this.resetState();
-            // this.handleError();
+        'activeChat': function () {
+            this.handleChatVisible();
         }
     },
+    created () {
+        this.handleChatVisible();
+    },
     methods: {
-        handleError () {
-            this.imgOrigial = false;
+        ...mapActions(['findPictureFromId']),
 
-            if (this.activeChat.kind === 'group') {
-                this.imgUser = false;
-                this.imgGroup = true;
-            } else {
-                this.imgUser = true;
-                this.imgGroup = false;
-            }
+        handleChatVisible () {
+            this.reset();
+
+            this.findPictureFromId({ id: this.activeChat.id }).then(value => {
+                this.picture = value;
+            });
         },
-        resetState () {
-            this.imgOrigial = true;
-            this.imgUser = false;
-            this.imgGroup = false;
+
+        reset () {
+            this.picture = '';
+            if (this.activeChat.kind === 'group') {
+                this.imgGroup = true;
+                this.imgUser = false;
+            } else {
+                this.imgGroup = false;
+                this.imgUser = true;
+            }
         }
     }
 };

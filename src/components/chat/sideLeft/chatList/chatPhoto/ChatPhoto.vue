@@ -1,11 +1,11 @@
 <template>
    <div class="box-photo-chat" v-b-visible.once="handleChatVisible">
       <transition mode="out-in" name="component-fade">
-         <img key="user" src="@/assets/images/wpp-photo-user.svg" v-if="isChat && !chat.picture"/>
+         <img key="user" src="@/assets/images/wpp-photo-user.svg" v-if="isChat && !picture"/>
 
-         <img key="group" src="@/assets/images/wpp-photo-group.svg" v-else-if="isGroup && !chat.picture"/>
+         <img key="group" src="@/assets/images/wpp-photo-group.svg" v-else-if="isGroup && !picture"/>
 
-         <img :src="chat.picture" key="original" v-else/>
+         <img key="original" :src="picture" v-else/>
       </transition>
    </div>
 </template>
@@ -18,29 +18,13 @@ export default {
     name: 'ChatPhoto',
     data () {
         return {
-            imgOriginal: true,
-            imgGroup: false,
-            imgUser: false
+            picture: ''
         };
     },
     props: {
         chat: {
             type: Object,
             required: true
-        }
-    },
-
-    watch: {
-        'chat.picture': function (val) {
-            if (val === '') {
-                if (this.chat.kind === 'group') {
-                    this.imgGroup = true;
-                    this.imgUser = false;
-                } else {
-                    this.imgGroup = false;
-                    this.imgUser = true;
-                }
-            }
         }
     },
     computed: {
@@ -53,11 +37,15 @@ export default {
         }
     },
     methods: {
-        ...mapActions(['subscribePresence']),
+        ...mapActions(['subscribePresence', 'findPictureFromId']),
 
         handleChatVisible (visible) {
             if (visible) {
                 this.subscribePresence({ chatId: this.chat.id });
+
+                this.findPictureFromId({ id: this.chat.id }).then(value => {
+                    this.picture = value;
+                });
             }
         }
 

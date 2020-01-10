@@ -1,6 +1,8 @@
 <template>
-    <span class="time"><span class="time-text">{{timeConverted}}</span> <MessageIconStatus :ack="msg.ack"
-                                                                                           v-if="msg.id.fromMe"/></span>
+    <span class="time">
+        <span class="time-text">{{timeConverted}}</span>
+        <MessageIconStatus :ack="msg.ack" v-if="msg.id.fromMe && msg.type !== 'revoked' "/>
+    </span>
 </template>
 
 <script>
