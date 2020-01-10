@@ -13,6 +13,7 @@ const store = new Vuex.Store({
         self: null,
         contacts: null,
         chats: null,
+        pictures: [],
         timeOutChats: -1,
         activeChat: null,
         poolContext: [],
@@ -118,6 +119,10 @@ const store = new Vuex.Store({
 
         SET_TIMEOUT_CHATS (state, payload) {
             state.timeOutChats = payload;
+        },
+
+        ADD_PICTURE_TO_CACHE (state, payload) {
+            state.pictures[payload.id] = payload.picture;
         }
     },
 
@@ -330,6 +335,34 @@ const store = new Vuex.Store({
             return '+' + (payload.id.split('@')[0]);
         },
 
+        findChatFromId (context, payload) {
+            return new Promise((resolve, reject) => {
+                const chat = context.state.chats.find(chat => chat.id === payload.id);
+
+                if (!chat) {
+                    context.dispatch('sendWsMessage', { msg: `findChat,${payload.id}` }).then(chat => {
+                        context.dispatch('newChat', chat);
+                        resolve(chat);
+                    }).catch(reason => reject(reason));
+                } else {
+                    resolve(chat);
+                }
+            });
+        },
+
+        findPictureFromId (context, payload) {
+            return new Promise((resolve, reject) => {
+                if (context.state.pictures[payload.id]) {
+                    resolve(context.state.pictures[payload.id]);
+                } else {
+                    context.dispatch('sendWsMessage', { msg: `findPicture,${payload.id}` }).then(picture => {
+                        context.commit('ADD_PICTURE_TO_CACHE', { id: payload.id, picture: picture });
+                        resolve(picture);
+                    }).catch(reason => reject(reason));
+                }
+            });
+        },
+
         /*
               CHATS
           */
@@ -343,10 +376,6 @@ const store = new Vuex.Store({
                 context.commit('ADD_NEW_CHAT', payload);
                 context.dispatch('sortChatsByTime');
             }
-        },
-
-        getPicture (context, payload) {
-            context.state.ws.send(`updatePicture,${payload.chatId}`);
         },
 
         updatePicture (context, payload) {
@@ -373,6 +402,9 @@ const store = new Vuex.Store({
                 },
                 set (v) {
                 }
+            });
+            context.dispatch('findPictureFromId', { id: el.id }).then(value => {
+                el.picture = value;
             });
         },
 

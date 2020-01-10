@@ -149,7 +149,7 @@ export default {
 
             if (this.recorder && this.recorder.state === 'recording') {
                 this.recorder.stop();
-                this.gumStream.getAudioTracks()[0].stop();
+                this.gumStream.getAudioTracks().forEach(value => value.stop());
                 clearInterval(this.interval);
                 this.time = 0;
             } else {
@@ -196,16 +196,12 @@ export default {
             (async () => {
                 let file = (await toBase64(data));
 
-                file = file.replace('data:audio/webm', 'data:audio/ogg');
-
-                console.log(file);
-
                 this.activeChat.quotedMsg = undefined;
 
                 let msg = {
                     chatId: this.activeChat.id,
                     media: file,
-                    fileName: new Date().getTime() + '.ptt'
+                    fileName: new Date().getTime() + '.ogg'
                 };
 
                 if (this.activeChat.quotedMsg) {

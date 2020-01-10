@@ -53,14 +53,11 @@ export default {
         }
     },
     methods: {
-        ...mapActions(['getPicture', 'subscribePresence']),
+        ...mapActions(['subscribePresence']),
 
         handleChatVisible (visible) {
             if (visible) {
                 this.subscribePresence({ chatId: this.chat.id });
-                this.getPicture({
-                    chatId: this.chat.id
-                });
             }
         }
 

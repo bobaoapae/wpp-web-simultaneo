@@ -35,20 +35,12 @@ export default {
     },
     methods: {
         ...mapMutations(['SET_ACTIVE_CHAT']),
-        ...mapActions(['sendWsMessage', 'newChat']),
+        ...mapActions(['findChatFromId']),
 
         handleClick () {
-            const chat = this.chats.find(chat => chat.id === this.contact.id);
-
-            if (chat) {
-                console.log('CHAT OK');
+            this.findChatFromId({ id: this.contact.id }).then(chat => {
                 this.SET_ACTIVE_CHAT(chat);
-            } else {
-                this.sendWsMessage({ msg: `findChat,${this.contact.id}` }).then(chat => {
-                    this.newChat(chat);
-                    this.SET_ACTIVE_CHAT(chat);
-                });
-            }
+            });
 
             this.$root.$emit('showNewChat', false);
         }

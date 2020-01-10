@@ -24,13 +24,13 @@ export default {
         };
     },
     methods: {
-        ...mapActions(['getPicture']),
+        ...mapActions(['findPictureFromId']),
 
         handleChatVisible (visible) {
             if (visible) {
-                // this.getPicture({
-                //     chatId: this.id
-                // });
+                this.findPictureFromId({ id: this.id }).then(value => {
+                    this.picture = value;
+                });
             }
         }
     }
