@@ -1,6 +1,7 @@
 import emojiRegex from 'emoji-regex';
 import data from 'emoji-mart-vue-fast/data/apple.json';
 import { EmojiIndex } from 'emoji-mart-vue-fast';
+import { escape, unescape } from 'html-escaper';
 
 const emojiIndex = new EmojiIndex(data);
 const unicodeEmojiRegex = emojiRegex();
@@ -63,7 +64,7 @@ export const msg = {
                 href = `http://${url}`;
             }
 
-            return ` <a href="${href.toLowerCase()}" target="_blank">${url}</a>`;
+            return ` <a href="${href.toLowerCase()}" target="_blank">${unescape(url)}</a>`;
         });
     },
 
@@ -86,7 +87,7 @@ export const msg = {
     },
 
     formatMsg (text) {
-    // text = this.linkify(text);
+        text = escape(text);
         text = this.urlify(text);
         text = this.formatStyle(text);
         return text;
