@@ -590,6 +590,7 @@ const store = new Vuex.Store({
                 if (msg) {
                     msg.ack = payload.ack;
                     msg.type = payload.type;
+                    msg.id = payload.id;
                 }
             }
         },
