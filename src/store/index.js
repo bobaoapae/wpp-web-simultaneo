@@ -583,17 +583,13 @@ const store = new Vuex.Store({
             });
 
             if (chat) {
-                console.log('CHAT OK');
-
                 const msg = chat.msgs.find((element) => {
-                    return element.id.id === payload.id.id;
+                    return element.id.id === payload.id.id || element.id.id === payload.oldId.id;
                 });
 
                 if (msg) {
-                    console.log('ANTES', msg.type);
                     msg.ack = payload.ack;
                     msg.type = payload.type;
-                    console.log('DEPOIS', msg.type);
                 }
             }
         },
