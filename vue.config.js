@@ -20,6 +20,19 @@ module.exports = {
                 };
                 return options;
             });
+        config.module
+            .rule('worker-loader')
+            .test(/\.worker\.js$/)
+            .use('worker-loader')
+            .loader('worker-loader')
+            .end();
+        config.module
+            .rule('file-loader')
+            .test(/\.wasm$/)
+            .type('javascript/auto')
+            .use('file-loader')
+            .loader('file-loader')
+            .end();
     },
 
     runtimeCompiler: true

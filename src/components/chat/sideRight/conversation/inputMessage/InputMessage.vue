@@ -88,6 +88,12 @@ import { mapState, mapActions } from 'vuex';
 import { msg } from '@/helper.js';
 import { rageSave } from '@/rangeSelectionSaveRestore.js';
 import QuotedMsg from '../../../../shared/quotedMsg/QuotedMsg';
+import OpusMediaRecorder from 'opus-media-recorder';
+import Worker from 'worker-loader!opus-media-recorder/encoderWorker.js';
+const OggOpusWasm = import('opus-media-recorder/OggOpusEncoder.wasm');
+const WebMOpusWasm = import('opus-media-recorder/WebMOpusEncoder.wasm');
+
+window.MediaRecorder = OpusMediaRecorder;
 
 export default {
     name: 'InputMessage',
@@ -156,11 +162,19 @@ export default {
                 navigator.mediaDevices.getUserMedia({
                     audio: true
                 })
-                    .then((stream) => {
+                    .then(async (stream) => {
                         this.interval = setInterval(() => { this.time++; }, 1000);
 
                         this.gumStream = stream;
-                        this.recorder = new MediaRecorder(stream);
+                        const options = { mimeType: 'audio/ogg' };
+                        const ogg = await OggOpusWasm;
+                        const webm = await WebMOpusWasm;
+                        const workerOptions = {
+                            encoderWorkerFactory: _ => new Worker(),
+                            OggOpusEncoderWasmPath: ogg.default,
+                            WebMOpusEncoderWasmPath: webm.default
+                        };
+                        this.recorder = new MediaRecorder(stream, options, workerOptions);
                         this.recorder.ondataavailable = (e) => {
                             if (!this.ignoreRecording) {
                                 this.handleSendPtt(e.data);
