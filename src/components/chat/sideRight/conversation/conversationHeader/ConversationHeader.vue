@@ -64,7 +64,7 @@ export default {
         },
 
         isOffline () {
-            return this.activeChat.presenceType === 'unavailable';
+            return this.activeChat.presenceType === 'unavailable' || this.activeChat.presenceType === '';
         },
 
         isOnline () {
