@@ -215,7 +215,7 @@ export default {
                 let msg = {
                     chatId: this.activeChat.id,
                     media: file,
-                    fileName: new Date().getTime() + '.ogg'
+                    fileName: new Date().getTime() + '.ptt'
                 };
 
                 if (this.activeChat.quotedMsg) {
