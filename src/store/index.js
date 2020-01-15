@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import uniqueid from 'uniqid';
 
 Vue.use(Vuex);
 
@@ -24,7 +25,8 @@ const store = new Vuex.Store({
             id: ''
         },
         ws: {},
-        wsEvents: {}
+        wsEvents: {},
+        intervalPong: -1
     },
 
     mutations: {
@@ -123,6 +125,13 @@ const store = new Vuex.Store({
 
         ADD_PICTURE_TO_CACHE (state, payload) {
             state.pictures[payload.id] = payload.picture;
+        },
+
+        INTERVAL_PONG (state, payload) {
+            if (state.intervalPong !== -1) {
+                clearInterval(state.intervalPong);
+            }
+            state.intervalPong = payload;
         }
     },
 
@@ -180,6 +189,7 @@ const store = new Vuex.Store({
                         context.commit('SET_IS_LOADING_CHAT', false);
                         context.state.poolContext.forEach(func => func());
                         context.state.poolContext = [];
+                        context.dispatch('initPong');
 
                         break;
                     }
@@ -296,11 +306,6 @@ const store = new Vuex.Store({
                         break;
                     }
 
-                    case 'ping': {
-                        console.log('delay::', (new Date().getTime() - responseData), 'ms');
-                        break;
-                    }
-
                     default: {
                         context.commit('NEW_MSG_WS', { tag: responseType, data: responseData });
                     }
@@ -311,7 +316,7 @@ const store = new Vuex.Store({
 
         sendWsMessage (context, payload) {
             return new Promise((resolve, reject) => {
-                payload.tag = performance.now();
+                payload.tag = uniqueid();
                 context.commit('ADD_NEW_LISTENNER', { tag: payload.tag, resolve: resolve, reject: reject });
                 context.state.ws.send(`${payload.tag},${payload.msg}`);
             });
@@ -347,6 +352,21 @@ const store = new Vuex.Store({
                 } else {
                     resolve(chat);
                 }
+            });
+        },
+
+        initPong (context) {
+            context.commit('INTERVAL_PONG', setInterval(() => {
+                context.dispatch('checkDelayToServer').then(value => console.log('delay::', value, 'ms'));
+            }, 10000));
+        },
+
+        checkDelayToServer (context) {
+            return new Promise((resolve, reject) => {
+                let time = new Date().getTime();
+                context.dispatch('sendWsMessage', { msg: 'pong' }).then(result => {
+                    resolve(new Date().getTime() - time);
+                }).catch(reason => reject(reason));
             });
         },
 
