@@ -409,36 +409,41 @@ const store = new Vuex.Store({
             }
         },
 
-        updatePicture (context, payload) {
-            const chat = context.state.chats.find((element) => {
-                return element.id === payload.id;
-            });
-
-            if (chat) {
-                chat.picture = payload.picture;
+        setChatProperties (context, el) {
+            if (!Array.isArray(el)) {
+                setProperties(el);
+            } else {
+                el.forEach(el => {
+                    setProperties(el);
+                });
+            }
+            function setProperties (el) {
+                el.quotedMsg = undefined;
+                el.msgsGrouped = {};
+                Object.defineProperty(el, 'lastMsg', {
+                    get () {
+                        let array = this.msgs.filter(e => e.type !== 'e2e_notification' && e.type !== 'gp2').sort((a, b) => {
+                            if (a.t < b.t) {
+                                return -1;
+                            }
+                            if (a.t > b.t) {
+                                return 1;
+                            }
+                            return 0;
+                        }).slice(-1);
+                        if (array.length > 0) {
+                            return array[0];
+                        }
+                        return undefined;
+                    },
+                    set (v) {
+                    }
+                });
             }
         },
 
-        setChatProperties (context, el) {
-            el.quotedMsg = undefined;
-            el.msgsGrouped = {};
-            Object.defineProperty(el, 'lastMsg', {
-                get () {
-                    let array = this.msgs.filter(e => e.type !== 'e2e_notification' && e.type !== 'gp2').slice(-1);
-                    if (array.length > 0) {
-                        return array[0];
-                    }
-                    return undefined;
-                },
-                set (v) {
-                }
-            });
-        },
-
         handleChatProperties (context, payload) {
-            payload.chats.forEach(el => {
-                context.dispatch('setChatProperties', el);
-            });
+            context.dispatch('setChatProperties', payload.chats);
 
             context.commit('SET_CHATS', payload.chats);
             context.dispatch('updateTitle');

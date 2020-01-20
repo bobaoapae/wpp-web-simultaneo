@@ -13,6 +13,7 @@
 <script>
 import { mapState } from 'vuex';
 import Contact from './contact/Contact';
+import sort from 'fast-sort';
 
 export default {
     name: 'ListContact',
@@ -26,9 +27,7 @@ export default {
         ...mapState(['contacts']),
 
         contactsFiltered () {
-            let contacts = this.contacts.filter(contact => {
-                return contact.isMyContact;
-            });
+            let contacts = this.contacts;
 
             if (this.filter !== '') {
                 contacts = contacts.filter(contact => {
@@ -37,16 +36,7 @@ export default {
                 });
             }
 
-            return contacts.sort((a, b) => {
-                if (a.formattedName.toLowerCase() < b.formattedName.toLowerCase()) {
-                    return -1;
-                }
-                if (a.formattedName.toLowerCase() > b.formattedName.toLowerCase()) {
-                    return 1;
-                }
-                // a deve ser igual a b
-                return 0;
-            });
+            return sort(contacts).asc(contact => contact.formattedName);
         }
     },
     mounted () {
