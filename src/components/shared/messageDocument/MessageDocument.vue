@@ -88,10 +88,10 @@ export default {
 
     },
     methods: {
-        ...mapActions(['sendWsMessage']),
+        ...mapActions(['downloadMedia']),
 
         downloadDocument () {
-            this.sendWsMessage({ msg: `downloadMedia,${this.msg.id._serialized}` }).then(e => {
+            this.downloadMedia({ id: this.msg.id._serialized }).then(e => {
                 const element = document.createElement('a');
                 element.setAttribute('href', e.base64);
                 element.setAttribute('download', e.fileName);

@@ -38,7 +38,7 @@ export default {
     },
     methods: {
         ...mapMutations(['SET_MODAL']),
-        ...mapActions(['sendWsMessage']),
+        ...mapActions(['downloadMedia']),
 
         handleModalKeydown () {
             if (this.modal.show) {
@@ -65,7 +65,7 @@ export default {
         },
 
         download () {
-            this.sendWsMessage({ msg: `downloadMedia,${this.modal.id}` }).then(e => {
+            this.downloadMedia({ id: this.modal.id }).then(e => {
                 const element = document.createElement('a');
                 element.setAttribute('href', e.base64);
                 element.setAttribute('download', e.fileName);

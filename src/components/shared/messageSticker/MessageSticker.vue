@@ -41,11 +41,11 @@ export default {
         ...mapState(['activeChat'])
     },
     methods: {
-        ...mapActions(['addFullMediaInMsg', 'sendWsMessage']),
+        ...mapActions(['addFullMediaInMsg', 'downloadMedia']),
 
         getSticker () {
             if (!this.msg.base64MediaFull) {
-                this.sendWsMessage({ msg: `downloadMedia,${this.msg.id._serialized}` }).then(e => {
+                this.downloadMedia({ id: this.msg.id._serialized }).then(e => {
                     this.sticker = e.base64;
 
                     let idChat;

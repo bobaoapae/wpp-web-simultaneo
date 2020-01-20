@@ -58,7 +58,7 @@ export default {
         };
     },
     methods: {
-        ...mapActions(['addFullMediaInMsg', 'markPlayed', 'sendWsMessage']),
+        ...mapActions(['addFullMediaInMsg', 'markPlayed', 'downloadMedia']),
 
         handleMarkPlayed () {
             if (this.msg.ack !== 4) {
@@ -69,7 +69,7 @@ export default {
             this.srcLoading = true;
 
             if (!this.msg.base64MediaFull) {
-                this.sendWsMessage({ msg: `downloadMedia,${this.msg.id._serialized}` }).then(e => {
+                this.downloadMedia({ id: this.msg.id._serialized }).then(e => {
                     this.srcAudio = e.base64;
                     this.srcLoading = false;
                     this.srcError = false;

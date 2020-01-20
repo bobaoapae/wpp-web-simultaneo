@@ -15,6 +15,7 @@ const store = new Vuex.Store({
         contacts: null,
         chats: null,
         pictures: [],
+        medias: [],
         timeOutChats: -1,
         activeChat: null,
         poolContext: [],
@@ -127,6 +128,10 @@ const store = new Vuex.Store({
             state.pictures[payload.id] = payload.picture;
         },
 
+        ADD_MEDIA_TO_CACHE (state, payload) {
+            state.medias[payload.id] = payload.data;
+        },
+
         INTERVAL_PONG (state, payload) {
             if (state.intervalPong !== -1) {
                 clearInterval(state.intervalPong);
@@ -142,7 +147,10 @@ const store = new Vuex.Store({
             const ws = context.state.ws;
 
             ws.onopen = function (e) {
-                ws.send(`token,${sessionStorage.TOKEN}`);
+                context.dispatch('sendWsMessage', { event: 'token', payload: sessionStorage.TOKEN }).catch(reason => {
+                    sessionStorage.removeItem('TOKEN');
+                    window.location.reload();
+                });
             };
             ws.onclose = function (e) {
                 window.location.reload();
@@ -290,22 +298,6 @@ const store = new Vuex.Store({
                         break;
                     }
 
-                    case 'chat-picture': {
-                        const r = JSON.parse(responseData);
-
-                        context.dispatch('updatePicture', r);
-
-                        break;
-                    }
-
-                    case 'token': {
-                        if (responseData === 'invalido') {
-                            sessionStorage.removeItem('TOKEN');
-                            window.location.reload();
-                        }
-                        break;
-                    }
-
                     default: {
                         context.commit('NEW_MSG_WS', { tag: responseType, data: responseData });
                     }
@@ -316,9 +308,15 @@ const store = new Vuex.Store({
 
         sendWsMessage (context, payload) {
             return new Promise((resolve, reject) => {
-                payload.tag = uniqueid();
-                context.commit('ADD_NEW_LISTENNER', { tag: payload.tag, resolve: resolve, reject: reject });
-                context.state.ws.send(`${payload.tag},${payload.msg}`);
+                let payLoadSend = {
+                    tag: uniqueid(),
+                    webSocketRequestPayLoad: payload
+                };
+                if (typeof (payLoadSend.webSocketRequestPayLoad.payload) === 'object') {
+                    payLoadSend.webSocketRequestPayLoad.payload = JSON.stringify(payLoadSend.webSocketRequestPayLoad.payload);
+                }
+                context.commit('ADD_NEW_LISTENNER', { tag: payLoadSend.tag, resolve: resolve, reject: reject });
+                context.state.ws.send(JSON.stringify(payLoadSend));
             });
         },
 
@@ -345,7 +343,7 @@ const store = new Vuex.Store({
                 const chat = context.state.chats.find(chat => chat.id === payload.id);
 
                 if (!chat) {
-                    context.dispatch('sendWsMessage', { msg: `findChat,${payload.id}` }).then(chat => {
+                    context.dispatch('sendWsMessage', { event: 'findChat', payload: payload.id }).then(chat => {
                         context.dispatch('newChat', chat);
                         resolve(chat);
                     }).catch(reason => reject(reason));
@@ -364,7 +362,7 @@ const store = new Vuex.Store({
         checkDelayToServer (context) {
             return new Promise((resolve, reject) => {
                 let time = new Date().getTime();
-                context.dispatch('sendWsMessage', { msg: 'pong' }).then(result => {
+                context.dispatch('sendWsMessage', { event: 'pong' }).then(result => {
                     resolve(new Date().getTime() - time);
                 }).catch(reason => reject(reason));
             });
@@ -375,9 +373,22 @@ const store = new Vuex.Store({
                 if (context.state.pictures[payload.id]) {
                     resolve(context.state.pictures[payload.id]);
                 } else {
-                    context.dispatch('sendWsMessage', { msg: `findPicture,${payload.id}` }).then(picture => {
+                    context.dispatch('sendWsMessage', { event: 'findPicture', payload: payload.id }).then(picture => {
                         context.commit('ADD_PICTURE_TO_CACHE', { id: payload.id, picture: picture });
                         resolve(picture);
+                    }).catch(reason => reject(reason));
+                }
+            });
+        },
+
+        downloadMedia (context, payload) {
+            return new Promise((resolve, reject) => {
+                if (context.state.medias[payload.id]) {
+                    resolve(context.state.medias[payload.id]);
+                } else {
+                    context.dispatch('sendWsMessage', { event: 'downloadMedia', payload: payload.id }).then(data => {
+                        context.commit('ADD_MEDIA_TO_CACHE', { id: payload.id, data: data });
+                        resolve(data);
                     }).catch(reason => reject(reason));
                 }
             });
@@ -521,27 +532,27 @@ const store = new Vuex.Store({
               MESSAGES
           */
         deleteMsg (context, payload) {
-            context.state.ws.send(`deleteMessage,${JSON.stringify(payload)}`);
+            return context.dispatch('sendWsMessage', { event: 'deleteMessage', payload: payload });
         },
 
         sendMsg (context, payload) {
-            context.state.ws.send(`sendMessage,${JSON.stringify(payload)}`);
+            return context.dispatch('sendWsMessage', { event: 'sendMessage', payload: payload });
         },
 
         seeChat (context, payload) {
-            context.state.ws.send(`seeChat,${payload.chatId}`);
+            return context.dispatch('sendWsMessage', { event: 'seeChat', payload: payload.chatId });
         },
 
         subscribePresence (context, payload) {
-            context.state.ws.send(`subscribePresence,${payload.chatId}`);
+            return context.dispatch('sendWsMessage', { event: 'subscribePresence', payload: payload.chatId });
         },
 
         loadEarly (context, payload) {
-            context.state.ws.send(`loadEarly,${payload.chatId}`);
+            return context.dispatch('sendWsMessage', { event: 'loadEarly', payload: payload.chatId });
         },
 
         markPlayed (context, payload) {
-            context.state.ws.send(`markPlayed,${payload.msgId}`);
+            return context.dispatch('sendWsMessage', { event: 'markPlayed', payload: payload.msgId });
         },
 
         addNewMsgInChat (context, payload) {

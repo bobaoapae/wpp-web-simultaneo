@@ -62,11 +62,11 @@ export default {
     },
     methods: {
         ...mapMutations(['SET_MODAL']),
-        ...mapActions(['addFullMediaInMsg', 'sendWsMessage']),
+        ...mapActions(['addFullMediaInMsg', 'downloadMedia']),
 
         getFullImage () {
             if (!this.msg.base64MediaFull) {
-                this.sendWsMessage({ msg: `downloadMedia,${this.msg.id._serialized}` }).then(e => {
+                this.downloadMedia({ id: this.msg.id._serialized }).then(e => {
                     this.imageFull = e.base64;
 
                     let idChat;

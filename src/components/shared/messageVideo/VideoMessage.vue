@@ -54,12 +54,12 @@ export default {
         }
     },
     methods: {
-        ...mapActions(['addFullMediaInMsg', 'sendWsMessage']),
+        ...mapActions(['addFullMediaInMsg', 'downloadMedia']),
         ...mapMutations(['SET_MODAL']),
 
         getVideo () {
             if (!this.msg.base64MediaFull) {
-                this.sendWsMessage({ msg: `downloadMedia,${this.msg.id._serialized}` }).then(e => {
+                this.downloadMedia({ id: this.msg.id._serialized }).then(e => {
                     this.srcVideo = e.base64;
                     this.saveInCache(this.srcVideo);
                 });

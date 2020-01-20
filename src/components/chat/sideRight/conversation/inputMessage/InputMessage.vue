@@ -210,8 +210,6 @@ export default {
             (async () => {
                 let file = (await toBase64(data));
 
-                this.activeChat.quotedMsg = undefined;
-
                 let msg = {
                     chatId: this.activeChat.id,
                     media: file,
@@ -221,6 +219,8 @@ export default {
                 if (this.activeChat.quotedMsg) {
                     msg.quotedMsg = this.activeChat.quotedMsg.id._serialized;
                 }
+
+                this.activeChat.quotedMsg = undefined;
 
                 this.sendMsg(msg);
             })();
