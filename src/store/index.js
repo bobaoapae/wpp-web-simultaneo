@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import uniqueid from 'uniqid';
+import visibility from 'vue-visibility-change';
 
 Vue.use(Vuex);
 
@@ -27,7 +28,8 @@ const store = new Vuex.Store({
         },
         ws: {},
         wsEvents: {},
-        intervalPong: -1
+        intervalPong: -1,
+        intervalPresence: -1
     },
 
     mutations: {
@@ -137,6 +139,13 @@ const store = new Vuex.Store({
                 clearInterval(state.intervalPong);
             }
             state.intervalPong = payload;
+        },
+
+        INTERVAL_PRESENCE (state, payload) {
+            if (state.intervalPresence !== -1) {
+                clearInterval(state.intervalPresence);
+            }
+            state.intervalPresence = payload;
         }
     },
 
@@ -198,6 +207,7 @@ const store = new Vuex.Store({
                         context.state.poolContext.forEach(func => func());
                         context.state.poolContext = [];
                         context.dispatch('initPong');
+                        context.dispatch('initPresenceInterval');
 
                         break;
                     }
@@ -359,6 +369,26 @@ const store = new Vuex.Store({
             }, 10000));
         },
 
+        initPresenceInterval (context) {
+            if (visibility.hidden()) {
+                context.dispatch('sendPresenceStatus', { type: 'Unavailable' });
+            } else {
+                context.dispatch('sendPresenceStatus', { type: 'Available' });
+            }
+            visibility.change((evt, hidden) => {
+                if (hidden) {
+                    context.commit('INTERVAL_PRESENCE', setInterval(() => {
+                        context.dispatch('sendPresenceStatus', { type: 'Unavailable' });
+                    }, 5000));
+                } else {
+                    context.dispatch('sendPresenceStatus', { type: 'Available' });
+                    context.commit('INTERVAL_PRESENCE', setInterval(() => {
+                        context.dispatch('sendPresenceStatus', { type: 'Available' });
+                    }, 5000));
+                }
+            });
+        },
+
         checkDelayToServer (context) {
             return new Promise((resolve, reject) => {
                 let time = new Date().getTime();
@@ -391,6 +421,15 @@ const store = new Vuex.Store({
                         resolve(data);
                     }).catch(reason => reject(reason));
                 }
+            });
+        },
+
+        sendPresenceStatus (context, payload) {
+            console.log('sendPresence::', payload.type);
+            return new Promise((resolve, reject) => {
+                context.dispatch('sendWsMessage', { event: `sendPresence${payload.type}` }).then(data => {
+                    resolve(data);
+                }).catch(reason => reject(reason));
             });
         },
 

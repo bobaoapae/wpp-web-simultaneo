@@ -10,7 +10,8 @@
                             categories: {
                               search: '',
                               recent: 'Recentes',
-                              people: 'Emojis & Pessoas',
+                              smileys: 'Emojis & Emoções',
+                              people: 'Pessoas & Corpos',
                               nature: 'Animais & natureza',
                               foods: 'Comida & Bebida',
                               activity: 'Atividade',
