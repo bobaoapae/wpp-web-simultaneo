@@ -29,7 +29,8 @@ const store = new Vuex.Store({
         ws: {},
         wsEvents: {},
         intervalPong: -1,
-        intervalPresence: -1
+        intervalPresence: -1,
+        audio: null
     },
 
     mutations: {
@@ -123,6 +124,9 @@ const store = new Vuex.Store({
         },
 
         SET_TIMEOUT_CHATS (state, payload) {
+            if (state.timeOutChats !== -1) {
+                clearTimeout(state.timeOutChats);
+            }
             state.timeOutChats = payload;
         },
 
@@ -146,6 +150,10 @@ const store = new Vuex.Store({
                 clearInterval(state.intervalPresence);
             }
             state.intervalPresence = payload;
+        },
+
+        SET_AUDIO (state, payload) {
+            state.audio = payload;
         }
     },
 
@@ -425,7 +433,6 @@ const store = new Vuex.Store({
         },
 
         sendPresenceStatus (context, payload) {
-            console.log('sendPresence::', payload.type);
             return new Promise((resolve, reject) => {
                 context.dispatch('sendWsMessage', { event: `sendPresence${payload.type}` }).then(data => {
                     resolve(data);
@@ -494,6 +501,7 @@ const store = new Vuex.Store({
             });
 
             if (chat) {
+                delete payload.msgs;
                 let sortChats = chat.pin !== payload.pin;
                 Object.assign(chat, payload);
                 context.dispatch('updateTitle');
@@ -503,14 +511,7 @@ const store = new Vuex.Store({
             }
         },
 
-        clearTimeoutChats (context) {
-            if (context.state.timeOutChats !== -1) {
-                clearTimeout(context.state.timeOutChats);
-            }
-        },
-
         sortChatsByTime (context) {
-            context.dispatch('clearTimeoutChats');
             context.commit('SET_TIMEOUT_CHATS', setTimeout(() => {
                 const chats = context.state.chats;
 
@@ -537,7 +538,6 @@ const store = new Vuex.Store({
                     return 0;
                 });
 
-                context.dispatch('clearTimeoutChats');
                 context.commit('SET_CHATS', chats);
                 context.dispatch('updateTitle');
                 context.dispatch('groupMsgsByDate');
@@ -570,6 +570,13 @@ const store = new Vuex.Store({
                 });
                 chat.msgsGrouped = msgsGrouped;
             });
+        },
+
+        playNewMsgNotification (context, payload) {
+            if (!context.state.audio) {
+                context.commit('SET_AUDIO', new Audio(require('@/assets/audio/web_whatsapp.mp3')));
+            }
+            context.state.audio.play();
         },
 
         /*
@@ -614,7 +621,6 @@ const store = new Vuex.Store({
 
                 if (!msg) {
                     chat.msgs.push(payload);
-
                     chat.msgs.sort(function (a, b) {
                         if (a.t > b.t) {
                             return 1;
@@ -624,8 +630,10 @@ const store = new Vuex.Store({
                         }
                         return 0;
                     });
-
                     context.dispatch('sortChatsByTime');
+                    if ((!payload.id.fromMe && chat.muteExpiration <= 0) && (chat.lastMsg.t < payload.t || chat.lastMsg.id === payload.id)) {
+                        context.dispatch('playNewMsgNotification');
+                    }
                 }
             }
         },
