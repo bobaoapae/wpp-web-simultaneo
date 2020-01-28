@@ -466,6 +466,7 @@ const store = new Vuex.Store({
             function setProperties (el) {
                 el.quotedMsg = undefined;
                 el.msgsGrouped = {};
+                el.openChatInfo = false;
                 Object.defineProperty(el, 'lastMsg', {
                     get () {
                         let array = this.msgs.filter(e => e.type !== 'e2e_notification' && e.type !== 'gp2').sort((a, b) => {

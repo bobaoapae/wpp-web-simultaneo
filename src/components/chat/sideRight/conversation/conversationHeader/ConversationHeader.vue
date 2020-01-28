@@ -4,7 +4,7 @@
          <ChatActivePhoto/>
       </div>
 
-      <div class="box-info">
+      <div class="box-info" @click.prevent="openChatInfo">
          <div class="nome" v-html="nameEmojify"></div>
 
          <div class="info">
@@ -157,6 +157,10 @@ export default {
             }
 
             this.sendMsg(msg);
+        },
+
+        openChatInfo () {
+            this.activeChat.openChatInfo = !this.activeChat.openChatInfo;
         }
     }
 };
@@ -176,6 +180,10 @@ export default {
       background: #eee;
       display: flex;
       padding: 10px 16px;
+      height: 63px;
+      max-height: 63px;
+      cursor: pointer;
+      user-select: none;
    }
 
    .box-img {

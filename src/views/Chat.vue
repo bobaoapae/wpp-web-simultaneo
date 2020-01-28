@@ -5,17 +5,19 @@
             <div class="row">
                <SideLeft/>
                <SideRight/>
+               <ChatInfo v-if="activeChat && activeChat.openChatInfo"/>
             </div>
          </div>
       </div>
 
       <ModalMedia/>
-       <ModalDeleteMsg/>
+      <ModalDeleteMsg/>
    </div>
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { mapState } from 'vuex';
+import ChatInfo from '@/components/chat/sideRight/chatInfo/ChatInfo';
 import SideLeft from '@/components/chat/sideLeft/SideLeft.vue';
 import SideRight from '@/components/chat/sideRight/SideRight.vue';
 import ModalMedia from './ModalMedia';
@@ -27,16 +29,11 @@ export default {
         ModalDeleteMsg,
         ModalMedia,
         SideLeft,
-        SideRight
+        SideRight,
+        ChatInfo
     },
-    data () {
-        return {};
-    },
-    created () {
-    // this.getChats();
-    },
-    methods: {
-        ...mapActions(['setNewMsgEvent', 'getChats'])
+    computed: {
+        ...mapState(['activeChat'])
     }
 };
 </script>
