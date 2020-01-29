@@ -170,9 +170,11 @@ const store = new Vuex.Store({
                 });
             };
             ws.onclose = function (e) {
+                console.log('Ws Close', e);
                 window.location.reload();
             };
             ws.onerror = function (e) {
+                console.log('Ws Error', e);
                 window.location.reload();
             };
 
@@ -440,6 +442,15 @@ const store = new Vuex.Store({
             });
         },
 
+        findCustomProperties (context, payload) {
+            return new Promise((resolve, reject) => {
+                setTimeout(() => { resolve([{ key: 'teste' + payload.id, value: 'valor' }, { key: 'teste2', value: 'valor2' }]); }, 2000);
+                /* context.dispatch('sendWsMessage', { event: 'findCustomProperties', payload: payload.id }).then(data => {
+                    resolve(data);
+                }).catch(reason => reject(reason)); */
+            });
+        },
+
         /*
               CHATS
           */
@@ -467,6 +478,17 @@ const store = new Vuex.Store({
                 el.quotedMsg = undefined;
                 el.msgsGrouped = {};
                 el.openChatInfo = false;
+                el.customProperties = {
+                    properties: [],
+                    loaded: false
+                };
+                el.customProperties.loadProperties = function () {
+                    this.loaded = false;
+                    return context.dispatch('findCustomProperties', { id: el.id }).then(value => {
+                        this.properties = value;
+                        this.loaded = true;
+                    });
+                };
                 Object.defineProperty(el, 'lastMsg', {
                     get () {
                         let array = this.msgs.filter(e => e.type !== 'e2e_notification' && e.type !== 'gp2').sort((a, b) => {
