@@ -444,7 +444,7 @@ const store = new Vuex.Store({
 
         findCustomProperties (context, payload) {
             return new Promise((resolve, reject) => {
-                setTimeout(() => { resolve([{ key: 'teste' + payload.id, value: 'valor' }, { key: 'teste2', value: 'valor2' }]); }, 2000);
+                resolve([]);
                 /* context.dispatch('sendWsMessage', { event: 'findCustomProperties', payload: payload.id }).then(data => {
                     resolve(data);
                 }).catch(reason => reject(reason)); */
