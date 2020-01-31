@@ -15,8 +15,7 @@ export default {
     },
     computed: {
         time () {
-            const t = this.chat.msgs.length;
-            const lastMsg = this.chat.msgs[t - 1];
+            const lastMsg = this.chat.lastMsg;
 
             if (lastMsg === undefined) {
                 return '';

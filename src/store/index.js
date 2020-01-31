@@ -654,7 +654,7 @@ const store = new Vuex.Store({
                         return 0;
                     });
                     context.dispatch('sortChatsByTime');
-                    if ((!payload.id.fromMe && chat.muteExpiration <= 0) && (chat.lastMsg.t < payload.t || chat.lastMsg.id === payload.id)) {
+                    if (!payload.id.fromMe && chat.muteExpiration <= 0 && payload.id.isNewMsg) {
                         context.dispatch('playNewMsgNotification');
                     }
                 }
