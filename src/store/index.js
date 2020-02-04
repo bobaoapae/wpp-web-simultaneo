@@ -480,14 +480,21 @@ const store = new Vuex.Store({
                 el.openChatInfo = false;
                 el.customProperties = {
                     properties: [],
-                    loaded: false
+                    loaded: false,
+                    loadProperties: function () {
+                        this.loaded = false;
+                        return context.dispatch('findCustomProperties', { id: el.id }).then(value => {
+                            this.properties = value;
+                            this.loaded = true;
+                        });
+                    }
                 };
-                el.customProperties.loadProperties = function () {
-                    this.loaded = false;
-                    return context.dispatch('findCustomProperties', { id: el.id }).then(value => {
-                        this.properties = value;
-                        this.loaded = true;
+                el.sendQueue = [];
+                el.sendMessage = function (payload) {
+                    Object.assign(payload, {
+                        chatId: this.id
                     });
+                    return context.dispatch('sendMsg', payload);
                 };
                 Object.defineProperty(el, 'lastMsg', {
                     get () {
@@ -504,8 +511,6 @@ const store = new Vuex.Store({
                             return array[0];
                         }
                         return undefined;
-                    },
-                    set (v) {
                     }
                 });
             }
