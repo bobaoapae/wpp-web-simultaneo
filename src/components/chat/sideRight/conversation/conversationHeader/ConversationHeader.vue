@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
+import { mapState } from 'vuex';
 import ChatActivePhoto from './chatActivePhoto/ChatActivePhoto.vue';
 import { msg } from '@/helper.js';
 
@@ -88,8 +88,6 @@ export default {
         }
     },
     methods: {
-        ...mapActions(['sendMsg']),
-
         timeConverter (unixTimeStamp) {
             let a = new Date(unixTimeStamp * 1000);
             let year = a.getFullYear();
@@ -147,7 +145,6 @@ export default {
 
         handleSendMsg (name) {
             let msg = {
-                chatId: this.activeChat.id,
                 media: this.file,
                 fileName: name
             };
@@ -156,7 +153,7 @@ export default {
                 msg.quotedMsg = this.activeChat.quotedMsg.id._serialized;
             }
 
-            this.sendMsg(msg);
+            this.activeChat.sendMessage(msg);
         },
 
         openChatInfo () {

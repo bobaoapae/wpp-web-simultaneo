@@ -85,7 +85,7 @@
 
 <script>
 import { Picker } from 'emoji-mart-vue-fast';
-import { mapState, mapActions } from 'vuex';
+import { mapState } from 'vuex';
 import { msg } from '@/helper.js';
 import { rageSave } from '@/rangeSelectionSaveRestore.js';
 import QuotedMsg from '../../../../shared/quotedMsg/QuotedMsg';
@@ -149,8 +149,6 @@ export default {
         }
     },
     methods: {
-        ...mapActions(['sendMsg']),
-
         toggleRecording () {
             this.gravando = !this.gravando;
 
@@ -212,7 +210,6 @@ export default {
                 let file = (await toBase64(data));
 
                 let msg = {
-                    chatId: this.activeChat.id,
                     media: file,
                     fileName: new Date().getTime() + '.ptt'
                 };
@@ -223,7 +220,7 @@ export default {
 
                 this.activeChat.quotedMsg = undefined;
 
-                this.sendMsg(msg);
+                this.activeChat.sendMessage(msg);
             })();
         },
 
@@ -260,7 +257,6 @@ export default {
         },
         handleSendMsg () {
             let msg = {
-                chatId: this.activeChat.id,
                 message: this.mensagem
             };
 
@@ -268,7 +264,7 @@ export default {
                 msg.quotedMsg = this.activeChat.quotedMsg.id._serialized;
             }
 
-            this.sendMsg(msg);
+            this.activeChat.sendMessage(msg);
             this.clearInput();
         },
         capitalize (value) {
