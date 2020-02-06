@@ -2,6 +2,9 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import Login from '@/views/Login';
 import Wpp from '@/views/Wpp';
+import ForgotPassword from '@/views/ForgotPassword';
+import NewAccount from '@/views/NewAccount';
+import ChangePassword from '@/views/ChangePassword';
 
 Vue.use(VueRouter);
 
@@ -22,6 +25,21 @@ const routes = [
         path: '/login',
         name: 'login',
         component: Login
+    },
+    {
+        path: '/forgotpassword',
+        name: 'forgot-password',
+        component: ForgotPassword
+    },
+    {
+        path: '/newaccount',
+        name: 'new-account',
+        component: NewAccount
+    },
+    {
+        path: '/changepassword',
+        name: 'change-password',
+        component: ChangePassword
     }
 ];
 

@@ -19,7 +19,14 @@
       <div class="box-icons">
          <img src="@/assets/images/wpp-icon-status.svg"/>
          <img src="@/assets/images/wpp-icon-message.svg" @click="handleClick"/>
-         <img src="@/assets/images/wpp-icon-kebab-menu.svg"/>
+
+         <b-dropdown variant="link" toggle-class="text-decoration-none p-0" no-caret>
+            <template v-slot:button-content>
+               <img src="@/assets/images/wpp-icon-kebab-menu.svg"/>
+            </template>
+            <b-dropdown-item to="/changepassword">Alterar Senha</b-dropdown-item>
+            <b-dropdown-item class="d-none" to="/changenumber">Alterar Numero</b-dropdown-item>
+         </b-dropdown>
       </div>
    </header>
 </template>

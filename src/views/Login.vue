@@ -7,18 +7,23 @@
             <form @submit.prevent="handleLogin" id="form-login">
                <p>Login</p>
 
-               <input id="user" placeholder="USUARIO" required type="text" v-model="form.user"/>
+               <input id="user" placeholder="Login" required type="text" v-model="form.user"/>
 
                <input
                   :type="showPass ? 'text' : 'password'"
                   id="password"
-                  placeholder="SENHA"
+                  placeholder="Senha"
                   required
                   v-model="form.pass"
                />
-               <div class="show-pass">
-                  <label for="showPass">Mostrar senha</label>
-                  <input id="showPass" type="checkbox" v-model="showPass">
+
+               <div class="pass-options">
+                  <div class="show-pass">
+                     <label for="showPass">Mostrar senha</label>
+                     <input id="showPass" type="checkbox" v-model="showPass">
+                  </div>
+
+                  <router-link class="forgot-password-link" to="/forgotpassword">Esqueci minha senha</router-link>
                </div>
 
                <button :disabled="btn.loading" type="submit">{{btn.label}}</button>
@@ -28,7 +33,7 @@
 
             <hr/>
 
-            <a href="https://www.zapia.com.br" target="_blank">Zapiá</a>
+            <a class="site-link" href="https://www.zapia.com.br" target="_blank">Zapiá</a>
          </div>
       </div>
    </div>
@@ -159,31 +164,34 @@ export default {
       margin-bottom: 25px;
       border-radius: 20px;
       padding: 10px;
-   }
-
-   div.show-pass {
-      display: flex;
-      align-items: center;
-      padding: 10px 0;
-      margin-bottom: 20px;
-   }
-
-   div.show-pass label {
-      font-size: 13px;
-      font-weight: 500;
-      margin-bottom: 0;
-      margin-right: 15px;
+      outline: none;
    }
 
    form input#password {
       margin-bottom: 0;
    }
 
-   form input#showPass {
+   .pass-options {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+   }
+
+   .show-pass {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      flex-basis: 150px;
+   }
+
+   .show-pass input[type='checkbox'] {
       margin: 0;
       padding: 0;
-      height: 15px;
-      width: 15px;
+   }
+
+   .show-pass label {
+      margin: 0 15px 0 0;
+      font-weight: 600;
    }
 
    form button {
@@ -193,6 +201,7 @@ export default {
       background: linear-gradient(300deg, #009688 0%, #1ebea5 50%);
       transition: opacity 0.3s;
       color: aliceblue;
+      margin-top: 15px;
    }
 
    form button:hover {
@@ -209,8 +218,9 @@ export default {
       text-align: center;
    }
 
-   a {
-      text-align: center;
-      margin-bottom: 50px;
-   }
+   .site-link {
+    text-align: center;
+    margin-top: 30px;
+    margin-bottom: 15px;
+}
 </style>

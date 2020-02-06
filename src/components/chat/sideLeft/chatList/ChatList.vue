@@ -1,7 +1,7 @@
 <template>
   <div id="chat-list">
     <div class="box-input-search">
-      <input placeholder="Procurar" type="text" v-model="inputFilter"/>
+      <input style="outline: none;" placeholder="Procurar" type="text" v-model="inputFilter"/>
     </div>
 
     <div class="box-list-group">
