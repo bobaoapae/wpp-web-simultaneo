@@ -5,6 +5,7 @@ import Wpp from '@/views/Wpp';
 import ForgotPassword from '@/views/ForgotPassword';
 import NewAccount from '@/views/NewAccount';
 import ChangePassword from '@/views/ChangePassword';
+import store from '@/store';
 
 Vue.use(VueRouter);
 
@@ -15,6 +16,8 @@ const routes = [
         component: Wpp,
         beforeEnter: (to, from, next) => {
             if (sessionStorage.TOKEN) {
+                store.dispatch('closeWs');
+                store.commit('reset');
                 next();
             } else {
                 router.push('/login');

@@ -2,10 +2,12 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import uniqueid from 'uniqid';
 import visibility from 'vue-visibility-change';
+import VuexReset from '@ianwalter/vuex-reset';
 
 Vue.use(Vuex);
 
 const store = new Vuex.Store({
+    plugins: [VuexReset()],
     state: {
         isLogged: false,
         isQrCodeLogged: false,
@@ -26,7 +28,7 @@ const store = new Vuex.Store({
             show: false,
             id: ''
         },
-        ws: {},
+        ws: null,
         wsEvents: {},
         intervalPong: -1,
         intervalPresence: -1,
@@ -34,6 +36,8 @@ const store = new Vuex.Store({
     },
 
     mutations: {
+        reset: (state) => {},
+
         SET_IS_LOGGED (state, payload) {
             state.isLogged = payload;
         },
@@ -88,6 +92,9 @@ const store = new Vuex.Store({
         },
 
         SET_WS (state, payload) {
+            if (state.ws) {
+                state.ws.close();
+            }
             state.ws = payload;
         },
 
@@ -172,7 +179,9 @@ const store = new Vuex.Store({
             };
             ws.onclose = function (e) {
                 console.log('Ws Close', e);
-                window.location.reload();
+                if (e.code !== 4000) {
+                    window.location.reload();
+                }
             };
             ws.onerror = function (e) {
                 console.log('Ws Error', e);
@@ -372,6 +381,12 @@ const store = new Vuex.Store({
                     resolve(chat);
                 }
             });
+        },
+
+        closeWs (context) {
+            if (context.state.ws) {
+                context.state.ws.close(4000);
+            }
         },
 
         initPong (context) {
