@@ -28,7 +28,7 @@
 
                <button :disabled="btn.loading" type="submit">{{btn.label}}</button>
 
-               <span class="error" v-show="error.active">Usuario e/ou Senha invalido</span>
+               <span class="error" v-show="error.active">{{error.msg}}</span>
             </form>
 
             <hr/>
@@ -56,7 +56,8 @@ export default {
                 loading: false
             },
             error: {
-                active: false
+                active: false,
+                msg: ''
             },
             showPass: false
         };
@@ -76,16 +77,28 @@ export default {
                     this.btn.label = 'ENTRAR';
                     this.btn.loading = false;
                     sessionStorage.TOKEN = r.data.token;
+                    sessionStorage.USER = JSON.stringify(r.data.usuario);
                     api.defaults.headers['Authorization'] = 'Bearer ' + sessionStorage.TOKEN;
 
                     this.SET_IS_LOGGED(true);
                     this.$router.push('/');
                 })
-                .catch(r => {
+                .catch((r) => {
+                    let data = r.response.data;
                     this.btn.label = 'ENTRAR';
                     this.btn.loading = false;
 
                     this.error.active = true;
+                    switch (data.message) {
+                        case 'Bad credentials': {
+                            this.error.msg = 'Usuário ou Senha Inválidos';
+                            break;
+                        }
+                        case 'User account is locked': {
+                            this.error.msg = 'Conta Inativa';
+                            break;
+                        }
+                    }
                 });
         }
     }

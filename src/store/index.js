@@ -166,6 +166,7 @@ const store = new Vuex.Store({
             ws.onopen = function (e) {
                 context.dispatch('sendWsMessage', { event: 'token', payload: sessionStorage.TOKEN }).catch(reason => {
                     sessionStorage.removeItem('TOKEN');
+                    sessionStorage.removeItem('USER');
                     window.location.reload();
                 });
             };
