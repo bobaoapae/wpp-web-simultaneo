@@ -31,6 +31,14 @@
                <span class="error" v-show="error.active">{{error.msg}}</span>
             </form>
 
+            <hr>
+
+            <div class="box-new-account">
+               <span>Ainda não tem uma conta?</span>
+               <span>Que tal criar uma agora...</span>
+               <router-link to="/newaccount">Clique aqui</router-link>
+            </div>
+
             <hr/>
 
             <a class="site-link" href="https://www.zapia.com.br" target="_blank">Zapiá</a>
@@ -224,6 +232,13 @@ export default {
    .error {
       text-align: center;
       color: red;
+   }
+
+   .box-new-account {
+      padding: 0 50px;
+      display: flex;
+      flex-direction: column;
+      align-items: center
    }
 
    hr {
