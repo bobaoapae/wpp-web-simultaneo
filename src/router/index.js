@@ -3,7 +3,7 @@ import VueRouter from 'vue-router';
 import Login from '@/views/Login';
 import Wpp from '@/views/Wpp';
 import ForgotPassword from '@/views/ForgotPassword';
-import NewAccount from '@/views/NewAccount';
+import NewOperator from '@/views/NewOperator';
 import ChangePassword from '@/views/ChangePassword';
 import store from '@/store';
 
@@ -17,7 +17,6 @@ const routes = [
         beforeEnter: (to, from, next) => {
             if (sessionStorage.TOKEN) {
                 store.dispatch('closeWs');
-                store.commit('reset');
                 next();
             } else {
                 router.push('/login');
@@ -35,9 +34,9 @@ const routes = [
         component: ForgotPassword
     },
     {
-        path: '/newaccount',
-        name: 'new-account',
-        component: NewAccount
+        path: '/newoperator',
+        name: 'new-operator',
+        component: NewOperator
     },
     {
         path: '/changepassword',

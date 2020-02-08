@@ -25,7 +25,7 @@
 
          <label for="file">
             <img src="@/assets/images/wpp-icon-clip.svg">
-            <input @change="onChange" id="file" type="file"/>
+            <input @change="onChange" id="file" type="file" ref="file"/>
          </label>
 
          <img src="@/assets/images/wpp-icon-kebab-menu.svg">
@@ -138,8 +138,6 @@ export default {
                 const file = event.target.files[0];
                 this.file = (await toBase64(file));
                 this.handleSendMsg(event.target.files[0].name);
-
-                this.activeChat.quotedMsg = undefined;
             })();
         },
 
@@ -153,7 +151,10 @@ export default {
                 msg.quotedMsg = this.activeChat.quotedMsg.id._serialized;
             }
 
+            this.activeChat.quotedMsg = undefined;
+
             this.activeChat.sendMessage(msg);
+            this.$refs.file.value = null;
         },
 
         openChatInfo () {

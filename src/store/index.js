@@ -3,12 +3,20 @@ import Vuex from 'vuex';
 import uniqueid from 'uniqid';
 import visibility from 'vue-visibility-change';
 import VuexReset from '@ianwalter/vuex-reset';
+import VuexPersistence from 'vuex-persist';
+
+const vuexLocal = new VuexPersistence({
+    storage: window.sessionStorage,
+    modules: ['user'],
+    supportCircular: true
+});
 
 Vue.use(Vuex);
 
 const store = new Vuex.Store({
-    plugins: [VuexReset()],
+    plugins: [VuexReset(), vuexLocal.plugin],
     state: {
+        user: {},
         isLogged: false,
         isQrCodeLogged: false,
         isLoadingChat: true,
@@ -37,6 +45,10 @@ const store = new Vuex.Store({
 
     mutations: {
         reset: (state) => {},
+
+        SET_CURRENT_USER (state, payload) {
+            state.user = payload;
+        },
 
         SET_IS_LOGGED (state, payload) {
             state.isLogged = payload;
@@ -346,7 +358,12 @@ const store = new Vuex.Store({
                     payLoadSend.webSocketRequestPayLoad.payload = JSON.stringify(payLoadSend.webSocketRequestPayLoad.payload);
                 }
                 context.commit('ADD_NEW_LISTENNER', { tag: payLoadSend.tag, resolve: resolve, reject: reject });
-                context.state.ws.send(JSON.stringify(payLoadSend));
+
+                if (context.state.ws.readyState === WebSocket.OPEN) {
+                    context.state.ws.send(JSON.stringify(payLoadSend));
+                } else {
+                    reject(new Error('WebSocket Not Open'));
+                }
             });
         },
 
@@ -461,7 +478,7 @@ const store = new Vuex.Store({
         findCustomProperties (context, payload) {
             return new Promise((resolve, reject) => {
                 resolve([]);
-                /* context.dispatch('sendWsMessage', { event: 'findCustomProperties', payload: payload.id }).then(data => {
+                /* context.dispatch('sendWsMessage', { event: 'findChatCustomProperties', payload: payload.id }).then(data => {
                     resolve(data);
                 }).catch(reason => reject(reason)); */
             });

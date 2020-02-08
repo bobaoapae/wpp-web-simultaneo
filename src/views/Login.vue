@@ -31,16 +31,6 @@
                <span class="error" v-show="error.active">{{error.msg}}</span>
             </form>
 
-            <hr>
-
-            <div class="box-new-account">
-               <span>Ainda não tem uma conta?</span>
-               <span>Que tal criar uma agora...</span>
-               <router-link to="/newaccount">Clique aqui</router-link>
-            </div>
-
-            <hr/>
-
             <a class="site-link" href="https://www.zapia.com.br" target="_blank">Zapiá</a>
          </div>
       </div>
@@ -71,7 +61,7 @@ export default {
         };
     },
     methods: {
-        ...mapMutations(['SET_IS_LOGGED']),
+        ...mapMutations(['SET_IS_LOGGED', 'SET_CURRENT_USER']),
         handleLogin () {
             this.btn.label = 'ENTRANDO...';
             this.btn.loading = true;
@@ -85,7 +75,7 @@ export default {
                     this.btn.label = 'ENTRAR';
                     this.btn.loading = false;
                     sessionStorage.TOKEN = r.data.token;
-                    sessionStorage.USER = JSON.stringify(r.data.usuario);
+                    this.SET_CURRENT_USER(r.data.usuario);
                     api.defaults.headers['Authorization'] = 'Bearer ' + sessionStorage.TOKEN;
 
                     this.SET_IS_LOGGED(true);

@@ -1,11 +1,11 @@
 <template>
-    <div class="bg" id="login">
+    <div class="bg">
         <div class="container">
             <div class="content">
                 <div class="content-header"></div>
 
                 <form @submit.prevent="handleSubmit" id="form-login">
-                    <p class="title">Nova Conta</p>
+                    <p class="title">Novo Operador</p>
 
                     <input id="name" placeholder="Nome" required type="text" v-model="form.name" />
 
@@ -14,21 +14,15 @@
                     <input id="password" placeholder="Senha" required type="password" v-model="form.password" />
 
                     <span class="error" v-if="error.active">
-                        Ocorreu um erro ao criar sua conta :(
+                        {{error.msg}} :(
                     </span>
 
                     <button :disabled="btn.loading" type="submit">
                         {{btn.label}}
                     </button>
+
+                    <hr/>
                 </form>
-
-                <hr />
-
-                <router-link class="new-account-link" to="/login">Já possui uma conta?<br/>Clique aqui para acessar</router-link>
-
-                <hr />
-
-                <a class="site-link" href="https://www.zapia.com.br" target="_blank">Zapiá</a>
             </div>
         </div>
     </div>
@@ -47,11 +41,12 @@ export default {
                 password: ''
             },
             btn: {
-                label: 'ENVIAR',
+                label: 'CRIAR',
                 loading: false
             },
             error: {
-                active: false
+                active: false,
+                msg: ''
             }
         };
     },
@@ -61,23 +56,29 @@ export default {
             this.btn.loading = true;
 
             const data = {
-                'nome': this.form.nome,
+                'nome': this.form.name,
                 'login': this.form.login,
                 'senha': this.form.password
             };
 
-            api.post('/api/users', data)
+            api.post('/api/operators', data)
                 .then((r) => {
                     this.btn.label = 'ENVIAR';
                     this.btn.loading = false;
-                    alert('Conta criado com sucesso!');
-                    alert('Você será redirecionado para a tela de login');
-                    this.$router.push('/login');
+                    alert('Operador Criado com Sucesso!');
+                    this.$router.push('/');
                 })
                 .catch(r => {
+                    let data = r.response.data;
                     this.btn.label = 'ENVIAR';
                     this.btn.loading = false;
                     this.error.active = true;
+                    let error = data.error;
+                    if (error.includes('duplicate key')) {
+                        this.error.msg = 'Este usuário já está em uso';
+                    } else {
+                        this.error.msg = error;
+                    }
                 });
         }
     }

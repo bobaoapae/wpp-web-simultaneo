@@ -1,5 +1,5 @@
 <template>
-    <div class="bg" id="login">
+    <div class="bg">
         <div class="container">
             <div class="content">
                 <div class="content-header"></div>
@@ -7,9 +7,9 @@
                 <form @submit.prevent="handleSubmit" id="form-login">
                     <p class="title">Mudar minha senha</p>
 
-                    <input id="login" placeholder="Senha atual" required type="password" v-model="form.oldPass" />
+                    <input placeholder="Senha atual" required type="password" v-model="form.oldPass" />
 
-                    <input id="login" placeholder="Nova senha" required type="password" v-model="form.newPass" />
+                    <input placeholder="Nova senha" required type="password" v-model="form.newPass" />
 
                     <button type="submit">
                         ALTERAR

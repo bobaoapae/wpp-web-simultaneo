@@ -25,6 +25,12 @@
                <img src="@/assets/images/wpp-icon-kebab-menu.svg"/>
             </template>
             <b-dropdown-item to="/changepassword">Alterar Senha</b-dropdown-item>
+            <b-dropdown-item v-if="canCreateOperator" to="/newoperator">Novo Operador</b-dropdown-item>
+             <b-dropdown-form v-if="canCreateOperator" class="text-nowrap">
+                 <b-form-checkbox v-model="user.configuracao.enviarNomeOperadores" name="check-button" switch>
+                     Enviar Nome Operadores
+                 </b-form-checkbox>
+             </b-dropdown-form>
             <b-dropdown-item class="d-none" to="/changenumber">Alterar Numero</b-dropdown-item>
          </b-dropdown>
       </div>
@@ -32,14 +38,28 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapMutations } from 'vuex';
+import api from '@/api';
 
 export default {
     name: 'LeftHeader',
+    watch: {
+        'user.configuracao.enviarNomeOperadores': function () {
+            api.post('/api/users/config/toggleEnvioNomeOperador').then(e => {
+                this.SET_CURRENT_USER(e.data);
+            });
+        }
+    },
     computed: {
-        ...mapState(['self'])
+        ...mapState(['self', 'user']),
+
+        canCreateOperator () {
+            return this.user.permissao && this.user.permissao.permissao !== 'ROLE_OPERATOR';
+        }
     },
     methods: {
+        ...mapMutations(['SET_CURRENT_USER']),
+
         handleClick () {
             this.$root.$emit('showNewChat', true);
         }
