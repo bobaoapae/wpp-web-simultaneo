@@ -88,7 +88,7 @@ export default {
             type: Object,
             required: false
         },
-        previusMsg: {
+        previousMsg: {
             type: Object,
             required: false
         }
@@ -97,7 +97,7 @@ export default {
         ...mapState(['activeChat']),
 
         showTail () {
-            return !this.previusMsg || this.msg.from !== this.previusMsg.from;
+            return !this.previousMsg || this.msg.from !== this.previousMsg.from;
         },
 
         isSameColor () {

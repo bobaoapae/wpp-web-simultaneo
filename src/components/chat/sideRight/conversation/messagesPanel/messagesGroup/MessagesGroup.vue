@@ -2,8 +2,8 @@
    <div class="messages-group">
        <div :key="item.id.id" v-for="(item, index) in msgs">
          <MessageInfo :msg="item" v-if="isNotification(item.type)"/>
-         <MessageOut :msg="item" :previusMsg="msgs[index-1]" v-else-if="item.id.fromMe"/>
-         <MessageIn :msg="item" :previusMsg="msgs[index-1]" v-else/>
+         <MessageOut :msg="item" :previousMsg="msgs[index-1]" v-else-if="item.id.fromMe"/>
+         <MessageIn :msg="item" :previousMsg="msgs[index-1]" v-else/>
       </div>
    </div>
 </template>
