@@ -1,7 +1,9 @@
 <template>
    <div class="message-out">
-      <div @mouseenter="showMenuIcon = true" @mouseleave="showMenuIcon = false" class="message-out-container">
-         <div
+       <div v-if="showTail" class="tail"></div>
+       <div @mouseenter="showMenuIcon = true" @mouseleave="showMenuIcon = false" class="message-out-container" :class="showTail ? 'tail' : ''">
+           <div v-if="showTail" class="tail-container"></div>
+           <div
             :style="[isSameColor ? {background: 'linear-gradient(90deg,hsla(0,0%,100%,0) 0,#DCF8C6 50%)', height: '25px', width: '40px'} : {}]"
             class="msg-menu"
             v-show="showMenuIcon || menuAberto">
@@ -32,7 +34,7 @@
          <MessageVideo :msg="msg" v-else-if="isVideo"/>
          <MessageDocument :msg="msg" v-else-if="isDocument"/>
          <MessageAudio :msg="msg" v-else-if="isAudio"/>
-          <MessageRevoked :msg="msg" v-else-if="isRevoked"/>
+         <MessageRevoked :msg="msg" v-else-if="isRevoked"/>
       </div>
    </div>
 </template>
@@ -72,10 +74,18 @@ export default {
         msg: {
             type: Object,
             required: true
+        },
+        previusMsg: {
+            type: Object,
+            required: false
         }
     },
     computed: {
         ...mapState(['activeChat']),
+
+        showTail () {
+            return !this.previusMsg || this.msg.from !== this.previusMsg.from;
+        },
 
         isSameColor () {
             return this.isChat && !this.hasQuotedMsg;
@@ -157,6 +167,23 @@ export default {
       position: relative;
       background-color: #DCF8C6;
       border-radius: 7.5px;
+   }
+
+   .tail {
+       border-top-right-radius: 0;
+   }
+
+   .tail-container {
+       position: absolute;
+       right: -12px;
+       min-width: 12px;
+       min-height: 19px;
+       max-width: 12px;
+       max-height: 19px;
+       background-position: 50% 50%;
+       background-repeat: no-repeat;
+       background-size: contain;
+       background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAmCAMAAADp2asXAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAADAUExURUxpcXmHa4maet/4yA0aDRMTE8fhsgAAAAAAAMDXrCsxJeX/z1xzXIiYetPsvGBsVUdPPuH8zOH8zNDrvMvmtrrOpwAAAAAAABUVFRoaGtnyxLTMozQ+MMfftFBeSR8nH5aoh6q/mW9+ZN/4yMjhtRwlHAAAAIOWd+r/06C1kkNLOwsLC9z4xur/0+n/0t76x9v4xeL9y+b/z+j/0d/7yeH8yuX/zeD8ytz5xt76yOP/zeH+y+b/zuD8yd35xuf/0MY9jkkAAAAsdFJOUwBvd/ATDZIBAsMp/At/11c9yPbizHoICQwT4bY1ykkgjahl6s8bBYT6nUAWOLbtFAAAAIhJREFUKM/tzbUWwlAURNFBE9zdg0NecLf//yvKUJyUdDnl7HXXletXqmXl9wPbQ9JCcC+VJsOj2mDwovzj3osjHGNFEVxNRAj7UR1hlx+I4FbuC8HkZBE8OwnRxamdFsEmUxCCGdoI51RLBK9xVwTvjyMEbzlDMJMp7lqseNc8YNc6CGyF/a0vcmwhZbCG+kEAAAAASUVORK5CYII=");
    }
 
 </style>
