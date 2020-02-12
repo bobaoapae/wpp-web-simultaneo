@@ -1,5 +1,5 @@
 <template>
-    <a class="thumbnail" :href="msg.canonicalUrl" target="_blank">
+    <a class="thumbnail" :href="msg.matchedText" target="_blank">
         <div class="image">
             <img :src="'data:image/jpeg;base64,'+msg.thumbnail" alt="">
         </div>
@@ -30,9 +30,7 @@ export default {
     },
     computed: {
         link () {
-            const link = this.msg.canonicalUrl.split('/')[2];
-            console.log(link);
-            return link;
+            return this.msg.matchedText.split('/')[2];
         }
     }
 };
