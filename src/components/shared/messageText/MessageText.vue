@@ -1,7 +1,10 @@
 <template>
    <div class="text-container">
-
       <div class="message-text">
+         <Thumbnail v-if="msg.thumbnail" :msg="msg">
+            liunk
+         </Thumbnail>
+
          <span v-html="msgFormated"></span>
       </div>
 
@@ -12,13 +15,15 @@
 
 <script>
 import MessageTime from '../messageTime/MessageTime';
+import Thumbnail from '../thumbnail/Thumbnail';
 
 import { msg } from '@/helper.js';
 
 export default {
     name: 'MessageText',
     components: {
-        MessageTime
+        MessageTime,
+        Thumbnail
     },
     props: {
         msg: {
