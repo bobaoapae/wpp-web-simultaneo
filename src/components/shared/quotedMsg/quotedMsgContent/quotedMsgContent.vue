@@ -1,11 +1,11 @@
 <template>
    <div class="quoted-msg-content">
-      <MsgSymbol :type="type"/>
+      <MsgSymbol :msg="msg"/>
 
       <div class="box-content">
-         <span class="content" v-html="caption" v-if="caption"></span>
-         <span class="content" v-else-if="body && type === 'chat'  " v-html="body"></span>
-         <MsgType :type="type" v-else/>
+         <span class="content" v-html="msg.caption | formated" v-if="msg.caption"></span>
+         <span class="content" v-else-if="msg.body && msg.isChat" v-html="msg.body | formated"></span>
+         <MsgType :msg="msg" v-else/>
       </div>
    </div>
 </template>
@@ -13,20 +13,23 @@
 <script>
 import MsgSymbol from './msgSymbol/MsgSymbol';
 import MsgType from './msgType/MsgType';
+import { msg } from '@/helper';
 
 export default {
     name: 'quotedMsgContent',
     components: { MsgType, MsgSymbol },
     props: {
-        body: {
+        msg: {
+            type: Object,
             required: true
-        },
-        type: {
-            type: String,
-            required: true
-        },
-        caption: {
-            required: true
+        }
+    },
+    filters: {
+        formated (value) {
+            if (value) {
+                return msg.processNativeEmojiToImage(value);
+            }
+            return '';
         }
     }
 };

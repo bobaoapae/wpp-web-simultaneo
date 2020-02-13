@@ -13,17 +13,16 @@
  }">
       <div class="box-content">
          <Author :color="color" :senderObj="quotedMsg.senderObj"/>
-         <QuotedMsgContent :body="bodyformated" :caption="captionFormated" :type="quotedMsg.type"/>
+         <QuotedMsgContent :msg="quotedMsg"/>
       </div>
 
       <div class="box-media">
-         <QuotedMedia :body="quotedMsg.body" v-if=" quotedMsg.type !== 'chat' "/>
+         <QuotedMedia :body="quotedMsg.body" v-if="!quotedMsg.isChat"/>
       </div>
    </div>
 </template>
 
 <script>
-import { msg } from '@/helper';
 import { mapState } from 'vuex';
 import Author from './author/Author';
 import QuotedMsgContent from './quotedMsgContent/quotedMsgContent';
@@ -46,20 +45,6 @@ export default {
                 return '#74cff8';
             }
             return '#35cd96';
-        },
-
-        captionFormated () {
-            if (this.quotedMsg.caption) {
-                return msg.processNativeEmojiToImage(this.quotedMsg.caption);
-            }
-            return '';
-        },
-
-        bodyformated () {
-            if (this.quotedMsg.body) {
-                return msg.processNativeEmojiToImage(this.quotedMsg.body);
-            }
-            return '';
         },
 
         encodedQuotedMsgId () {

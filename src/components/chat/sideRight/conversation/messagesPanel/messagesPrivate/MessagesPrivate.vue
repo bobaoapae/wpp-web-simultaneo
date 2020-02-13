@@ -1,6 +1,6 @@
 <template>
    <div class="messages-private">
-      <div :key="item.id.id" v-for="(item, index) in msgs">
+      <div :key="encodedMsgId(item)" :id="encodedMsgId(item)" v-for="(item, index) in msgs">
          <MessageInfo :msg="item" v-if="isNotification(item.type)"/>
          <MessageOut :msg="item" :previousMsg="msgs[index-1]" v-else-if="item.id.fromMe"/>
          <MessageIn :msg="item" :previousMsg="msgs[index-1]" v-else/>
@@ -34,6 +34,10 @@ export default {
                 return true;
             }
             return false;
+        },
+
+        encodedMsgId (msg) {
+            return msg.id._serialized.replace(/[^\w\s]/gi, '').replace(/[_]/gi, '');
         }
     }
 };

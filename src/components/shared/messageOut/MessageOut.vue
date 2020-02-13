@@ -4,7 +4,7 @@
        <div @mouseenter="showMenuIcon = true" @mouseleave="showMenuIcon = false" class="message-out-container" :class="showTail ? 'tail' : ''">
            <div v-if="showTail" class="tail-container"></div>
            <div
-            :style="[isSameColor ? {background: 'linear-gradient(90deg,hsla(0,0%,100%,0) 0,#DCF8C6 50%)', height: '25px', width: '40px'} : {}]"
+            :style="[msg.isSameColor ? {background: 'linear-gradient(90deg,hsla(0,0%,100%,0) 0,#DCF8C6 50%)', height: '25px', width: '40px'} : {}]"
             class="msg-menu"
             v-show="showMenuIcon || menuAberto">
             <b-dropdown
@@ -16,7 +16,7 @@
                variant="link"
             >
                <template v-slot:button-content>
-                  <img :style="[isSameColor ? {filter: 'brightness(0.55) grayscale(1)'} :{}]" class="icon"
+                  <img :style="[msg.isSameColor ? {filter: 'brightness(0.55) grayscale(1)'} :{}]" class="icon"
                        src="@/assets/images/wpp-message-arrow-down.svg">
                </template>
 
@@ -27,15 +27,15 @@
 
          <!-- Mensagem Encaminhada -->
          <ForwardedIndicator v-if="msg.isForwarded"/>
-         <QuotedMsg :quotedMsg="msg.quotedMsgObject" v-if="hasQuotedMsg"/>
-         <MessageText :msg="msg" v-if="isChat"/>
-         <MessagePhoto :msg="msg" v-else-if="isImage"/>
-         <MessageSticker :msg="msg" v-else-if="isSticker"/>
-         <MessageVideo :msg="msg" v-else-if="isVideo"/>
-         <MessageDocument :msg="msg" v-else-if="isDocument"/>
-         <MessageAudio :msg="msg" v-else-if="isAudio"/>
-         <MessageRevoked :msg="msg" v-else-if="isRevoked"/>
-         <MessageLocation :msg="msg" v-else-if="isLocation"/>
+         <QuotedMsg :quotedMsg="msg.quotedMsgObject" v-if="msg.hasQuotedMsg"/>
+         <MessageText :msg="msg" v-if="msg.isChat"/>
+         <MessagePhoto :msg="msg" v-else-if="msg.isImage"/>
+         <MessageSticker :msg="msg" v-else-if="msg.isSticker"/>
+         <MessageVideo :msg="msg" v-else-if="msg.isVideo"/>
+         <MessageDocument :msg="msg" v-else-if="msg.isDocument"/>
+         <MessageAudio :msg="msg" v-else-if="msg.isAudio"/>
+         <MessageRevoked :msg="msg" v-else-if="msg.isRevoked"/>
+         <MessageLocation :msg="msg" v-else-if="msg.isLocation"/>
       </div>
    </div>
 </template>
@@ -88,37 +88,6 @@ export default {
 
         showTail () {
             return !this.previousMsg || this.msg.from !== this.previousMsg.from;
-        },
-
-        isSameColor () {
-            return this.isChat && !this.hasQuotedMsg;
-        },
-        hasQuotedMsg () {
-            return !!this.msg.quotedMsg;
-        },
-        isChat () {
-            return this.msg.type === 'chat';
-        },
-        isImage () {
-            return this.msg.type === 'image';
-        },
-        isSticker () {
-            return this.msg.type === 'sticker';
-        },
-        isVideo () {
-            return this.msg.type === 'video';
-        },
-        isDocument () {
-            return this.msg.type === 'document';
-        },
-        isAudio () {
-            return this.msg.type === 'ptt' || this.msg.type === 'audio';
-        },
-        isRevoked () {
-            return this.msg.type === 'revoked';
-        },
-        isLocation () {
-            return this.msg.type === 'location';
         }
     },
     methods: {

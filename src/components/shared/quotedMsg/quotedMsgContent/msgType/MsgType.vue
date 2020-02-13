@@ -1,12 +1,10 @@
 <template>
    <div class="msg-type">
-      <span v-if=" type === 'image' ">Foto</span>
+      <span v-if="msg.isImage">Foto</span>
 
-      <span v-else-if=" type === 'video' ">Video</span>
+      <span v-else-if="msg.isVideo">Video</span>
 
-      <span v-else-if=" type === 'ptt' ">Audio</span>
-
-      <span v-else-if=" type === 'audio' ">Audio</span>
+      <span v-else-if="msg.isAudio || msg.isPtt">Audio</span>
    </div>
 </template>
 
@@ -14,7 +12,8 @@
 export default {
     name: 'MsgType',
     props: {
-        type: {
+        msg: {
+            type: Object,
             required: true
         }
     }

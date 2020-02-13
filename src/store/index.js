@@ -231,7 +231,7 @@ const store = new Vuex.Store({
                         const r = JSON.parse(responseData);
                         console.log('init', r);
 
-                        context.dispatch('handleChatProperties', { chats: r.chats });
+                        context.dispatch('handleSetChats', { chats: r.chats });
                         context.dispatch('sortChatsByTime');
                         context.commit('SET_SELF', r.self);
                         context.commit('SET_CONTACTS', { contacts: r.contacts });
@@ -508,6 +508,7 @@ const store = new Vuex.Store({
                 });
             }
             function setProperties (el) {
+                context.dispatch('setMsgsProperties', el.msgs);
                 el.quotedMsg = undefined;
                 el.msgsGrouped = {};
                 el.openChatInfo = false;
@@ -549,9 +550,84 @@ const store = new Vuex.Store({
             }
         },
 
-        handleChatProperties (context, payload) {
-            context.dispatch('setChatProperties', payload.chats);
+        setMsgsProperties (context, payload) {
+            if (!Array.isArray(payload)) {
+                setProperties(payload);
+            } else {
+                payload.forEach(msg => {
+                    setProperties(msg);
+                });
+            }
 
+            function setProperties (msg) {
+                Object.defineProperty(msg, 'isChat', {
+                    get () {
+                        return this.type === 'chat';
+                    }
+                });
+                Object.defineProperty(msg, 'isImage', {
+                    get () {
+                        return this.type === 'image';
+                    }
+                });
+                Object.defineProperty(msg, 'isSticker', {
+                    get () {
+                        return this.type === 'sticker';
+                    }
+                });
+                Object.defineProperty(msg, 'isVideo', {
+                    get () {
+                        return this.type === 'video';
+                    }
+                });
+                Object.defineProperty(msg, 'isDocument', {
+                    get () {
+                        return this.type === 'document';
+                    }
+                });
+                Object.defineProperty(msg, 'isAudio', {
+                    get () {
+                        return this.type === 'ptt';
+                    }
+                });
+                Object.defineProperty(msg, 'isPtt', {
+                    get () {
+                        return this.type === 'ptt';
+                    }
+                });
+                Object.defineProperty(msg, 'isRevoked', {
+                    get () {
+                        return this.type === 'revoked';
+                    }
+                });
+                Object.defineProperty(msg, 'isLocation', {
+                    get () {
+                        return this.type === 'location';
+                    }
+                });
+                Object.defineProperty(msg, 'isVcard', {
+                    get () {
+                        return this.type === 'vcard';
+                    }
+                });
+                Object.defineProperty(msg, 'hasQuotedMsg', {
+                    get () {
+                        return !!this.quotedMsg;
+                    }
+                });
+                Object.defineProperty(msg, 'isSameColor', {
+                    get () {
+                        return this.isChat && !this.hasQuotedMsg;
+                    }
+                });
+                if (msg.hasQuotedMsg) {
+                    setProperties(msg.quotedMsgObject);
+                }
+            }
+        },
+
+        handleSetChats (context, payload) {
+            context.dispatch('setChatProperties', payload.chats);
             context.commit('SET_CHATS', payload.chats);
             context.dispatch('updateTitle');
         },
@@ -681,6 +757,7 @@ const store = new Vuex.Store({
                 });
 
                 if (!msg) {
+                    context.dispatch('setMsgsProperties', payload);
                     chat.msgs.push(payload);
                     chat.msgs.sort(function (a, b) {
                         if (a.t > b.t) {
