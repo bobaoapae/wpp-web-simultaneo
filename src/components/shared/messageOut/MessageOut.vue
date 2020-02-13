@@ -36,6 +36,7 @@
          <MessageAudio :msg="msg" v-else-if="msg.isAudio"/>
          <MessageRevoked :msg="msg" v-else-if="msg.isRevoked"/>
          <MessageLocation :msg="msg" v-else-if="msg.isLocation"/>
+         <MessageContact :msg="msg" v-else-if="msg.isVcard"/>
       </div>
    </div>
 </template>
@@ -52,6 +53,7 @@ import MessageAudio from '@/components/shared/messageAudio/MessageAudio';
 import QuotedMsg from '../quotedMsg/QuotedMsg';
 import MessageRevoked from '../messageRevoked/MessageRevoked';
 import MessageLocation from '../messageLocation/MessageLocation';
+import MessageContact from '../messageContact/MessageContact';
 
 export default {
     name: 'MessageOut',
@@ -65,7 +67,8 @@ export default {
         MessageVideo,
         MessageDocument,
         MessageRevoked,
-        MessageLocation
+        MessageLocation,
+        MessageContact
     },
     data () {
         return {

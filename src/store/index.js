@@ -4,6 +4,7 @@ import uniqueid from 'uniqid';
 import visibility from 'vue-visibility-change';
 import VuexReset from '@ianwalter/vuex-reset';
 import VuexPersistence from 'vuex-persist';
+import vCardParse from 'vcard-parser';
 
 const vuexLocal = new VuexPersistence({
     storage: window.sessionStorage,
@@ -649,6 +650,9 @@ const store = new Vuex.Store({
                 });
                 if (msg.hasQuotedMsg) {
                     setProperties(msg.quotedMsgObject);
+                }
+                if (msg.isVcard) {
+                    msg.vCard = vCardParse.parse(msg.body);
                 }
             }
         },

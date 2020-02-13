@@ -14,7 +14,7 @@ import MessageIn from '@/components/shared/messageIn/MessageIn.vue';
 import MessageInfo from '@/components/shared/messageInfo/MessageInfo.vue';
 
 export default {
-    name: 'MessagesPrivate',
+    name: 'MessagesList',
     components: {
         MessageOut,
         MessageIn,

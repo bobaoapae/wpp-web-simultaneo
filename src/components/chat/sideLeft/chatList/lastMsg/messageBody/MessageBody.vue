@@ -38,6 +38,11 @@
         Áudio
     </span>
 
+    <span v-else-if="lastMsg.isVcard">
+        <img src="@/assets/images/wpp-type-vcard.svg">
+        {{lastMsg.vCard.fn[0].value}}
+    </span>
+
     <span v-else-if="lastMsg.isRevoked" class="msgRevoked">
         <span data-icon="recalled-in">
             <svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 17 19" width="17" height="19">

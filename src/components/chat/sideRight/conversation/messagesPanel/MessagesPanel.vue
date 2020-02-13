@@ -2,23 +2,20 @@
   <div @scroll="handleScroll" id="messages-panel">
     <LoadingEarlyMsg v-show="loadingEarly"/>
 
-    <MessagesPrivate :msgs="activeChat.msgs" v-if="isChat"/>
-    <MessagesGroup :msgs="activeChat.msgs" v-else-if="isGroup"/>
+    <MessagesList :msgs="activeChat.msgs"/>
   </div>
 </template>
 
 <script>
 import { mapState, mapActions } from 'vuex';
-import MessagesPrivate from './messagesPrivate/MessagesPrivate.vue';
-import MessagesGroup from './messagesGroup/MessagesGroup.vue';
+import MessagesList from './messagesList/MessagesList';
 import LoadingEarlyMsg from '@/components/shared/loadingEarlyMsg/LoadingEarlyMsg';
 
 export default {
     name: 'MessagesPanel',
     components: {
         LoadingEarlyMsg,
-        MessagesPrivate,
-        MessagesGroup
+        MessagesList
     },
     data () {
         return {
