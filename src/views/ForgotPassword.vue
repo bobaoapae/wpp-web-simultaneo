@@ -78,7 +78,7 @@ export default {
                 if (reason.response && reason.response.data) {
                     this.error.msg = reason.response.data;
                 }
-                this.error = true;
+                this.error.active = true;
             }).then(() => {
                 this.sendPost = false;
             });
