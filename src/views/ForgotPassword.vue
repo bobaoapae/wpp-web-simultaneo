@@ -25,9 +25,6 @@
                         <span class="line"></span>
                     </div>
 
-                    <div class="text-center">
-                        <router-link to="/newaccount">Criar uma nova conta</router-link>
-                    </div>
                 </div>
                 <div v-else-if="success">
                     <h1 class="text-success text-center">Sucesso!</h1>
