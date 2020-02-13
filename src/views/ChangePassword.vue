@@ -4,21 +4,31 @@
             <div class="content">
                 <div class="content-header"></div>
 
-                <form @submit.prevent="handleSubmit" id="form-login">
+                <form @submit.prevent="handleSubmit" id="form-login" v-if="!error.active && !success">
                     <p class="title">Mudar minha senha</p>
 
                     <input placeholder="Senha atual" required type="password" v-model="form.oldPass" />
 
                     <input placeholder="Nova senha" required type="password" v-model="form.newPass" />
 
-                    <button type="submit">
-                        ALTERAR
+                    <button type="submit" :disabled="btn.loading">
+                        {{btn.label}}
                     </button>
                 </form>
-
-                <hr/>
-
-                <router-link class="new-account-link" to="/login">Login</router-link>
+                <div v-else-if="success">
+                    <h1 class="text-success text-center">Sucesso!</h1>
+                    <p class="text-center">Sua senha foi alterada, agora você deve entrar com a nova senha.</p>
+                    <div class="text-center">
+                        <router-link class="text-center" to="/login">Entrar</router-link>
+                    </div>
+                </div>
+                <div v-else>
+                    <h1 class="text-danger text-center">Ocorreu um erro</h1>
+                    <p class="text-center">{{error.msg}}</p>
+                    <div class="text-center">
+                        <span class="btn btn-link" @click="tentarNovamente">Tentar Novamente</span>
+                    </div>
+                </div>
 
                 <hr />
 
@@ -32,9 +42,18 @@
 import api from '@/api';
 
 export default {
-    name: 'Login',
+    name: 'ChangePassword',
     data () {
         return {
+            success: false,
+            error: {
+                active: false,
+                msg: 'Falha na conexão'
+            },
+            btn: {
+                label: 'ALTERAR',
+                loading: false
+            },
             form: {
                 oldPass: '',
                 newPass: ''
@@ -46,16 +65,27 @@ export default {
             const f = new FormData();
             f.append('senhaAtual', this.form.oldPass);
             f.append('senha', this.form.newPass);
-
+            this.btn.loading = true;
+            this.btn.label = 'PROCESSANDO';
             api.post('/api/users/mudarSenha', f)
                 .then((r) => {
-                    alert('Senha alterado com sucesso!');
-                    alert('Você será redirecionado para a tela de login');
-                    this.$router.push('/login');
+                    this.success = true;
                 })
-                .catch(r => {
-
+                .catch(reason => {
+                    console.log(reason);
+                    if (reason.response && reason.response.data) {
+                        this.error.msg = reason.response.data;
+                    }
+                    this.error.active = true;
                 });
+        },
+
+        tentarNovamente () {
+            this.error.active = false;
+            this.btn.loading = false;
+            this.btn.label = 'ALTERAR';
+            this.form.oldPass = '';
+            this.form.newPass = '';
         }
     }
 };

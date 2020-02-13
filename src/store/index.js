@@ -531,7 +531,7 @@ const store = new Vuex.Store({
                 };
                 Object.defineProperty(el, 'lastMsg', {
                     get () {
-                        let array = this.msgs.filter(e => e.type !== 'e2e_notification' && e.type !== 'gp2').sort((a, b) => {
+                        let array = this.msgs.filter(e => e.type && e.type !== 'e2e_notification' && e.type !== 'gp2').sort((a, b) => {
                             if (a.t < b.t) {
                                 return -1;
                             }

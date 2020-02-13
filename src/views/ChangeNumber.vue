@@ -4,41 +4,35 @@
             <div class="content">
                 <div class="content-header"></div>
 
-                <div  v-if="!error.active && !success">
-                    <form @submit.prevent="handleSubmit" id="form-login">
-                        <p class="title">Esqueci minha senha</p>
+                <form @submit.prevent="handleSubmit" id="form-login" v-if="!error.active && !success">
+                    <p class="title">Mudar meu número</p>
 
-                        <p class="text-center font-weight-bold">Problemas para entrar?</p>
-                        <p class="text-center">Insira o seu nome de usuário e enviaremos uma nova senha para seu número de WhatsApp cadastrado</p>
-
-                        <input id="login" placeholder="Login" required type="text" v-model="form.login" />
-
-                        <button type="submit" v-bind:disabled="sendPost">
-                            <span v-if="!sendPost">ENVIAR</span>
-                            <span v-else>PROCESSANDO...</span>
+                    <vue-tel-input
+                        :placeholder="'Informe um número com WhatsApp'"
+                        v-model="inputTelefone"
+                    @input="onInput"/>
+                  <div>
+                      <span id="disabled-wrapper">
+                        <button class="mt-3" type="submit" :disabled="btn.loading || !dadosTelefone.isValid">
+                            {{btn.label}}
                         </button>
-                    </form>
-
-                    <div class="d-flex justify-content-center separator">
-                        <span class="line"></span>
-                        <span class="mx-3">OU</span>
-                        <span class="line"></span>
-                    </div>
-
-                    <div class="text-center">
-                        <router-link to="/newaccount">Criar uma nova conta</router-link>
-                    </div>
-                </div>
+                      </span>
+                      <b-tooltip v-if="!btn.loading && !dadosTelefone.isValid" target="disabled-wrapper">Número Inválido</b-tooltip>
+                  </div>
+                </form>
                 <div v-else-if="success">
                     <h1 class="text-success text-center">Sucesso!</h1>
-                    <p class="text-center">Sua senha foi resetada e enviada para o seu WhatsApp.</p>
+                    <p class="text-center">Foi enviado um link de confirmação para o seu número atual.</p>
                     <div class="text-center">
-                        <router-link class="text-center" to="/login">Entrar</router-link>
+                        <router-link class="text-center" to="/">Voltar</router-link>
                     </div>
                 </div>
                 <div v-else>
                     <h1 class="text-danger text-center">Ocorreu um erro</h1>
                     <p class="text-center">{{error.msg}}</p>
+                    <div class="text-center">
+                        <span class="btn btn-link" @click="tentarNovamente">Tentar Novamente</span>
+                    </div>
                 </div>
 
                 <hr />
@@ -53,7 +47,7 @@
 import api from '@/api';
 
 export default {
-    name: 'ForgotPassword',
+    name: 'ChangePassword',
     data () {
         return {
             success: false,
@@ -61,27 +55,46 @@ export default {
                 active: false,
                 msg: 'Falha na conexão'
             },
-            sendPost: false,
-            form: {
-                login: ''
+            btn: {
+                label: 'ALTERAR',
+                loading: false
+            },
+            inputTelefone: '',
+            dadosTelefone: {
+                isValid: false
             }
         };
     },
     methods: {
         handleSubmit () {
-            this.sendPost = true;
             const f = new FormData();
-            f.append('login', this.form.login);
-            api.put('/api/auth/resetPassword/', f).then(value => {
-                this.success = true;
-            }).catch(reason => {
-                if (reason.response && reason.response.data) {
-                    this.error.msg = reason.response.data;
-                }
-                this.error = true;
-            }).then(() => {
-                this.sendPost = false;
-            });
+            f.append('telefone', this.dadosTelefone.number.e164);
+            this.btn.loading = true;
+            this.btn.label = 'PROCESSANDO';
+            api.put('/api/users/alterarNumero', f)
+                .then((r) => {
+                    this.success = true;
+                })
+                .catch(reason => {
+                    this.error.active = true;
+                    if (reason.response && reason.response.data) {
+                        this.error.msg = reason.response.data;
+                    }
+                });
+        },
+
+        onInput (number, data) {
+            Object.assign(this.dadosTelefone, data);
+        },
+
+        tentarNovamente () {
+            this.error.active = false;
+            this.btn.loading = false;
+            this.btn.label = 'ALTERAR';
+            this.inputTelefone = '';
+            this.dadosTelefone = {
+                isValid: false
+            };
         }
     }
 };
@@ -165,6 +178,7 @@ form input {
 form button {
     border: none;
     height: 45px;
+    width: 100%;
     border-radius: 20px;
     background: linear-gradient(300deg, #009688 0%, #1ebea5 50%);
     transition: opacity 0.3s;
@@ -173,10 +187,6 @@ form button {
 
 form button:hover {
     opacity: 0.7;
-}
-
-form button:disabled {
-    opacity: 1;
 }
 
 hr {

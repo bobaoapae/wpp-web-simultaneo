@@ -35,6 +35,7 @@
          <MessageDocument :msg="msg" v-else-if="isDocument"/>
          <MessageAudio :msg="msg" v-else-if="isAudio"/>
          <MessageRevoked :msg="msg" v-else-if="isRevoked"/>
+         <MessageLocation :msg="msg" v-else-if="isLocation"/>
       </div>
    </div>
 </template>
@@ -50,6 +51,7 @@ import ForwardedIndicator from '@/components/shared/forwardedIndicator/Forwarded
 import MessageAudio from '@/components/shared/messageAudio/MessageAudio';
 import QuotedMsg from '../quotedMsg/QuotedMsg';
 import MessageRevoked from '../messageRevoked/MessageRevoked';
+import MessageLocation from '../messageLocation/MessageLocation';
 
 export default {
     name: 'MessageOut',
@@ -62,7 +64,8 @@ export default {
         MessagePhoto,
         MessageVideo,
         MessageDocument,
-        MessageRevoked
+        MessageRevoked,
+        MessageLocation
     },
     data () {
         return {
@@ -113,6 +116,9 @@ export default {
         },
         isRevoked () {
             return this.msg.type === 'revoked';
+        },
+        isLocation () {
+            return this.msg.type === 'location';
         }
     },
     methods: {

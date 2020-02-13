@@ -24,6 +24,7 @@
             <template v-slot:button-content>
                <img src="@/assets/images/wpp-icon-kebab-menu.svg"/>
             </template>
+            <b-dropdown-item to="/changenumber">Alterar Número</b-dropdown-item>
             <b-dropdown-item to="/changepassword">Alterar Senha</b-dropdown-item>
             <b-dropdown-item v-if="canCreateOperator" to="/newoperator">Novo Operador</b-dropdown-item>
              <b-dropdown-form v-if="canCreateOperator" class="text-nowrap">

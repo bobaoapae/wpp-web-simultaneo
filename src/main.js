@@ -8,6 +8,7 @@ import 'bootstrap-vue/dist/bootstrap-vue.min.css';
 import 'emoji-mart-vue-fast/css/emoji-mart.css';
 import AsyncComputed from 'vue-async-computed';
 import VueScrollTo from 'vue-scrollto';
+import VueTelInput from 'vue-tel-input';
 
 Vue.config.productionTip = false;
 
@@ -15,6 +16,7 @@ Vue.use(BootstrapVue);
 Vue.use(IconsPlugin);
 Vue.use(AsyncComputed);
 Vue.use(VueScrollTo);
+Vue.use(VueTelInput);
 
 new Vue({
     router,

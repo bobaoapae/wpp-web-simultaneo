@@ -14,7 +14,7 @@
                     <input id="password" placeholder="Senha" required type="password" v-model="form.password" />
 
                     <span class="error" v-if="error.active">
-                        {{error.msg}} :(
+                        {{error.msg}}
                     </span>
 
                     <button :disabled="btn.loading" type="submit">
@@ -32,7 +32,7 @@
 import api from '@/api';
 
 export default {
-    name: 'Login',
+    name: 'NewOperator',
     data () {
         return {
             form: {

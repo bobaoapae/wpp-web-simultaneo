@@ -4,44 +4,36 @@
             <div class="content">
                 <div class="content-header"></div>
 
-                <div  v-if="!error.active && !success">
-                    <form @submit.prevent="handleSubmit" id="form-login">
-                        <p class="title">Esqueci minha senha</p>
-
-                        <p class="text-center font-weight-bold">Problemas para entrar?</p>
-                        <p class="text-center">Insira o seu nome de usuário e enviaremos uma nova senha para seu número de WhatsApp cadastrado</p>
-
-                        <input id="login" placeholder="Login" required type="text" v-model="form.login" />
-
-                        <button type="submit" v-bind:disabled="sendPost">
-                            <span v-if="!sendPost">ENVIAR</span>
-                            <span v-else>PROCESSANDO...</span>
-                        </button>
-                    </form>
-
-                    <div class="d-flex justify-content-center separator">
-                        <span class="line"></span>
-                        <span class="mx-3">OU</span>
-                        <span class="line"></span>
-                    </div>
-
-                    <div class="text-center">
-                        <router-link to="/newaccount">Criar uma nova conta</router-link>
+                <div class="text-center" v-if="loading">
+                    <p class="title">Buscando informações...</p>
+                    <div class="loading-info m-auto">
+                        <LoadginSpinner/>
                     </div>
                 </div>
+                <form @submit.prevent="handleSubmit" id="form-login" v-else-if="!error.active && !success">
+                    <p class="title">Olá {{changeNumberData.usuario.nome}}.</p>
+
+                    <p class="text-center text-wrap text-break">
+                        Deseja confirmar a alteração do seu número atual <span class="text-success">{{changeNumberData.usuario.telefone | telefone}}</span> para o número <span class="text-warning">{{changeNumberData.novoNumero | telefone}}?</span>
+                    </p>
+
+                    <button type="submit" :disabled="btn.loading">
+                        {{btn.label}}
+                    </button>
+                </form>
                 <div v-else-if="success">
                     <h1 class="text-success text-center">Sucesso!</h1>
-                    <p class="text-center">Sua senha foi resetada e enviada para o seu WhatsApp.</p>
+                    <p class="text-center">Seu número foi alterado.</p>
                     <div class="text-center">
                         <router-link class="text-center" to="/login">Entrar</router-link>
                     </div>
                 </div>
                 <div v-else>
-                    <h1 class="text-danger text-center">Ocorreu um erro</h1>
+                    <h1 class="text-danger text-center">Ocorreu um erro!</h1>
                     <p class="text-center">{{error.msg}}</p>
                 </div>
 
-                <hr />
+                <hr/>
 
                 <a class="site-link" href="https://www.zapia.com.br" target="_blank">Zapiá</a>
             </div>
@@ -51,9 +43,24 @@
 
 <script>
 import api from '@/api';
+import LoadginSpinner from '@/components/shared/loadingSpinner/LoadingSpinner';
+import PhoneAwesome from 'awesome-phonenumber';
 
 export default {
-    name: 'ForgotPassword',
+    name: 'ChangeNumber',
+    components: { LoadginSpinner },
+    created () {
+        api.get(`/api/auth/changeNumber/${this.$route.query.token}`).then(value => {
+            Object.assign(this.changeNumberData, value.data);
+        }).catch(reason => {
+            if (reason.response && reason.response.data) {
+                this.error.msg = reason.response.data;
+            }
+            this.error.active = true;
+        }).then(() => {
+            this.loading = false;
+        });
+    },
     data () {
         return {
             success: false,
@@ -61,27 +68,34 @@ export default {
                 active: false,
                 msg: 'Falha na conexão'
             },
-            sendPost: false,
-            form: {
-                login: ''
-            }
+            btn: {
+                label: 'SIM',
+                loading: false
+            },
+            loading: true,
+            changeNumberData: {}
         };
     },
     methods: {
         handleSubmit () {
-            this.sendPost = true;
-            const f = new FormData();
-            f.append('login', this.form.login);
-            api.put('/api/auth/resetPassword/', f).then(value => {
+            this.btn.loading = true;
+            this.btn.label = 'PROCESSANDO...';
+            api.put(`/api/auth/changeNumber/${this.changeNumberData.uuid}`).then(value => {
                 this.success = true;
             }).catch(reason => {
                 if (reason.response && reason.response.data) {
                     this.error.msg = reason.response.data;
                 }
-                this.error = true;
+                this.error.active = true;
             }).then(() => {
-                this.sendPost = false;
+                this.btn.loading = false;
             });
+        }
+    },
+    filters: {
+        telefone (value) {
+            let number = new PhoneAwesome(value, 'BR');
+            return number.getNumber('international');
         }
     }
 };
@@ -144,7 +158,7 @@ form {
     margin: 0 50px;
 }
 
-form p.title {
+p.title {
     text-align: center;
     font-weight: bold;
     font-size: 30px;
@@ -175,10 +189,6 @@ form button:hover {
     opacity: 0.7;
 }
 
-form button:disabled {
-    opacity: 1;
-}
-
 hr {
     width: 80%;
     text-align: center;
@@ -206,5 +216,9 @@ hr {
     text-align: center;
     margin-top: 30px;
     margin-bottom: 15px;
+}
+
+.loading-info {
+    width: 50px;
 }
 </style>

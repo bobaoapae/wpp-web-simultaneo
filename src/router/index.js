@@ -5,6 +5,9 @@ import Wpp from '@/views/Wpp';
 import ForgotPassword from '@/views/ForgotPassword';
 import NewOperator from '@/views/NewOperator';
 import ChangePassword from '@/views/ChangePassword';
+import ChangeNumber from '@/views/ChangeNumber';
+import ConfirmChangeNumber from '@/views/ConfirmChangeNumber';
+import NotFound from '@/views/NotFound';
 import store from '@/store';
 
 Vue.use(VueRouter);
@@ -42,6 +45,21 @@ const routes = [
         path: '/changepassword',
         name: 'change-password',
         component: ChangePassword
+    },
+    {
+        path: '/changenumber',
+        name: 'change-number',
+        component: ChangeNumber
+    },
+    {
+        path: '/confirmchangenumber',
+        name: 'confirm-change-number',
+        component: ConfirmChangeNumber
+    },
+    {
+        path: '*',
+        name: 'not-found',
+        component: NotFound
     }
 ];
 
