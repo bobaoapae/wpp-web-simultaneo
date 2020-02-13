@@ -3,8 +3,8 @@
       <MsgSymbol :msg="msg"/>
 
       <div class="box-content">
-         <span class="content" v-html="msg.caption | formated" v-if="msg.caption"></span>
-         <span class="content" v-else-if="msg.body && msg.isChat" v-html="msg.body | formated"></span>
+         <span class="content" :inner-html.prop="msg.caption | formated" v-if="msg.caption"></span>
+         <span class="content" v-else-if="msg.body && msg.isChat" :inner-html.prop="msg.body | formated"></span>
          <MsgType :msg="msg" v-else/>
       </div>
    </div>

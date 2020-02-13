@@ -38,6 +38,7 @@ const store = new Vuex.Store({
         },
         ws: null,
         wsEvents: {},
+        promisesWsEvents: {},
         intervalPong: -1,
         intervalPresence: -1,
         audio: null
@@ -173,6 +174,13 @@ const store = new Vuex.Store({
 
         SET_AUDIO (state, payload) {
             state.audio = payload;
+        },
+
+        ADD_PROMISE_WS_EVENT (state, payload) {
+            if (!state.promisesWsEvents[payload.event]) {
+                state.promisesWsEvents[payload.event] = [];
+            }
+            state.promisesWsEvents[payload.event].push(payload.promise);
         }
     },
 
@@ -349,7 +357,7 @@ const store = new Vuex.Store({
         },
 
         sendWsMessage (context, payload) {
-            return new Promise((resolve, reject) => {
+            let promise = new Promise(async (resolve, reject) => {
                 let payLoadSend = {
                     tag: uniqueid(),
                     webSocketRequestPayLoad: payload
@@ -358,11 +366,30 @@ const store = new Vuex.Store({
                     payLoadSend.webSocketRequestPayLoad.payload = JSON.stringify(payLoadSend.webSocketRequestPayLoad.payload);
                 }
                 context.commit('ADD_NEW_LISTENNER', { tag: payLoadSend.tag, resolve: resolve, reject: reject });
-
+                await context.dispatch('waitResultPreviousWSEvent', payload.event);
+                context.commit('ADD_PROMISE_WS_EVENT', { event: payload.event, promise: promise });
                 if (context.state.ws.readyState === WebSocket.OPEN) {
                     context.state.ws.send(JSON.stringify(payLoadSend));
                 } else {
                     reject(new Error('WebSocket Not Open'));
+                }
+            });
+            return promise;
+        },
+
+        waitResultPreviousWSEvent (context, payload) {
+            return new Promise(async (resolve, reject) => {
+                let promises = context.state.promisesWsEvents[payload];
+                if (promises) {
+                    let promisesWait = [];
+                    for (let x = 0; x < 10 && x < promises.length; x++) {
+                        promisesWait.push(promises.shift());
+                    }
+                    Promise.all(promisesWait).finally(() => {
+                        resolve();
+                    });
+                } else {
+                    resolve();
                 }
             });
         },
