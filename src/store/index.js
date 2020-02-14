@@ -367,6 +367,7 @@ const store = new Vuex.Store({
                     payLoadSend.webSocketRequestPayLoad.payload = JSON.stringify(payLoadSend.webSocketRequestPayLoad.payload);
                 }
                 context.commit('ADD_NEW_LISTENNER', { tag: payLoadSend.tag, resolve: resolve, reject: reject });
+                setTimeout(() => reject(new Error('Time-Out')), 60000);
                 await context.dispatch('waitResultPreviousWSEvent', payload.event);
                 context.commit('ADD_PROMISE_WS_EVENT', { event: payload.event, promise: promise });
                 if (context.state.ws.readyState === WebSocket.OPEN) {
