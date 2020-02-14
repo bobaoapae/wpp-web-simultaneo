@@ -25,7 +25,7 @@
 
          <div class="box-range" v-show="srcLoading || srcError"></div>
 
-         <audio :src="srcAudio" controls ref="playAudio" v-show="!srcLoading && !srcError && srcAudio"></audio>
+         <audio :src="srcAudio" type='audio/ogg; codecs="vorbis"' controls ref="playAudio" v-show="!srcLoading && !srcError && srcAudio"></audio>
 
          <MessageTime :msg="msg"/>
       </div>
@@ -70,7 +70,7 @@ export default {
 
             if (!this.msg.base64MediaFull) {
                 this.downloadMedia({ id: this.msg.id._serialized }).then(e => {
-                    this.srcAudio = e.base64;
+                    this.srcAudio = e.base64.replace('vorbis', 'ogg');
                     this.srcLoading = false;
                     this.srcError = false;
                     this.saveInCache(this.srcAudio);

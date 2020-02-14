@@ -5,6 +5,7 @@ import visibility from 'vue-visibility-change';
 import VuexReset from '@ianwalter/vuex-reset';
 import VuexPersistence from 'vuex-persist';
 import vCardParse from 'vcard-parser';
+import api from '@/api';
 
 const vuexLocal = new VuexPersistence({
     storage: window.sessionStorage,
@@ -489,10 +490,25 @@ const store = new Vuex.Store({
                     resolve(context.state.medias[payload.id]);
                 } else {
                     context.dispatch('sendWsMessage', { event: 'downloadMedia', payload: payload.id }).then(data => {
-                        context.commit('ADD_MEDIA_TO_CACHE', { id: payload.id, data: data });
-                        resolve(data);
+                        api.get(`/api/downloadMedia/${data}`, { responseType: 'blob' }).then(async value => {
+                            let result = {
+                                fileName: value.headers.filename,
+                                base64: await context.dispatch('convertToBase64', { file: value.data })
+                            };
+                            context.commit('ADD_MEDIA_TO_CACHE', { id: payload.id, data: result });
+                            resolve(result);
+                        });
                     }).catch(reason => reject(reason));
                 }
+            });
+        },
+
+        convertToBase64 (context, payload) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(payload.file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
             });
         },
 
