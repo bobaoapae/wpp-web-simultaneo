@@ -8,11 +8,11 @@
          <div class="nome" v-html="nameEmojify"></div>
 
          <div class="info">
-            <div v-if="isChat">
-               <span v-if="isOffline && hasLastTimeAvailable">{{this.lastTimeAvailable}}</span>
-               <span v-else-if="isOnline">online</span>
-               <span v-else-if="isComposing">escrevendo...</span>
-               <span v-else-if="isRecording">gravando áudio...</span>
+            <div v-if="activeChat.isChat">
+               <span v-if="activeChat.isOffline && activeChat.hasLastTimeAvailable">{{this.lastTimeAvailable}}</span>
+               <span v-else-if="activeChat.isOnline">online</span>
+               <span v-else-if="activeChat.isComposing">escrevendo...</span>
+               <span v-else-if="activeChat.isRecording">gravando áudio...</span>
             </div>
             <div v-else>
 
@@ -25,7 +25,7 @@
 
          <label for="file">
             <img src="@/assets/images/wpp-icon-clip.svg">
-            <input @change="onChange" id="file" type="file" ref="file"/>
+            <input @change="onChange" id="file" type="file" ref="file" multiple/>
          </label>
 
          <img src="@/assets/images/wpp-icon-kebab-menu.svg">
@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 import ChatActivePhoto from './chatActivePhoto/ChatActivePhoto.vue';
 import { msg } from '@/helper.js';
 
@@ -59,35 +59,13 @@ export default {
             return '+' + this.activeChat.id.replace('@c.us', '');
         },
 
-        isChat () {
-            return this.activeChat.kind === 'chat';
-        },
-
-        isOffline () {
-            return this.activeChat.presenceType === 'unavailable' || this.activeChat.presenceType === '';
-        },
-
-        isOnline () {
-            return this.activeChat.presenceType === 'available';
-        },
-
-        isComposing () {
-            return this.activeChat.presenceType === 'composing';
-        },
-
-        isRecording () {
-            return this.activeChat.presenceType === 'recording';
-        },
-
-        hasLastTimeAvailable () {
-            return this.activeChat.lastPresenceAvailableTime && this.activeChat.lastPresenceAvailableTime > 0;
-        },
-
         lastTimeAvailable () {
             return this.timeConverter(this.activeChat.lastPresenceAvailableTime);
         }
     },
     methods: {
+        ...mapActions(['convertToBase64']),
+
         timeConverter (unixTimeStamp) {
             let a = new Date(unixTimeStamp * 1000);
             let year = a.getFullYear();
@@ -127,34 +105,20 @@ export default {
         },
 
         onChange (event) {
-            const toBase64 = (file) => new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
+            event.target.files.forEach(async file => {
+                let base64 = await this.convertToBase64({ file: file });
+                return this.handleSendMsg({ media: base64, fileName: file.name });
             });
-
-            (async () => {
-                const file = event.target.files[0];
-                this.file = (await toBase64(file));
-                this.handleSendMsg(event.target.files[0].name);
-            })();
         },
 
-        handleSendMsg (name) {
-            let msg = {
-                media: this.file,
-                fileName: name
-            };
-
+        handleSendMsg (msg) {
             if (this.activeChat.quotedMsg) {
                 msg.quotedMsg = this.activeChat.quotedMsg.id._serialized;
             }
 
             this.activeChat.quotedMsg = undefined;
 
-            this.activeChat.sendMessage(msg);
-            this.$refs.file.value = null;
+            return this.activeChat.sendMessage(msg);
         },
 
         openChatInfo () {

@@ -30,6 +30,7 @@ const store = new Vuex.Store({
         self: null,
         contacts: null,
         chats: null,
+        quickReplys: [],
         pictures: {},
         medias: {},
         timeOutChats: -1,
@@ -84,7 +85,11 @@ const store = new Vuex.Store({
         },
 
         SET_CONTACTS (state, payload) {
-            state.contacts = payload.contacts;
+            state.contacts = payload;
+        },
+
+        SET_QUICK_REPLYS (state, payload) {
+            state.quickReplys = payload;
         },
 
         // define a lista com todos os chats
@@ -244,10 +249,13 @@ const store = new Vuex.Store({
                         const r = JSON.parse(responseData);
                         console.log('init', r);
 
-                        context.dispatch('handleSetChats', { chats: r.chats });
+                        context.dispatch('handleSetChats', r.chats);
                         context.dispatch('sortChatsByTime');
                         context.commit('SET_SELF', r.self);
-                        context.commit('SET_CONTACTS', { contacts: r.contacts });
+                        context.commit('SET_CONTACTS', r.contacts);
+                        if (r.quickReplys) {
+                            context.commit('SET_QUICK_REPLYS', r.quickReplys);
+                        }
                         context.commit('SET_IS_LOADING_CHAT', false);
                         context.state.poolContext.forEach(func => func());
                         context.state.poolContext = [];
@@ -477,7 +485,6 @@ const store = new Vuex.Store({
         findPictureFromId (context, payload) {
             return new Promise((resolve, reject) => {
                 if (context.state.pictures[payload.id] && new Date().getTime() - context.state.pictures[payload.id].t <= 10800000) {
-                    console.log('fromCache');
                     resolve(context.state.pictures[payload.id].picture);
                 } else {
                     context.dispatch('sendWsMessage', { event: 'findPicture', payload: payload.id }).then(data => {
@@ -604,6 +611,41 @@ const store = new Vuex.Store({
                         return undefined;
                     }
                 });
+                Object.defineProperty(el, 'isChat', {
+                    get () {
+                        return this.kind === 'chat';
+                    }
+                });
+                Object.defineProperty(el, 'isGroup', {
+                    get () {
+                        return this.kind === 'group';
+                    }
+                });
+                Object.defineProperty(el, 'isOffline', {
+                    get () {
+                        return this.presenceType === 'unavailable' || this.presenceType === '';
+                    }
+                });
+                Object.defineProperty(el, 'isOnline', {
+                    get () {
+                        return this.presenceType === 'available';
+                    }
+                });
+                Object.defineProperty(el, 'isComposing', {
+                    get () {
+                        return this.presenceType === 'composing';
+                    }
+                });
+                Object.defineProperty(el, 'isRecording', {
+                    get () {
+                        return this.presenceType === 'recording';
+                    }
+                });
+                Object.defineProperty(el, 'hasLastTimeAvailable', {
+                    get () {
+                        return this.lastPresenceAvailableTime && this.lastPresenceAvailableTime > 0;
+                    }
+                });
             }
         },
 
@@ -687,8 +729,8 @@ const store = new Vuex.Store({
         },
 
         handleSetChats (context, payload) {
-            context.dispatch('setChatProperties', payload.chats);
-            context.commit('SET_CHATS', payload.chats);
+            context.dispatch('setChatProperties', payload);
+            context.commit('SET_CHATS', payload);
             context.dispatch('updateTitle');
         },
 

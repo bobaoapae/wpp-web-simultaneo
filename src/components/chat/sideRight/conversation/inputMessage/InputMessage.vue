@@ -40,6 +40,14 @@
             </div>
         </b-collapse>
 
+        <b-collapse id="collapse-answer-msg" v-model="quickReplysVisible">
+            <div v-if="showQuickReplys" class="quick-replys">
+                <div class="quick-reply" v-for="quickReply in filteredQuickReplys" :key="quickReply.id" @click="handleClickQuickReply(quickReply)">
+                    /<span class="quick-reply-name">{{quickReply.shortcut}}</span> <span class="quick-reply-msg">{{quickReply.message}}</span>
+                </div>
+            </div>
+        </b-collapse>
+
         <div id="input-message">
             <div class="box-icon-emoji">
                 <b-img
@@ -85,7 +93,7 @@
 
 <script>
 import { Picker } from 'emoji-mart-vue-fast';
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 import { msg } from '@/helper.js';
 import { rageSave } from '@/rangeSelectionSaveRestore.js';
 import QuotedMsg from '../../../../shared/quotedMsg/QuotedMsg';
@@ -108,6 +116,7 @@ export default {
             emojiIndex: msg.emojiIndex(),
             restore: null,
             answerVisible: false,
+            quickReplysVisible: false,
             recorder: {},
             gumStream: {},
             gravando: false,
@@ -128,7 +137,7 @@ export default {
 
     },
     computed: {
-        ...mapState(['activeChat']),
+        ...mapState(['activeChat', 'quickReplys']),
 
         timeConverter () {
             let a = new Date(this.time * 1000);
@@ -146,9 +155,21 @@ export default {
 
             time = min + ':' + sec;
             return time;
+        },
+
+        showQuickReplys () {
+            return this.mensagem && this.mensagem.charAt(0) === '/' && this.quickReplys && this.quickReplys.length > 0;
+        },
+
+        filteredQuickReplys () {
+            return this.quickReplys.filter(quickReply => {
+                return ('/' + quickReply.shortcut).includes(this.mensagem);
+            });
         }
     },
     methods: {
+        ...mapActions(['convertToBase64']),
+
         toggleRecording () {
             this.gravando = !this.gravando;
 
@@ -199,62 +220,65 @@ export default {
         },
 
         handleSendPtt (data) {
-            const toBase64 = (file) => new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
-            });
-
-            (async () => {
-                let file = (await toBase64(data));
-
+            this.convertToBase64({ file: data }).then(value => {
                 let msg = {
-                    media: file,
+                    media: value,
                     fileName: new Date().getTime() + '.ptt'
                 };
 
                 if (this.activeChat.quotedMsg) {
                     msg.quotedMsg = this.activeChat.quotedMsg.id._serialized;
                 }
-
-                this.activeChat.quotedMsg = undefined;
-
                 this.activeChat.sendMessage(msg);
-            })();
+                this.clearInput();
+            });
         },
 
         onInput (evt) {
             this.savePosition();
             this.mensagem = this.formatar(this.$refs.input);
+            if (this.mensagem && this.showQuickReplys) {
+                this.quickReplysVisible = true;
+            } else {
+                this.quickReplysVisible = false;
+            }
         },
+
         handleClickCloseAnswer () {
             this.answerVisible = false;
             this.activeChat.quotedMsg = undefined;
         },
+
         onPaste (evt) {
             const textMsg = msg.processNativeEmojiToImage(evt.clipboardData.getData('text'));
             document.execCommand('insertHTML', false, textMsg);
         },
+
         restorePosition () {
             if (this.restore) {
                 rageSave.restoreSelection(this.restore);
                 this.restore = null;
             }
         },
+
         savePosition () {
             this.restore = rageSave.saveSelection();
         },
+
         addEmoji (emoji) {
             this.$refs.input.focus();
             emoji = emoji.native;
             document.execCommand('insertHTML', false, msg.processNativeEmojiToImage(emoji));
         },
+
         handleEnterPress () {
-            if (this.mensagem !== '') {
+            if (this.quickReplysVisible && this.filteredQuickReplys.length === 1) {
+                this.handleClickQuickReply(this.filteredQuickReplys[0]);
+            } else if (this.mensagem !== '') {
                 this.handleSendMsg();
             }
         },
+
         handleSendMsg () {
             let msg = {
                 message: this.mensagem
@@ -267,11 +291,20 @@ export default {
             this.activeChat.sendMessage(msg);
             this.clearInput();
         },
+
+        handleClickQuickReply (quickReply) {
+            this.$refs.input.focus();
+            this.$refs.input.innerHTML = '';
+            this.mensagem = '';
+            document.execCommand('insertHTML', false, quickReply.message);
+        },
+
         capitalize (value) {
             if (!value) return '';
             value = value.toString();
             return value.charAt(0).toUpperCase() + value.slice(1);
         },
+
         formatar (domElement) {
             let msg = '';
             domElement.childNodes.forEach(function (e) {
@@ -287,6 +320,7 @@ export default {
 
             return this.capitalize(msg);
         },
+
         clearInput () {
             this.$refs.input.innerHTML = '';
             this.mensagem = '';
@@ -299,95 +333,132 @@ export default {
 </script>
 
 <style scoped>
+.recorder-time {
+    margin-right: 40px;
+    margin-left: 40px;
+    font-size: 23px;
+    color: rgba(0, 0, 0, 0.45);
+}
 
-    .recorder-time {
-        margin-right: 40px;
-        margin-left: 40px;
-        font-size: 23px;
-        color: rgba(0, 0, 0, 0.45);
-    }
+.box-answer {
+    display: flex;
+    flex-direction: row;
+    background-color: #f0f0f0;
+}
 
-    .box-answer {
-        display: flex;
-        flex-direction: row;
-        background-color: #f0f0f0;
-    }
+.close-answer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    cursor: pointer;
+}
 
-    .close-answer {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 10px;
-        cursor: pointer;
-    }
+.emoji-mart {
+    width: 100% !important;
+}
 
-    .emoji-mart {
-        width: 100% !important;
-    }
+[contentEditable="true"]:empty:before {
+    content: attr(data-text);
+    color: #a0a0a0;
+    cursor: text;
+}
 
-    [contentEditable="true"]:empty:before {
-        content: attr(data-text);
-        color: #a0a0a0;
-        cursor: text;
-    }
+.label {
+    display: none;
+    position: absolute;
+    color: #a0a0a0;
+    visibility: visible;
+}
 
-    .label {
-        display: none;
-        position: absolute;
-        color: #a0a0a0;
-        visibility: visible;
-    }
+#input-message {
+    display: flex;
+    background: #efefef;
+    padding: 5px 10px;
+}
 
-    #input-message {
-        display: flex;
-        background: #efefef;
-        padding: 5px 10px;
-    }
+.box-icon-send {
+    padding: 5px 10px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-    .box-icon-send {
-        padding: 5px 10px;
-        cursor: pointer;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
+.box-input {
+    box-sizing: border-box;
+    flex: 1 1 auto;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 20px;
+    min-height: 20px;
+    min-width: 0;
+    outline: none;
+    width: inherit;
+    will-change: width;
+    background-color: #fff;
+    border: 1px solid #fff;
+    border-radius: 21px;
+    padding: 9px 12px 11px;
+    margin: 5px 10px;
+}
 
-    .box-input {
-        box-sizing: border-box;
-        flex: 1 1 auto;
-        font-size: 15px;
-        font-weight: 400;
-        line-height: 20px;
-        min-height: 20px;
-        min-width: 0;
-        outline: none;
-        width: inherit;
-        will-change: width;
-        background-color: #fff;
-        border: 1px solid #fff;
-        border-radius: 21px;
-        padding: 9px 12px 11px;
-        margin: 5px 10px;
-    }
+.box-input .input {
+    font-size: 15px;
+    font-weight: 400;
+    max-height: 100px;
+    min-height: 20px;
+    outline: none;
+    overflow-x: hidden;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    z-index: 1;
+}
 
-    .box-input .input {
-        font-size: 15px;
-        font-weight: 400;
-        max-height: 100px;
-        min-height: 20px;
-        outline: none;
-        overflow-x: hidden;
-        overflow-y: auto;
-        white-space: pre-wrap;
-        word-wrap: break-word;
-        z-index: 1;
-    }
+.box-icon-emoji {
+    padding: 5px 10px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-    .box-icon-emoji {
-        padding: 5px 10px;
-        cursor: pointer;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
+.quick-replys {
+    background-color: #f0f0f0;
+    box-shadow: 0 -5px 7px -5px rgba(0,0,0,.04);
+    border-left: 1px solid #e0e0e0;
+    padding-top: 3px;
+    position: relative;
+    overflow: hidden;
+}
+
+.quick-reply {
+    margin-left: 3px;
+    color: rgba(0,0,0,.45);
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+    white-space: nowrap;
+    padding: 16px 19px;
+    cursor: pointer;
+}
+
+.quick-reply-name {
+    color: #303030;
+}
+
+.quick-reply-msg {
+    color: rgba(0,0,0,.45);
+    font-size: 14px;
+    height: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+    white-space: nowrap;
+    flex-grow: 1;
+    position: relative;
+    margin-left: 3px;
+}
 </style>

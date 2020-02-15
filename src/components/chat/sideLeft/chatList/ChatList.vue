@@ -22,12 +22,12 @@
             </div>
 
             <div class="d-flex">
-              <div v-if="showPresenceInfo(chat)" class="presenceInfo">
-                <span v-if="isComposing(chat)">digitando...</span>
-                <span v-if="isRecording(chat)">gravando áudio...</span>
+              <div v-if="chat.isChat && (chat.isComposing || chat.isRecording)" class="presenceInfo">
+                <span v-if="chat.isComposing">digitando...</span>
+                <span v-if="chat.isRecording">gravando áudio...</span>
               </div>
-              <LastMsg v-if="!showPresenceInfo(chat)" :chat="chat"/>
-              <Icons v-if="!showPresenceInfo(chat)" :chat="chat"/>
+              <LastMsg v-if="!chat.isChat || (!chat.isComposing && !chat.isRecording)" :chat="chat"/>
+              <Icons v-if="!chat.isChat || (!chat.isComposing && !chat.isRecording)" :chat="chat"/>
             </div>
           </div>
         </li>
@@ -95,30 +95,6 @@ export default {
 
         visualizarMsgs (id) {
             this.seeChat({ chatId: id });
-        },
-
-        showPresenceInfo (chat) {
-            return this.isChat(chat) && (this.isComposing(chat) || this.isRecording(chat));
-        },
-
-        isChat (chat) {
-            return chat.kind === 'chat';
-        },
-
-        isOffline (chat) {
-            return chat.presenceType === 'unavailable';
-        },
-
-        isOnline (chat) {
-            return chat.presenceType === 'available';
-        },
-
-        isComposing (chat) {
-            return chat.presenceType === 'composing';
-        },
-
-        isRecording (chat) {
-            return chat.presenceType === 'recording';
         }
     }
 };

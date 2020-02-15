@@ -11,11 +11,11 @@
                 <div class="chat-desc">
                     <span class="chat-title">{{activeChat.formattedTitle}}</span>
                     <div class="chat-sub-title">
-                        <div v-if="isChat">
-                            <span v-if="isOffline && hasLastTimeAvailable">{{this.lastTimeAvailable}}</span>
-                            <span v-else-if="isOnline">online</span>
-                            <span v-else-if="isComposing">escrevendo...</span>
-                            <span v-else-if="isRecording">gravando áudio...</span>
+                        <div v-if="activeChat.isChat">
+                            <span v-if="activeChat.isOffline && activeChat.hasLastTimeAvailable">{{this.lastTimeAvailable}}</span>
+                            <span v-else-if="activeChat.isOnline">online</span>
+                            <span v-else-if="activeChat.isComposing">escrevendo...</span>
+                            <span v-else-if="activeChat.isRecording">gravando áudio...</span>
                         </div>
                         <div v-else>
                             <span>Criado em {{createdTime}}</span>
@@ -62,30 +62,6 @@ export default {
     },
     computed: {
         ...mapState(['activeChat']),
-
-        isChat () {
-            return this.activeChat.kind === 'chat';
-        },
-
-        isOffline () {
-            return this.activeChat.presenceType === 'unavailable' || this.activeChat.presenceType === '';
-        },
-
-        isOnline () {
-            return this.activeChat.presenceType === 'available';
-        },
-
-        isComposing () {
-            return this.activeChat.presenceType === 'composing';
-        },
-
-        isRecording () {
-            return this.activeChat.presenceType === 'recording';
-        },
-
-        hasLastTimeAvailable () {
-            return this.activeChat.lastPresenceAvailableTime && this.activeChat.lastPresenceAvailableTime > 0;
-        },
 
         lastTimeAvailable () {
             return this.timeConverterPresence(this.activeChat.lastPresenceAvailableTime);
