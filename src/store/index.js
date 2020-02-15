@@ -476,9 +476,17 @@ const store = new Vuex.Store({
                 if (context.state.pictures[payload.id]) {
                     resolve(context.state.pictures[payload.id]);
                 } else {
-                    context.dispatch('sendWsMessage', { event: 'findPicture', payload: payload.id }).then(picture => {
-                        context.commit('ADD_PICTURE_TO_CACHE', { id: payload.id, picture: picture });
-                        resolve(picture);
+                    context.dispatch('sendWsMessage', { event: 'findPicture', payload: payload.id }).then(data => {
+                        if (data !== '') {
+                            api.get(`/api/downloadFile/${data}`, { responseType: 'blob' }).then(value => {
+                                context.dispatch('convertToBase64', { file: value.data }).then(base64 => {
+                                    context.commit('ADD_PICTURE_TO_CACHE', { id: payload.id, picture: base64 });
+                                    resolve(base64);
+                                });
+                            });
+                        } else {
+                            resolve('');
+                        }
                     }).catch(reason => reject(reason));
                 }
             });
@@ -490,7 +498,7 @@ const store = new Vuex.Store({
                     resolve(context.state.medias[payload.id]);
                 } else {
                     context.dispatch('sendWsMessage', { event: 'downloadMedia', payload: payload.id }).then(data => {
-                        api.get(`/api/downloadMedia/${data}`, { responseType: 'blob' }).then(async value => {
+                        api.get(`/api/downloadFile/${data}`, { responseType: 'blob' }).then(async value => {
                             let result = {
                                 fileName: value.headers.filename,
                                 base64: await context.dispatch('convertToBase64', { file: value.data })
