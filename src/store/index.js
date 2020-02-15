@@ -9,7 +9,10 @@ import api from '@/api';
 
 const vuexLocal = new VuexPersistence({
     storage: window.sessionStorage,
-    modules: ['user'],
+    reducer: state => ({
+        user: state.user,
+        pictures: state.pictures
+    }),
     supportCircular: true
 });
 
@@ -27,8 +30,8 @@ const store = new Vuex.Store({
         self: null,
         contacts: null,
         chats: null,
-        pictures: [],
-        medias: [],
+        pictures: {},
+        medias: {},
         timeOutChats: -1,
         activeChat: null,
         poolContext: [],
@@ -153,7 +156,7 @@ const store = new Vuex.Store({
         },
 
         ADD_PICTURE_TO_CACHE (state, payload) {
-            state.pictures[payload.id] = payload.picture;
+            state.pictures[payload.id] = { picture: payload.picture, t: payload.t };
         },
 
         ADD_MEDIA_TO_CACHE (state, payload) {
@@ -473,14 +476,15 @@ const store = new Vuex.Store({
 
         findPictureFromId (context, payload) {
             return new Promise((resolve, reject) => {
-                if (context.state.pictures[payload.id]) {
-                    resolve(context.state.pictures[payload.id]);
+                if (context.state.pictures[payload.id] && new Date().getTime() - context.state.pictures[payload.id].t <= 10800000) {
+                    console.log('fromCache');
+                    resolve(context.state.pictures[payload.id].picture);
                 } else {
                     context.dispatch('sendWsMessage', { event: 'findPicture', payload: payload.id }).then(data => {
                         if (data !== '') {
                             api.get(`/api/downloadFile/${data}`, { responseType: 'blob' }).then(value => {
                                 context.dispatch('convertToBase64', { file: value.data }).then(base64 => {
-                                    context.commit('ADD_PICTURE_TO_CACHE', { id: payload.id, picture: base64 });
+                                    context.commit('ADD_PICTURE_TO_CACHE', { id: payload.id, picture: base64, t: new Date().getTime() });
                                     resolve(base64);
                                 });
                             });
