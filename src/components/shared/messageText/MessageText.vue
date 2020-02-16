@@ -5,7 +5,7 @@
             liunk
          </Thumbnail>
 
-         <span v-html="msgFormated"></span>
+         <span :inner-html.prop="msg.body | formatMsg | emojify"></span>
       </div>
 
       <MessageTime :msg="msg"/>
@@ -17,8 +17,6 @@
 import MessageTime from '../messageTime/MessageTime';
 import Thumbnail from '../thumbnail/Thumbnail';
 
-import { msg } from '@/helper.js';
-
 export default {
     name: 'MessageText',
     components: {
@@ -29,11 +27,6 @@ export default {
         msg: {
             type: Object,
             required: true
-        }
-    },
-    computed: {
-        msgFormated () {
-            return msg.processNativeEmojiToImage(msg.formatMsg(this.msg.body));
         }
     }
 };

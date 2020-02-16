@@ -16,7 +16,7 @@
       </div>
 
       <div class="box-caption" v-if="msg.caption">
-         <span v-html="captionFormated"></span>
+         <span :inner-html.prop="msg.caption | formatMsg | emojify"></span>
       </div>
 
       <MessageTime :class="{'no-caption' : !haveCaption}" :msg="msg"/>
@@ -26,7 +26,6 @@
 <script>
 import MessageTime from '../messageTime/MessageTime';
 import LoadingMedia from '../loadingMedia/LoadingMedia';
-import { msg } from '@/helper.js';
 import { mapActions, mapMutations } from 'vuex';
 
 export default {
@@ -52,12 +51,6 @@ export default {
         },
         haveCaption () {
             return this.msg.caption !== undefined;
-        },
-        captionFormated () {
-            if (this.msg.caption) {
-                return msg.processNativeEmojiToImage(msg.formatMsg(this.msg.caption));
-            }
-            return '';
         }
     },
     methods: {

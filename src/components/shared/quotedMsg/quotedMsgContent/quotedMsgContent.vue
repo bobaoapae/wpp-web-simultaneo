@@ -3,8 +3,8 @@
       <MsgSymbol :msg="msg"/>
 
       <div class="box-content">
-         <span class="content" :inner-html.prop="msg.caption | formated" v-if="msg.caption"></span>
-         <span class="content" v-else-if="msg.body && msg.isChat" :inner-html.prop="msg.body | formated"></span>
+         <span class="content" :inner-html.prop="msg.caption | emojify" v-if="msg.caption"></span>
+         <span class="content" v-else-if="msg.body && msg.isChat" :inner-html.prop="msg.body | emojify"></span>
          <MsgType :msg="msg" v-else/>
       </div>
    </div>
@@ -13,7 +13,6 @@
 <script>
 import MsgSymbol from './msgSymbol/MsgSymbol';
 import MsgType from './msgType/MsgType';
-import { msg } from '@/helper';
 
 export default {
     name: 'quotedMsgContent',
@@ -22,14 +21,6 @@ export default {
         msg: {
             type: Object,
             required: true
-        }
-    },
-    filters: {
-        formated (value) {
-            if (value) {
-                return msg.processNativeEmojiToImage(value);
-            }
-            return '';
         }
     }
 };

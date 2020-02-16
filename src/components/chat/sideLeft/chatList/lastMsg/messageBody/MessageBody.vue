@@ -1,5 +1,5 @@
 <template>
-   <span v-html="bodyFormated" v-if="lastMsg.isChat"></span>
+   <span :inner-html.prop="lastMsg.body | emojify" v-if="lastMsg.isChat"></span>
 
    <span v-else-if="lastMsg.isImage">
         <img src="@/assets/images/wpp-type-foto.svg">
@@ -40,7 +40,7 @@
 
     <span v-else-if="lastMsg.isVcard">
         <img src="@/assets/images/wpp-type-vcard.svg">
-        {{lastMsg.vCard.fn[0].value}}
+        <span :inner-html.prop="lastMsg.vCard.fn[0].value | emojify"></span>
     </span>
 
     <span v-else-if="lastMsg.isRevoked" class="msgRevoked">
@@ -57,8 +57,6 @@
 </template>
 
 <script>
-import { msg } from '@/helper.js';
-
 export default {
     name: 'MessageBody',
     props: {
@@ -68,9 +66,6 @@ export default {
         }
     },
     computed: {
-        bodyFormated () {
-            return msg.processNativeEmojiToImage(this.lastMsg.body);
-        },
         duration () {
             const duration = this.lastMsg.duration;
 

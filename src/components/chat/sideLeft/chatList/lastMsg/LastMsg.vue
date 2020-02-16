@@ -2,9 +2,7 @@
    <div :class="{unread : isUnread}" class="last-msg flex-grow-1 d-flex align-items-center" v-if="lastMsg">
       <MessageIconStatus :ack="lastMsg.ack" class="icon-status" v-if="lastMsg.id.fromMe"/>
 
-      <span v-if="isGroup && lastMsg && lastMsg.senderObj && !lastMsg.id.fromMe">
-            {{senderFormated}}:
-        </span>
+      <span v-if="isGroup && lastMsg && lastMsg.senderObj && !lastMsg.id.fromMe" :inner-html.prop="senderFormated | emojify"></span>
 
       <MessageBody :lastMsg="lastMsg"/>
    </div>
@@ -35,7 +33,6 @@
 import MessageBody from './messageBody/MessageBody.vue';
 import MessageIconStatus from '@/components/shared/messageIconStatus/MessageIconStatus.vue';
 import { mapActions } from 'vuex';
-import { msg } from '@/helper.js';
 
 export default {
     name: 'LastMsg',
@@ -71,7 +68,7 @@ export default {
         senderFormated: {
             async get () {
                 if (this.lastMsg && this.lastMsg.senderObj) {
-                    return msg.processNativeEmojiToImage(await this.findFormattedNameFromId({ id: this.lastMsg.senderObj.id }));
+                    return this.findFormattedNameFromId({ id: this.lastMsg.senderObj.id });
                 }
             },
             default () {

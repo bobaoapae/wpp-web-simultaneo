@@ -5,7 +5,7 @@
       </div>
 
       <div class="box-info" @click.prevent="openChatInfo">
-         <div class="nome" v-html="nameEmojify"></div>
+         <div class="nome" :inner-html.prop="nameEmojify | emojify"></div>
 
          <div class="info">
             <div v-if="activeChat.isChat">
@@ -37,7 +37,6 @@
 <script>
 import { mapState, mapActions } from 'vuex';
 import ChatActivePhoto from './chatActivePhoto/ChatActivePhoto.vue';
-import { msg } from '@/helper.js';
 
 export default {
     name: 'ConversationHeader',
@@ -54,7 +53,7 @@ export default {
 
         nameEmojify () {
             if (this.activeChat.formattedTitle) {
-                return msg.processNativeEmojiToImage(this.activeChat.formattedTitle);
+                return this.activeChat.formattedTitle;
             }
             return '+' + this.activeChat.id.replace('@c.us', '');
         },

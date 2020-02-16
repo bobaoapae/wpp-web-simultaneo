@@ -4,13 +4,11 @@
       class="flex-grow-1"
       id="name-chat"
    >
-      <span v-html="nameEmojify"></span>
+      <span :inner-html.prop="name | emojify"></span>
    </div>
 </template>
 
 <script>
-import { msg } from '@/helper.js';
-
 export default {
     name: 'NameChat',
     props: {
@@ -23,9 +21,9 @@ export default {
         isUnread () {
             return this.chat.unreadCount > 0;
         },
-        nameEmojify () {
+        name () {
             if (this.chat.formattedTitle) {
-                return msg.processNativeEmojiToImage(this.chat.formattedTitle);
+                return this.chat.formattedTitle;
             }
             return '+' + this.chat.id.replace('@c.us', '');
         }

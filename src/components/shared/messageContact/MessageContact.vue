@@ -1,7 +1,7 @@
 <template>
     <div class="contact-container">
         <div class="contact">
-            <Picture :id="vCardChatId"/> <div class="contact-name">{{msg.vCard.fn[0].value}}</div>
+            <Picture :id="vCardChatId"/> <div class="contact-name" :inner-html.prop="msg.vCard.fn[0].value | emojify"></div>
             <MessageTime :msg="msg"/>
         </div>
         <hr/>

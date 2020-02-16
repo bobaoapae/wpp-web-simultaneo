@@ -9,6 +9,7 @@ import 'emoji-mart-vue-fast/css/emoji-mart.css';
 import AsyncComputed from 'vue-async-computed';
 import VueScrollTo from 'vue-scrollto';
 import VueTelInput from 'vue-tel-input';
+import { msg } from '@/helper.js';
 
 Vue.config.productionTip = false;
 
@@ -17,6 +18,22 @@ Vue.use(IconsPlugin);
 Vue.use(AsyncComputed);
 Vue.use(VueScrollTo);
 Vue.use(VueTelInput);
+
+Vue.filter('capitalize', function (value) {
+    if (!value) return '';
+    value = value.toString();
+    return value.charAt(0).toUpperCase() + value.slice(1);
+});
+
+Vue.filter('emojify', function (value) {
+    if (!value) return '';
+    return msg.processNativeEmojiToImage(value);
+});
+
+Vue.filter('formatMsg', function (value) {
+    if (!value) return '';
+    return msg.formatMsg(value);
+});
 
 new Vue({
     router,

@@ -250,7 +250,7 @@ export default {
         },
 
         onPaste (evt) {
-            const textMsg = msg.processNativeEmojiToImage(evt.clipboardData.getData('text'));
+            const textMsg = this.$options.filter.emojify(evt.clipboardData.getData('text'));
             document.execCommand('insertHTML', false, textMsg);
         },
 
@@ -268,7 +268,7 @@ export default {
         addEmoji (emoji) {
             this.$refs.input.focus();
             emoji = emoji.native;
-            document.execCommand('insertHTML', false, msg.processNativeEmojiToImage(emoji));
+            document.execCommand('insertHTML', false, this.$options.filters.emojify(emoji));
         },
 
         handleEnterPress () {
@@ -299,12 +299,6 @@ export default {
             document.execCommand('insertHTML', false, quickReply.message);
         },
 
-        capitalize (value) {
-            if (!value) return '';
-            value = value.toString();
-            return value.charAt(0).toUpperCase() + value.slice(1);
-        },
-
         formatar (domElement) {
             let msg = '';
             domElement.childNodes.forEach(function (e) {
@@ -318,7 +312,7 @@ export default {
                 }
             });
 
-            return this.capitalize(msg);
+            return this.$options.filters.capitalize(msg);
         },
 
         clearInput () {
