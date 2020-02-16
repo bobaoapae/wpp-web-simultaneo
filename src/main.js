@@ -21,8 +21,8 @@ Vue.use(VueTelInput);
 
 Vue.filter('capitalize', function (value) {
     if (!value) return '';
-    value = value.toString();
-    return value.charAt(0).toUpperCase() + value.slice(1);
+    let re = /(^|[.!?]\s+)([a-z])/g;
+    return value.replace(re, (m, $1, $2) => $1 + $2.toUpperCase());
 });
 
 Vue.filter('emojify', function (value) {
