@@ -28,7 +28,7 @@
 
    <span v-else-if="lastMsg.isPtt">
         <img src="@/assets/images/wpp-type-ptt-gray.svg" v-if="lastMsg.id.fromMe">
-        <img src="@/assets/images/wpp-type-ptt-blue.svg" v-else-if="lastMsg.ack===3">
+        <img src="@/assets/images/wpp-type-ptt-blue.svg" v-else-if="lastMsg.ack === 4">
         <img src="@/assets/images/wpp-type-ptt-green.svg" v-else>
         {{duration}}
     </span>

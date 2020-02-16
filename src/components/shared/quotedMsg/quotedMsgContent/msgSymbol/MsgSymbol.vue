@@ -7,7 +7,7 @@
       <img src="@/assets/images/wpp-type-video.svg" v-else-if="msg.isVideo">
 
       <img src="@/assets/images/wpp-type-ptt-gray.svg" v-else-if="msg.isPtt && msg.id.fromMe">
-      <img src="@/assets/images/wpp-type-ptt-blue.svg" v-else-if="msg.isPtt && msg.ack === 3">
+      <img src="@/assets/images/wpp-type-ptt-blue.svg" v-else-if="msg.isPtt && msg.ack === 4">
       <img src="@/assets/images/wpp-type-ptt-green.svg" v-else-if="msg.isPtt">
 
       <img src="@/assets/images/wpp-type-audio.svg" v-else-if="msg.isAudio">
