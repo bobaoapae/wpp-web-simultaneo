@@ -10,8 +10,7 @@ import api from '@/api';
 const vuexLocal = new VuexPersistence({
     storage: window.sessionStorage,
     reducer: state => ({
-        user: state.user,
-        pictures: state.pictures
+        user: state.user
     }),
     supportCircular: true
 });
