@@ -13,7 +13,7 @@
          <span v-html="captionFormated"></span>
       </div>
 
-      <MessageTime :class="{'no-caption' : !haveCaption}" :msg="msg"/>
+      <MessageTime :class="{'no-caption' : !haveCaption, 'custom-time' : !haveCaption}" :msg="msg"/>
    </div>
 </template>
 
@@ -148,5 +148,10 @@ export default {
    .box-caption span {
       font-size: 14.2px;
       color: #262626;
+   }
+
+   .custom-time {
+       right: 3px;
+       bottom: 3px;
    }
 </style>

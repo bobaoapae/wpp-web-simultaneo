@@ -1,38 +1,17 @@
 <template>
-   <div :class="{unread : isUnread}" class="last-msg flex-grow-1 d-flex align-items-center" v-if="lastMsg">
-      <MessageIconStatus :ack="lastMsg.ack" class="icon-status" v-if="lastMsg.id.fromMe"/>
+   <div :class="{unread : chat.isUnread}" class="last-msg flex-grow-1 d-flex align-items-center" v-if="chat.lastMsg">
+      <MessageIconStatus :ack="chat.lastMsg.ack" class="icon-status" v-if="chat.lastMsg.id.fromMe"/>
 
-      <span v-if="isGroup && lastMsg && lastMsg.senderObj && !lastMsg.id.fromMe" :inner-html.prop="senderFormated | emojify"></span>
+      <span v-if="chat.isGroup && chat.lastMsg && chat.lastMsg.senderObj && !chat.lastMsg.id.fromMe" :inner-html.prop="`${chat.lastMsg.senderObj.formattedName}: ` | emojify"></span>
 
-      <MessageBody :lastMsg="lastMsg"/>
+      <MessageBody :lastMsg="chat.lastMsg"/>
    </div>
 </template>
 
 <script>
-// TODOS
-// chat
-// image
-// audio
-// sticker
-// video
-// ptt = audio
-// document
-// revoked = Mensagem apagada
-// e2e_notification = O código de segurança de ... mudou.
-
-// GRUPO
-// gp2 = ... saiu do grupo
-
-// USUARIO
-// call_log = log de chamada
-
-// vcard
-// notification_template
-// broadcast_notification
 
 import MessageBody from './messageBody/MessageBody.vue';
 import MessageIconStatus from '@/components/shared/messageIconStatus/MessageIconStatus.vue';
-import { mapActions } from 'vuex';
 
 export default {
     name: 'LastMsg',
@@ -52,35 +31,7 @@ export default {
     created () {
 
     },
-    watch: {},
-    computed: {
-        isUnread () {
-            return this.chat.unreadCount > 0;
-        },
-        isGroup () {
-            return this.chat.kind === 'group';
-        },
-        lastMsg () {
-            return this.chat.lastMsg;
-        }
-    },
-    asyncComputed: {
-        senderFormated: {
-            async get () {
-                if (this.lastMsg && this.lastMsg.senderObj) {
-                    return this.findFormattedNameFromId({ id: this.lastMsg.senderObj.id });
-                }
-            },
-            default () {
-                if (this.lastMsg && this.lastMsg.senderObj) {
-                    return '+' + this.lastMsg.senderObj.id.split('@')[0];
-                }
-            }
-        }
-    },
-    methods: {
-        ...mapActions(['findFormattedNameFromId'])
-    }
+    watch: {}
 };
 </script>
 

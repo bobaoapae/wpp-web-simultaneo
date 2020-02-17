@@ -90,7 +90,7 @@ export default {
         ...mapState(['activeChat']),
 
         showTail () {
-            return !this.previousMsg || this.msg.from !== this.previousMsg.from;
+            return !this.previousMsg || !this.msg.senderObj || !this.previousMsg.senderObj || (this.previousMsg.isSticker && !this.msg.isSticker) || this.msg.senderObj.id !== this.previousMsg.senderObj.id;
         }
     },
     methods: {

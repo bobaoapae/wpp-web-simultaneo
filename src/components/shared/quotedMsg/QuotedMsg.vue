@@ -38,10 +38,12 @@ export default {
         }
     },
     computed: {
-        ...mapState(['self']),
+        ...mapState(['self', 'activeChat']),
 
         color () {
-            if (this.quotedMsg.senderObj.id !== this.self.id) {
+            if (this.activeChat.isGroup && this.quotedMsg.senderObj.id !== this.self.id) {
+                return this.activeChat.getColor(this.quotedMsg.senderObj.id);
+            } else if (this.quotedMsg.senderObj.id !== this.self.id) {
                 return '#74cff8';
             }
             return '#35cd96';

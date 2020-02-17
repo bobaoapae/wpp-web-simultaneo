@@ -6,6 +6,7 @@ import VuexReset from '@ianwalter/vuex-reset';
 import VuexPersistence from 'vuex-persist';
 import vCardParse from 'vcard-parser';
 import api from '@/api';
+import randomColor from 'random-color';
 
 const vuexLocal = new VuexPersistence({
     storage: window.sessionStorage,
@@ -420,12 +421,16 @@ const store = new Vuex.Store({
         },
 
         findFormattedNameFromId (context, payload) {
-            const el = context.state.contacts.find(el => el.id === payload.id);
-
-            if (el && el.formattedName) {
-                return el.formattedName;
-            }
-            return '+' + (payload.id.split('@')[0]);
+            console.log('findFormattedNameFromId');
+            return new Promise((resolve, reject) => {
+                context.dispatch('findChatFromId', payload).then(el => {
+                    if (el && el.contact && el.contact.formattedName) {
+                        resolve(el.contact.formattedName);
+                    } else {
+                        resolve('+' + (payload.id.split('@')[0]));
+                    }
+                }).catch(reason => { reject(reason); });
+            });
         },
 
         findChatFromId (context, payload) {
@@ -648,6 +653,21 @@ const store = new Vuex.Store({
                         return this.lastPresenceAvailableTime && this.lastPresenceAvailableTime > 0;
                     }
                 });
+                Object.defineProperty(el, 'isUnread', {
+                    get () {
+                        return this.unreadCount > 0;
+                    }
+                });
+                if (el.isGroup) {
+                    el.colors = {};
+                    el.getColor = function (id) {
+                        if (this.colors[id]) {
+                            return this.colors[id];
+                        }
+                        this.colors[id] = randomColor().hexString();
+                        return this.colors[id];
+                    };
+                }
             }
         },
 
