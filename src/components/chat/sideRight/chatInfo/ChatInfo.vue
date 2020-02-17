@@ -1,12 +1,12 @@
 <template>
     <div class="col-3 col-md-3 col-lg-3 col-xs-2 p-0 chat-info">
         <div class="header">
-            <span>Dados do {{isChat ? 'Contato' :'Grupo'}}</span>
+            <span>Dados do {{activeChat.isChat ? 'Contato' :'Grupo'}}</span>
         </div>
         <div class="box-wrapper">
             <div class="chat-profile">
                 <div class="box-img">
-                    <ChatActivePhoto/>
+                    <ChatActivePhoto :full="true"/>
                 </div>
                 <div class="chat-desc">
                     <span class="chat-title">{{activeChat.formattedTitle}}</span>

@@ -13,6 +13,12 @@ import { mapState, mapActions } from 'vuex';
 
 export default {
     name: 'ChatActivePhoto',
+    props: {
+        full: {
+            type: Boolean,
+            required: false
+        }
+    },
     data () {
         return {
             imgUser: false,
@@ -37,7 +43,7 @@ export default {
         handleChatVisible () {
             this.reset();
 
-            this.findPictureFromId({ id: this.activeChat.id }).then(value => {
+            this.findPictureFromId({ id: this.activeChat.id, full: this.full }).then(value => {
                 this.picture = value;
             });
         },

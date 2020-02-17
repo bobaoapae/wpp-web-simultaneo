@@ -160,7 +160,10 @@ const store = new Vuex.Store({
         },
 
         ADD_PICTURE_TO_CACHE (state, payload) {
-            state.pictures[payload.id] = { picture: payload.picture, t: payload.t };
+            if (!state.pictures[payload.type]) {
+                state.pictures[payload.type] = [];
+            }
+            state.pictures[payload.full === true ? 'full' : 'min'][payload.id] = { picture: payload.picture, t: payload.t };
         },
 
         ADD_MEDIA_TO_CACHE (state, payload) {
@@ -483,14 +486,15 @@ const store = new Vuex.Store({
 
         findPictureFromId (context, payload) {
             return new Promise((resolve, reject) => {
-                if (context.state.pictures[payload.id] && new Date().getTime() - context.state.pictures[payload.id].t <= 10800000) {
-                    resolve(context.state.pictures[payload.id].picture);
+                let type = payload.full === true ? 'full' : 'min';
+                if (context.state.pictures[type] && context.state.pictures[type][payload.id] && new Date().getTime() - context.state.pictures[type][payload.id].t <= 10800000) {
+                    resolve(context.state.pictures[type][payload.id].picture);
                 } else {
-                    context.dispatch('sendWsMessage', { event: 'findPicture', payload: payload.id }).then(data => {
+                    context.dispatch('sendWsMessage', { event: 'findPicture', payload: { id: payload.id, full: payload.full === true } }).then(data => {
                         if (data !== '') {
                             api.get(`/api/downloadFile/${data}`, { responseType: 'blob' }).then(value => {
                                 context.dispatch('convertToBase64', { file: value.data }).then(base64 => {
-                                    context.commit('ADD_PICTURE_TO_CACHE', { id: payload.id, picture: base64, t: new Date().getTime() });
+                                    context.commit('ADD_PICTURE_TO_CACHE', { id: payload.id, picture: base64, t: new Date().getTime(), type: type });
                                     resolve(base64);
                                 });
                             });
