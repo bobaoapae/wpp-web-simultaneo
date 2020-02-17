@@ -22,12 +22,12 @@
             </div>
 
             <div class="d-flex">
-              <div v-if="chat.isChat && (chat.isComposing || chat.isRecording)" class="presenceInfo">
+              <div v-if="chat.isChat && (chat.isComposing || chat.isRecording)" class="flex-grow-1 d-flex align-items-center presenceInfo">
                 <span v-if="chat.isComposing">digitando...</span>
                 <span v-if="chat.isRecording">gravando áudio...</span>
               </div>
               <LastMsg v-if="!chat.isChat || (!chat.isComposing && !chat.isRecording)" :chat="chat"/>
-              <Icons v-if="!chat.isChat || (!chat.isComposing && !chat.isRecording)" :chat="chat"/>
+              <Icons :chat="chat"/>
             </div>
           </div>
         </li>

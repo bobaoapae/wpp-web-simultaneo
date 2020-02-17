@@ -250,7 +250,7 @@ export default {
         },
 
         onPaste (evt) {
-            const textMsg = this.$options.filter.emojify(evt.clipboardData.getData('text'));
+            const textMsg = this.$options.filters.emojify(evt.clipboardData.getData('text'));
             document.execCommand('insertHTML', false, textMsg);
         },
 
