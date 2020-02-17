@@ -72,7 +72,7 @@ export default {
    .header {
       display: flex;
       background: #EEEEEE;
-      padding: 10px 16px;
+      padding: 11px 16px;
    }
 
    .box-icons {

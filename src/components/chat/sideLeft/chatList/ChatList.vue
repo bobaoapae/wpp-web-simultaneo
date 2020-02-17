@@ -161,7 +161,7 @@ export default {
 
   @media screen and (min-width: 1441px) {
     .box-list-group {
-      max-height: calc(100vh - 143px);
+      max-height: calc(100vh - 147px);
       overflow-y: scroll;
       overflow-x: hidden;
     }
