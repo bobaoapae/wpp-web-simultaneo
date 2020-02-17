@@ -26,7 +26,7 @@
 
          <!-- Identificador de mensagens no grupo -->
          <div class="identify-msg-group p-2" v-if="activeChat.isGroup && showTail">
-            <div v-if="msg.senderObj.name">
+            <div v-if="msg.senderObj.name" :style="{color: activeChat.getColor(msg.senderObj.id)}">
                {{msg.senderObj.name | emojify}}
             </div>
 
