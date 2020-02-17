@@ -13,17 +13,10 @@
 
                         <input id="login" placeholder="Login" required type="text" v-model="form.login" />
 
-                        <button type="submit" v-bind:disabled="sendPost">
-                            <span v-if="!sendPost">ENVIAR</span>
-                            <span v-else>PROCESSANDO...</span>
+                        <button type="submit" v-bind:disabled="btn.loading">
+                            {{btn.label}}
                         </button>
                     </form>
-
-                    <div class="d-flex justify-content-center separator">
-                        <span class="line"></span>
-                        <span class="mx-3">OU</span>
-                        <span class="line"></span>
-                    </div>
 
                 </div>
                 <div v-else-if="success">
@@ -36,6 +29,9 @@
                 <div v-else>
                     <h1 class="text-danger text-center">Ocorreu um erro</h1>
                     <p class="text-center">{{error.msg}}</p>
+                    <div class="text-center">
+                        <span class="btn btn-link" @click="tentarNovamente">Tentar Novamente</span>
+                    </div>
                 </div>
 
                 <hr />
@@ -58,7 +54,10 @@ export default {
                 active: false,
                 msg: 'Falha na conexão'
             },
-            sendPost: false,
+            btn: {
+                label: 'ENVIAR',
+                loading: false
+            },
             form: {
                 login: ''
             }
@@ -66,7 +65,8 @@ export default {
     },
     methods: {
         handleSubmit () {
-            this.sendPost = true;
+            this.btn.loading = true;
+            this.btn.label = 'PROCESSANDO...';
             const f = new FormData();
             f.append('login', this.form.login);
             api.put('/api/auth/resetPassword/', f).then(value => {
@@ -77,8 +77,14 @@ export default {
                 }
                 this.error.active = true;
             }).then(() => {
-                this.sendPost = false;
+                this.btn.loading = false;
             });
+        },
+
+        tentarNovamente () {
+            this.error.active = false;
+            this.btn.loading = false;
+            this.btn.label = 'ENVIAR';
         }
     }
 };
