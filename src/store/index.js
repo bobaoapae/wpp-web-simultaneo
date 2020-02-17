@@ -727,15 +727,42 @@ const store = new Vuex.Store({
                         let year = date.getFullYear();
                         let month = date.getMonth() + 1;
                         let day = date.getDate();
+                        let dayOfWeek = date.getDay();
                         let today = new Date();
                         let todayDay = today.getDate();
                         let todayMonth = today.getMonth() + 1;
+                        let dayOfWeekStr = '';
+                        switch (dayOfWeek) {
+                            case 0:
+                                dayOfWeekStr = 'Domingo';
+                                break;
+                            case 1:
+                                dayOfWeekStr = 'Segunda-Feira';
+                                break;
+                            case 2:
+                                dayOfWeekStr = 'Terça-Feira';
+                                break;
+                            case 3:
+                                dayOfWeekStr = 'Quarta-Feira';
+                                break;
+                            case 4:
+                                dayOfWeekStr = 'Quinta-Feira';
+                                break;
+                            case 5:
+                                dayOfWeekStr = 'Sexta-Feira';
+                                break;
+                            case 6:
+                                dayOfWeekStr = 'Sábado';
+                                break;
+                        }
 
                         let text = `${day < 10 ? '0' : ''}${day}/${month < 10 ? '0' : ''}${month}/${year}`;
                         if (todayDay === day && todayMonth === month) {
                             text = 'hoje';
                         } else if (todayDay - day === 1 && todayMonth === month) {
                             text = 'ontem';
+                        } else if (today.getTime() - date.getTime() <= 432000000) {
+                            return dayOfWeekStr;
                         }
                         return text;
                     }

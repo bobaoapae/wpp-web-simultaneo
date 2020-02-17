@@ -19,6 +19,11 @@ Vue.use(AsyncComputed);
 Vue.use(VueScrollTo);
 Vue.use(VueTelInput);
 
+Vue.filter('uppercase', function (value) {
+    if (!value) return '';
+    return value.toUpperCase();
+});
+
 Vue.filter('capitalize', function (value) {
     if (!value) return '';
     let re = /(^|[.!?]\s+)([a-z])/g;

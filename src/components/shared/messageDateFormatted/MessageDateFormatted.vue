@@ -1,7 +1,7 @@
 <template>
    <div class="message-info">
       <div  class="message-info-container">
-          <span>{{formattedDate | capitalize}}</span>
+          <span>{{formattedDate | uppercase}}</span>
       </div>
    </div>
 </template>
