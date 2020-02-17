@@ -577,7 +577,6 @@ const store = new Vuex.Store({
             function setProperties (el) {
                 context.dispatch('setMsgsProperties', el.msgs);
                 el.quotedMsg = undefined;
-                el.msgsGrouped = {};
                 el.openChatInfo = false;
                 el.customProperties = {
                     properties: [],
@@ -722,6 +721,25 @@ const store = new Vuex.Store({
                         return this.isChat && !this.hasQuotedMsg;
                     }
                 });
+                Object.defineProperty(msg, 'fomattedDate', {
+                    get () {
+                        let date = new Date(this.t * 1000);
+                        let year = date.getFullYear();
+                        let month = date.getMonth() + 1;
+                        let day = date.getDate();
+                        let today = new Date();
+                        let todayDay = today.getDate();
+                        let todayMonth = today.getMonth() + 1;
+
+                        let text = `${day < 10 ? '0' : ''}${day}/${month < 10 ? '0' : ''}${month}/${year}`;
+                        if (todayDay === day && todayMonth === month) {
+                            text = 'hoje';
+                        } else if (todayDay - day === 1 && todayMonth === month) {
+                            text = 'ontem';
+                        }
+                        return text;
+                    }
+                });
                 if (msg.hasQuotedMsg) {
                     setProperties(msg.quotedMsgObject);
                 }
@@ -782,36 +800,7 @@ const store = new Vuex.Store({
 
                 context.commit('SET_CHATS', chats);
                 context.dispatch('updateTitle');
-                context.dispatch('groupMsgsByDate');
             }, 100));
-        },
-
-        groupMsgsByDate (context) {
-            let chats = context.state.chats;
-            chats.forEach((chat) => {
-                let msgsGrouped = {};
-                chat.msgs.forEach((msg) => {
-                    let a = new Date(msg.t * 1000);
-                    let year = a.getFullYear();
-                    let mes = a.getMonth() + 1;
-                    let date = a.getDate();
-                    let hoje = new Date();
-                    let hojeDia = hoje.getDate();
-                    let hojeMes = hoje.getMonth() + 1;
-
-                    let fraseDia = `${year}-${mes}-${date}`;
-                    if (hojeDia === date && hojeMes === mes) {
-                        fraseDia = 'hoje';
-                    } else if (hojeDia - date === 1 && hojeMes === mes) {
-                        fraseDia = 'ontem';
-                    }
-                    if (!msgsGrouped[fraseDia]) {
-                        msgsGrouped[fraseDia] = { firstMsg: msg, msgs: [] };
-                    }
-                    msgsGrouped[fraseDia].msgs.push(msg);
-                });
-                chat.msgsGrouped = msgsGrouped;
-            });
         },
 
         playNewMsgNotification (context, payload) {
