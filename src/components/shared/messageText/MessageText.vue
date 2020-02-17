@@ -1,9 +1,7 @@
 <template>
    <div class="text-container">
       <div class="message-text">
-         <Thumbnail v-if="msg.thumbnail" :msg="msg">
-            liunk
-         </Thumbnail>
+         <Thumbnail v-if="msg.matchedText" :msg="msg"/>
 
          <span :inner-html.prop="msg.body | formatMsg | emojify"></span>
       </div>

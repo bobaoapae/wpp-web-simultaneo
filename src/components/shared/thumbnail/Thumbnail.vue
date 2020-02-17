@@ -1,22 +1,24 @@
 <template>
     <a class="thumbnail" :href="msg.matchedText" target="_blank">
         <div class="image">
-            <img :src="'data:image/jpeg;base64,'+msg.thumbnail" alt="">
+            <img v-if="msg.thumbnail" :src="`data:image/jpeg;base64,${msg.thumbnail}`" :alt="msg.title">
         </div>
 
-        <div class="content">
-            <div class="title" :title="msg.title">
-                {{msg.title}}
-            </div>
+        <a :href="msg.matchedText" target="_blank">
+            <div class="content">
+                <div class="title" :title="msg.title">
+                    {{msg.title}}
+                </div>
 
-            <div class="description" :title="msg.description">
-                {{msg.description}}
-            </div>
+                <div class="description" :title="msg.description">
+                    {{msg.description}}
+                </div>
 
-            <div class="link">
-                {{link}}
+                <div class="link">
+                    {{link}}
+                </div>
             </div>
-        </div>
+        </a>
     </a>
 </template>
 
