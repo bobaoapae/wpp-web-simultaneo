@@ -42,9 +42,13 @@ export default {
 
         handleChatVisible () {
             this.reset();
-
-            this.findPictureFromId({ id: this.activeChat.id, full: this.full }).then(value => {
+            this.findPictureFromId({ id: this.activeChat.id }).then(value => {
                 this.picture = value;
+                if (this.full) {
+                    this.findPictureFromId({ id: this.activeChat.id, full: this.full }).then(value => {
+                        this.picture = value;
+                    });
+                }
             });
         },
 
