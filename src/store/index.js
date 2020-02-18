@@ -421,7 +421,6 @@ const store = new Vuex.Store({
         },
 
         findFormattedNameFromId (context, payload) {
-            console.log('findFormattedNameFromId');
             return new Promise((resolve, reject) => {
                 context.dispatch('findChatFromId', payload).then(el => {
                     if (el && el.contact && el.contact.formattedName) {
@@ -953,26 +952,6 @@ const store = new Vuex.Store({
                     msg.ack = payload.ack;
                     msg.type = payload.type;
                     msg.id = payload.id;
-                }
-            }
-        },
-
-        addFullMediaInMsg (context, payload) {
-            const idChat = payload.idChat;
-            const idMsg = payload.idMsg;
-            const media = payload.media;
-
-            const chat = context.state.chats.find((element) => {
-                return element.id === idChat;
-            });
-
-            if (chat) {
-                const msg = chat.msgs.find((element) => {
-                    return element.id === idMsg;
-                });
-
-                if (msg) {
-                    msg.base64MediaFull = media;
                 }
             }
         }

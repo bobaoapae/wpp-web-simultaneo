@@ -3,14 +3,15 @@
       <MsgSymbol :msg="msg"/>
 
       <div class="box-content">
-         <span class="content" :inner-html.prop="msg.caption | emojify" v-if="msg.caption"></span>
-         <span class="content" v-else-if="msg.body && msg.isChat" :inner-html.prop="msg.body | emojify"></span>
+         <span class="content" :inner-html.prop="caption" v-if="msg.caption"></span>
+         <span class="content" v-else-if="msg.body && msg.isChat" :inner-html.prop="body"></span>
          <MsgType :msg="msg" v-else/>
       </div>
    </div>
 </template>
 
 <script>
+import { mapActions } from 'vuex';
 import MsgSymbol from './msgSymbol/MsgSymbol';
 import MsgType from './msgType/MsgType';
 
@@ -22,6 +23,59 @@ export default {
             type: Object,
             required: true
         }
+    },
+    asyncComputed: {
+        caption: {
+            async get () {
+                let caption = this.$options.filters.emojify(this.$options.filters.formatMsg(this.msg.caption));
+                if (this.msg.mentionedJidList && this.msg.mentionedJidList.length > 0) {
+                    let promises = [];
+                    let results = {};
+                    for (let x = 0; x < this.msg.mentionedJidList.length; x++) {
+                        promises.push(this.findChatFromId({ id: this.msg.mentionedJidList[x] }).then(value => {
+                            results[this.msg.mentionedJidList[x]] = value;
+                        }));
+                    }
+                    await Promise.all(promises);
+                    for (let x = 0; x < this.msg.mentionedJidList.length; x++) {
+                        let chat = results[this.msg.mentionedJidList[x]];
+                        let name = chat.contact.formattedName || chat.contact.verifiedName || chat.contact.pushname;
+                        caption = caption.replace('@' + this.msg.mentionedJidList[x].split('@')[0], `<span class='mention-symbol'>@</span><span class='btn-link' dir="ltr">${name}</span>`);
+                    }
+                }
+                return caption;
+            },
+            default () {
+                return this.msg.caption;
+            }
+        },
+        body: {
+            async get () {
+                let body = this.$options.filters.emojify(this.$options.filters.formatMsg(this.msg.body));
+                if (this.msg.mentionedJidList && this.msg.mentionedJidList.length > 0) {
+                    let promises = [];
+                    let results = {};
+                    for (let x = 0; x < this.msg.mentionedJidList.length; x++) {
+                        promises.push(this.findChatFromId({ id: this.msg.mentionedJidList[x] }).then(value => {
+                            results[this.msg.mentionedJidList[x]] = value;
+                        }));
+                    }
+                    await Promise.all(promises);
+                    for (let x = 0; x < this.msg.mentionedJidList.length; x++) {
+                        let chat = results[this.msg.mentionedJidList[x]];
+                        let name = chat.contact.formattedName || chat.contact.verifiedName || chat.contact.pushname;
+                        body = body.replace('@' + this.msg.mentionedJidList[x].split('@')[0], `<span class='mention-symbol'>@</span><span class='btn-link' dir="ltr">${name}</span>`);
+                    }
+                }
+                return body;
+            },
+            default () {
+                return this.msg.body;
+            }
+        }
+    },
+    methods: {
+        ...mapActions(['findChatFromId'])
     }
 };
 </script>

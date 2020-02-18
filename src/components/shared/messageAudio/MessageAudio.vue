@@ -52,13 +52,13 @@ export default {
     },
     data () {
         return {
-            srcAudio: this.msg.base64MediaFull,
+            srcAudio: '',
             srcLoading: false,
             srcError: false
         };
     },
     methods: {
-        ...mapActions(['addFullMediaInMsg', 'markPlayed', 'downloadMedia']),
+        ...mapActions(['markPlayed', 'downloadMedia']),
 
         handleMarkPlayed () {
             if (this.msg.ack !== 4) {
@@ -67,35 +67,13 @@ export default {
         },
         getAudio () {
             this.srcLoading = true;
-
-            if (!this.msg.base64MediaFull) {
-                this.downloadMedia({ id: this.msg.id._serialized }).then(e => {
-                    this.srcAudio = e.base64.replace('vorbis', 'ogg');
-                    this.srcLoading = false;
-                    this.srcError = false;
-                    this.saveInCache(this.srcAudio);
-                }).catch(e => {
-                    this.srcLoading = false;
-                    this.srcError = true;
-                });
-            } else {
-                this.srcAudio = this.msg.base64MediaFull;
-                this.srcLoading = false;
+            this.downloadMedia({ id: this.msg.id._serialized }).then(e => {
+                this.srcAudio = e.base64.replace('vorbis', 'ogg');
                 this.srcError = false;
-            }
-        },
-        saveInCache (media) {
-            let idChat;
-            if (this.msg.id.fromMe) {
-                idChat = this.msg.to;
-            } else {
-                idChat = this.msg.from;
-            }
-
-            this.addFullMediaInMsg({
-                idChat: idChat,
-                idMsg: this.msg.id,
-                media: media
+            }).catch(e => {
+                this.srcError = true;
+            }).finally(() => {
+                this.srcLoading = false;
             });
         },
         onVisible (visible) {

@@ -3,7 +3,7 @@
       <div class="message-text">
          <Thumbnail v-if="msg.matchedText" :msg="msg"/>
 
-         <span :inner-html.prop="msg.body | formatMsg | emojify"></span>
+         <span class="message-body" v-html="body"></span>
       </div>
 
       <MessageTime :msg="msg"/>
@@ -14,6 +14,7 @@
 <script>
 import MessageTime from '../messageTime/MessageTime';
 import Thumbnail from '../thumbnail/Thumbnail';
+import { mapActions } from 'vuex';
 
 export default {
     name: 'MessageText',
@@ -26,6 +27,35 @@ export default {
             type: Object,
             required: true
         }
+    },
+    asyncComputed: {
+        body: {
+            async get () {
+                let body = this.$options.filters.emojify(this.$options.filters.formatMsg(this.msg.body));
+                if (this.msg.mentionedJidList && this.msg.mentionedJidList.length > 0) {
+                    let promises = [];
+                    let results = {};
+                    for (let x = 0; x < this.msg.mentionedJidList.length; x++) {
+                        promises.push(this.findChatFromId({ id: this.msg.mentionedJidList[x] }).then(value => {
+                            results[this.msg.mentionedJidList[x]] = value;
+                        }));
+                    }
+                    await Promise.all(promises);
+                    for (let x = 0; x < this.msg.mentionedJidList.length; x++) {
+                        let chat = results[this.msg.mentionedJidList[x]];
+                        let name = chat.contact.formattedName || chat.contact.verifiedName || chat.contact.pushname;
+                        body = body.replace('@' + this.msg.mentionedJidList[x].split('@')[0], `<span class='mention-symbol'>@</span><span class='btn-link' dir="ltr">${name}</span>`);
+                    }
+                }
+                return body;
+            },
+            default () {
+                return this.msg.body;
+            }
+        }
+    },
+    methods: {
+        ...mapActions(['findChatFromId'])
     }
 };
 </script>
@@ -46,5 +76,9 @@ export default {
       word-wrap: break-word;
       color: #262626;
       font-size: 14.2px;
+   }
+
+   .message-body >>> .mention-symbol {
+       color: rgba(0,0,0,0.25)
    }
 </style>

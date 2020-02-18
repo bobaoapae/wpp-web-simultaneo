@@ -16,7 +16,7 @@
       </div>
 
       <div class="box-caption" v-if="msg.caption">
-         <span :inner-html.prop="msg.caption | formatMsg | emojify"></span>
+         <span :inner-html.prop="caption"></span>
       </div>
 
       <MessageTime :class="{'no-caption' : !haveCaption, 'custom-time' : !haveCaption}" :msg="msg"/>
@@ -42,7 +42,7 @@ export default {
     },
     data () {
         return {
-            imageFull: this.msg.base64MediaFull
+            imageFull: ''
         };
     },
     computed: {
@@ -53,31 +53,40 @@ export default {
             return this.msg.caption !== undefined;
         }
     },
+    asyncComputed: {
+        caption: {
+            async get () {
+                let caption = this.$options.filters.emojify(this.$options.filters.formatMsg(this.msg.caption));
+                if (this.msg.mentionedJidList && this.msg.mentionedJidList.length > 0) {
+                    let promises = [];
+                    let results = {};
+                    for (let x = 0; x < this.msg.mentionedJidList.length; x++) {
+                        promises.push(this.findChatFromId({ id: this.msg.mentionedJidList[x] }).then(value => {
+                            results[this.msg.mentionedJidList[x]] = value;
+                        }));
+                    }
+                    await Promise.all(promises);
+                    for (let x = 0; x < this.msg.mentionedJidList.length; x++) {
+                        let chat = results[this.msg.mentionedJidList[x]];
+                        let name = chat.contact.formattedName || chat.contact.verifiedName || chat.contact.pushname;
+                        caption = caption.replace('@' + this.msg.mentionedJidList[x].split('@')[0], `<span class='mention-symbol'>@</span><span class='btn-link' dir="ltr">${name}</span>`);
+                    }
+                }
+                return caption;
+            },
+            default () {
+                return this.msg.caption;
+            }
+        }
+    },
     methods: {
         ...mapMutations(['SET_MODAL']),
-        ...mapActions(['addFullMediaInMsg', 'downloadMedia']),
+        ...mapActions(['downloadMedia', 'findChatFromId']),
 
         getFullImage () {
-            if (!this.msg.base64MediaFull) {
-                this.downloadMedia({ id: this.msg.id._serialized }).then(e => {
-                    this.imageFull = e.base64;
-
-                    let idChat;
-                    if (this.msg.id.fromMe) {
-                        idChat = this.msg.to;
-                    } else {
-                        idChat = this.msg.from;
-                    }
-
-                    this.addFullMediaInMsg({
-                        idChat: idChat,
-                        idMsg: this.msg.id,
-                        media: this.imageFull
-                    });
-                });
-            } else {
-                this.imageFull = this.msg.base64MediaFull;
-            }
+            this.downloadMedia({ id: this.msg.id._serialized }).then(e => {
+                this.imageFull = e.base64;
+            });
         },
         handleClick () {
             this.SET_MODAL({
@@ -154,5 +163,9 @@ export default {
    .custom-time {
        right: 5px;
        bottom: 6px;
+   }
+
+   .box-caption >>> .mention-symbol {
+       color: rgba(0,0,0,0.25)
    }
 </style>

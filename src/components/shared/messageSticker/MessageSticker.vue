@@ -34,36 +34,19 @@ export default {
     },
     data () {
         return {
-            sticker: this.msg.base64MediaFull
+            sticker: ''
         };
     },
     computed: {
         ...mapState(['activeChat'])
     },
     methods: {
-        ...mapActions(['addFullMediaInMsg', 'downloadMedia']),
+        ...mapActions(['downloadMedia']),
 
         getSticker () {
-            if (!this.msg.base64MediaFull) {
-                this.downloadMedia({ id: this.msg.id._serialized }).then(e => {
-                    this.sticker = e.base64;
-
-                    let idChat;
-                    if (this.msg.id.fromMe) {
-                        idChat = this.msg.to;
-                    } else {
-                        idChat = this.msg.from;
-                    }
-
-                    this.addFullMediaInMsg({
-                        idChat: idChat,
-                        idMsg: this.msg.id,
-                        media: this.sticker
-                    });
-                });
-            } else {
-                this.sticker = this.msg.base64MediaFull;
-            }
+            this.downloadMedia({ id: this.msg.id._serialized }).then(e => {
+                this.sticker = e.base64;
+            });
         },
         onVisible (visible) {
             if (visible && !this.sticker) {
