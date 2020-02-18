@@ -603,7 +603,7 @@ const store = new Vuex.Store({
                 };
                 Object.defineProperty(el, 'lastMsg', {
                     get () {
-                        let array = this.msgs.filter(e => e.type && e.type !== 'e2e_notification' && e.type !== 'gp2').sort((a, b) => {
+                        let array = this.msgs.filter(e => e.type && e.type !== 'e2e_notification' && e.type !== 'gp2' && e.type !== 'notification_template').sort((a, b) => {
                             if (a.t < b.t) {
                                 return -1;
                             }
@@ -847,7 +847,7 @@ const store = new Vuex.Store({
 
                 context.commit('SET_CHATS', chats);
                 context.dispatch('updateTitle');
-            }, 100));
+            }, 50));
         },
 
         playNewMsgNotification (context, payload) {

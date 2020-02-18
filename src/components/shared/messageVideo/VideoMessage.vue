@@ -10,7 +10,7 @@
       </div>
 
       <div class="box-caption" v-if="msg.caption">
-         <span v-html="captionFormated"></span>
+         <span v-html="msg.caption | formatMsg"></span>
       </div>
 
       <MessageTime :class="{'no-caption' : !haveCaption, 'custom-time' : !haveCaption}" :msg="msg"/>
@@ -19,7 +19,6 @@
 
 <script>
 import { mapActions, mapMutations } from 'vuex';
-import { msg } from '@/helper.js';
 import LoadingMedia from '../loadingMedia/LoadingMedia.vue';
 import MessageTime from '../messageTime/MessageTime.vue';
 import PlayMedia from '../playMedia/PlayMedia';
@@ -43,12 +42,6 @@ export default {
         };
     },
     computed: {
-        captionFormated () {
-            if (this.msg.caption) {
-                return msg.formatMsg(this.msg.caption);
-            }
-            return '';
-        },
         haveCaption () {
             return this.msg.caption !== undefined;
         }

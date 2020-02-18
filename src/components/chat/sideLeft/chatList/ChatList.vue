@@ -65,7 +65,7 @@ export default {
 
         chatsFiltered () {
             const chatVisible = this.chats.filter(chat => {
-                return chat.shouldAppearInList;
+                return chat.shouldAppearInList && !chat.archive;
             });
 
             if (this.inputFilter === '') {
@@ -136,13 +136,14 @@ export default {
     max-height: calc(100vh - 105px);
     overflow-y: scroll;
     overflow-x: hidden;
+    transition: transform 0.2s;
   }
 
   .list-group-item {
     padding: 0;
     cursor: pointer;
     border: none;
-    transition: background 0.2s;
+    transition: background 0.1s;
   }
 
   .list-group-item:hover {
