@@ -26,12 +26,12 @@
 
          <!-- Identificador de mensagens no grupo -->
          <div class="identify-msg-group p-2" v-if="activeChat.isGroup && showTail">
-            <div v-if="msg.senderObj.name" :style="{color: activeChat.getColor(msg.senderObj.id)}">
+            <div v-if="msg.senderObj.name" class="btn-link" :style="{color: activeChat.getColor(msg.senderObj.id)}" @click="handleClick">
                {{msg.senderObj.name | emojify}}
             </div>
 
             <div class="d-flex justify-content-between" v-else>
-               <span class="number" :style="{color: activeChat.getColor(msg.senderObj.id)}">{{msg.senderObj.formattedName | emojify}}</span>
+               <span class="btn-link number" :style="{color: activeChat.getColor(msg.senderObj.id)}" @click="handleClick">{{msg.senderObj.formattedName | emojify}}</span>
                <span class="name">~{{msg.senderObj.pushname}}</span>
             </div>
          </div>
@@ -55,7 +55,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapActions, mapMutations, mapState } from 'vuex';
 import MessageText from '@/components/shared/messageText/MessageText.vue';
 import MessagePhoto from '@/components/shared/messagePhoto/MessagePhoto.vue';
 import MessageSticker from '@/components/shared/messageSticker/MessageSticker.vue';
@@ -107,6 +107,9 @@ export default {
         }
     },
     methods: {
+        ...mapMutations(['SET_ACTIVE_CHAT']),
+        ...mapActions(['findChatFromId']),
+
         handleShowMenu (evt) {
             this.menuAberto = true;
         },
@@ -120,6 +123,14 @@ export default {
 
         handleClickDelete () {
             this.$root.$emit('showModalDelteMsg', this.msg);
+        },
+
+        handleClick () {
+            this.findChatFromId({ id: this.msg.senderObj.id }).then(chat => {
+                this.SET_ACTIVE_CHAT(chat);
+            });
+
+            this.$root.$emit('showNewChat', false);
         }
     }
 };
