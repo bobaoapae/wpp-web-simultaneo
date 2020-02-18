@@ -35,5 +35,6 @@ module.exports = {
             .end();
     },
 
-    runtimeCompiler: true
+    runtimeCompiler: true,
+    productionSourceMap: false
 };
