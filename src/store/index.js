@@ -135,17 +135,38 @@ const store = new Vuex.Store({
                 reject: (e) => {
                     payload.reject(e);
                     delete state.wsEvents[payload.tag];
-                }
+                },
+                frames: []
             };
         },
 
         NEW_MSG_WS (state, payload) {
-            if (state.wsEvents[payload.tag]) {
+            let wsEvent = state.wsEvents[payload.tag];
+            if (wsEvent) {
                 let webSocketResponse = JSON.parse(payload.data);
                 if (webSocketResponse.status === 200 || webSocketResponse.status === 201) {
-                    state.wsEvents[payload.tag].resolve(webSocketResponse.response);
+                    if (webSocketResponse.frameId) {
+                        if (webSocketResponse.frameId >= 1) {
+                            wsEvent.frames.push(webSocketResponse);
+                        } else if (webSocketResponse.frameId === -1) {
+                            let frames = wsEvent.frames.sort((a, b) => a.frameId - b.frameId);
+                            let response = '';
+                            for (let x = 0; x < frames.length; x++) {
+                                response += frames[x].response;
+                            }
+                            response += webSocketResponse.response;
+                            try {
+                                response = JSON.parse(response);
+                            } catch (e) {
+                                console.log(e);
+                            }
+                            wsEvent.resolve(response);
+                        }
+                    } else {
+                        wsEvent.resolve(webSocketResponse.response);
+                    }
                 } else {
-                    state.wsEvents[payload.tag].reject(webSocketResponse);
+                    wsEvent.reject(webSocketResponse);
                 }
             }
         },
@@ -249,7 +270,10 @@ const store = new Vuex.Store({
                         const r = JSON.parse(responseData);
                         context.commit('SET_SELF', r.self);
 
+                        let init = performance.now();
                         context.dispatch('getAllChats').then(chats => {
+                            console.log('chats::', chats);
+                            console.log('time get all chats::', performance.now() - init);
                             context.commit('SET_IS_LOADING_CHAT', false);
                             context.dispatch('handleSetChats', chats);
                             context.dispatch('sortChatsByTime');
