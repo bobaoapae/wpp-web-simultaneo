@@ -759,7 +759,7 @@ const store = new Vuex.Store({
                 });
                 Object.defineProperty(msg, 'isAudio', {
                     get () {
-                        return this.type === 'ptt';
+                        return this.type === 'audio';
                     }
                 });
                 Object.defineProperty(msg, 'isPtt', {

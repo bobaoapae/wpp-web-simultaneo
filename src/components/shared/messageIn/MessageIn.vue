@@ -46,7 +46,7 @@
          <MessageSticker :msg="msg" v-else-if="msg.isSticker"/>
          <MessageVideo :msg="msg" v-else-if="msg.isVideo"/>
          <MessageDocument :msg="msg" v-else-if="msg.isDocument"/>
-         <MessageAudio :msg="msg" v-else-if="msg.isAudio"/>
+         <MessageAudio :msg="msg" v-else-if="msg.isAudio || msg.isPtt"/>
          <MessageRevoked :msg="msg" v-else-if="msg.isRevoked"/>
          <MessageLocation :msg="msg" v-else-if="msg.isLocation"/>
          <MessageContact :msg="msg" v-else-if="msg.isVcard"/>
