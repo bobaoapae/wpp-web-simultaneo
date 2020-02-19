@@ -1,6 +1,6 @@
 <template>
     <div>
-        <b-collapse id="collapse-emoji">
+        <b-collapse id="collapse-emoji" v-model="emojiVisible">
             <picker
                 :color="'#009688'"
                 :data="emojiIndex"
@@ -122,8 +122,17 @@ export default {
             gravando: false,
             ignoreRecording: false,
             time: 0,
-            interval: null
+            interval: null,
+            emojiVisible: false
         };
+    },
+    created () {
+        this.$root.$on('focusInput', () => {
+            this.$refs.input.focus();
+        });
+    },
+    mounted () {
+        this.$refs.input.focus();
     },
     watch: {
         'activeChat.quotedMsg': function (val) {
@@ -133,6 +142,9 @@ export default {
             } else {
                 this.answerVisible = false;
             }
+        },
+        'activeChat': function (val) {
+            this.$refs.input.focus();
         }
 
     },
@@ -320,6 +332,7 @@ export default {
             this.mensagem = '';
             this.restore = null;
             this.activeChat.quotedMsg = undefined;
+            this.emojiVisible = false;
         }
     }
 };

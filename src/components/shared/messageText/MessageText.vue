@@ -61,24 +61,25 @@ export default {
 </script>
 
 <style scoped>
-   .text-container {
-      min-width: 100px;
-      max-width: 500px;
-   }
+.text-container {
+    min-width: 100px;
+    max-width: 500px;
+}
 
-   .message-text {
-      padding: 6px 7px 8px 9px;
-   }
+.message-text {
+    padding: 6px 7px 8px 9px;
+    line-height: 19px;
+}
 
-   .message-text span {
-      margin-right: 55px;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      color: #262626;
-      font-size: 14.2px;
-   }
+.message-text span {
+    margin-right: 55px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: #262626;
+    font-size: 14.2px;
+}
 
-   .message-body >>> .mention-symbol {
-       color: rgba(0,0,0,0.25)
-   }
+.message-body >>> .mention-symbol {
+    color: rgba(0,0,0,0.25)
+}
 </style>

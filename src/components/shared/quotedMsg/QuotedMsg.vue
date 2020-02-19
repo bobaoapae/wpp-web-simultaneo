@@ -69,9 +69,7 @@ export default {
       border-radius: 5px;
       border-left: 4px solid #35cd96;
       margin: 3px;
-       max-width: 500px;
-       overflow-x: hidden;
-
+      overflow-x: hidden;
    }
 
    .box-content {

@@ -47,7 +47,8 @@ const store = new Vuex.Store({
         promisesWsEvents: {},
         intervalPong: -1,
         intervalPresence: -1,
-        audio: null
+        audio: null,
+        visible: true
     },
 
     mutations: {
@@ -212,6 +213,10 @@ const store = new Vuex.Store({
                 state.promisesWsEvents[payload.event] = [];
             }
             state.promisesWsEvents[payload.event].push(payload.promise);
+        },
+
+        SET_VISIBLE (state, payload) {
+            state.visible = payload;
         }
     },
 
@@ -518,6 +523,7 @@ const store = new Vuex.Store({
                 context.dispatch('sendPresenceStatus', { type: 'Available' });
             }
             visibility.change((evt, hidden) => {
+                context.commit('SET_VISIBLE', !hidden);
                 if (hidden) {
                     context.commit('INTERVAL_PRESENCE', setInterval(() => {
                         context.dispatch('sendPresenceStatus', { type: 'Unavailable' });
@@ -961,7 +967,8 @@ const store = new Vuex.Store({
                         return 0;
                     });
                     context.dispatch('sortChatsByTime');
-                    if (!payload.id.fromMe && chat.muteExpiration <= 0 && payload.id.isNewMsg) {
+                    if (!payload.id.fromMe && chat.muteExpiration <= 0 && payload.isNewMsg && (chat !== context.state.activeChat || !context.state.visible)) {
+                        console.log('playSound');
                         context.dispatch('playNewMsgNotification');
                     }
                 }

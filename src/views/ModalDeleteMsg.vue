@@ -32,7 +32,7 @@ export default {
         };
     },
     mounted () {
-        this.$root.$on('showModalDelteMsg', data => {
+        this.$root.$on('showModalDeleteMsg', data => {
             this.show = true;
             this.msg = data;
         });

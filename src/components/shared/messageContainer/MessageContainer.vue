@@ -1,9 +1,9 @@
 <template>
-   <div class="message-in">
-      <div @mouseenter="showMenuIcon = true" @mouseleave="showMenuIcon = false" class="message-in-container" :class="showTail ? 'tail' : ''">
+   <div class="message-container" :class="{'message-in' : !msg.id.fromMe, 'message-out': msg.id.fromMe}" @dblclick.left.prevent="handleDoubleClick">
+      <div v-b-hover="handleHover" class="message-body" :class="showTail ? 'tail' : ''">
          <div v-if="showTail" class="tail-container"></div>
          <div
-            :style="[msg.isSameColor ? {background: 'linear-gradient(90deg,hsla(0,0%,100%,0) 0,#FFF 50%)', height: '25px', width: '48px'} : {}]"
+            :class="{'same-color' : msg.isSameColor}"
             class="msg-menu"
             v-show="showMenuIcon || menuAberto">
             <b-dropdown
@@ -15,8 +15,7 @@
                variant="link"
             >
                <template v-slot:button-content>
-                  <img :style="[msg.isSameColor ? {filter: 'brightness(0.55) grayscale(1)'} :{}]" class="icon"
-                       src="@/assets/images/wpp-message-arrow-down.svg">
+                  <img src="@/assets/images/wpp-message-arrow-down.svg">
                </template>
 
                <b-dropdown-item @click="handleClickAnswer">Responder</b-dropdown-item>
@@ -25,7 +24,7 @@
          </div>
 
          <!-- Identificador de mensagens no grupo -->
-         <div class="identify-msg-group p-2" v-if="activeChat.isGroup && showTail">
+         <div class="identify-msg-group pb-0 pt-2 pl-2 pr-2" v-if="activeChat.isGroup && !msg.id.fromMe && showTail">
             <div v-if="msg.senderObj.name" class="btn-link" :style="{color: activeChat.getColor(msg.senderObj.id)}" @click="handleClick">
                {{msg.senderObj.name | emojify}}
             </div>
@@ -69,7 +68,7 @@ import MessageLocation from '../messageLocation/MessageLocation';
 import MessageContact from '../messageContact/MessageContact';
 
 export default {
-    name: 'MessageIn',
+    name: 'MessageContainer',
     components: {
         MessageRevoked,
         QuotedMsg,
@@ -92,7 +91,7 @@ export default {
     props: {
         msg: {
             type: Object,
-            required: false
+            required: true
         },
         previousMsg: {
             type: Object,
@@ -110,9 +109,14 @@ export default {
         ...mapMutations(['SET_ACTIVE_CHAT']),
         ...mapActions(['findChatFromId']),
 
+        handleHover (isHover) {
+            this.showMenuIcon = isHover;
+        },
+
         handleShowMenu (evt) {
             this.menuAberto = true;
         },
+
         handleHideMenu (evt) {
             this.menuAberto = false;
         },
@@ -122,7 +126,7 @@ export default {
         },
 
         handleClickDelete () {
-            this.$root.$emit('showModalDelteMsg', this.msg);
+            this.$root.$emit('showModalDeleteMsg', this.msg);
         },
 
         handleClick () {
@@ -131,6 +135,10 @@ export default {
             });
 
             this.$root.$emit('showNewChat', false);
+        },
+
+        handleDoubleClick () {
+            this.activeChat.quotedMsg = this.msg;
         }
     }
 };
@@ -139,16 +147,22 @@ export default {
 <style scoped>
 .msg-menu {
     position: absolute;
-    top: 3px;
     right: 3px;
     border-top-right-radius: 5px;
     display: block;
     text-align: right;
-    background: linear-gradient(15deg, transparent, transparent 45%, rgba(0, 0, 0, .12) 70%, rgba(0, 0, 0, .33));
     height: 25px;
-    max-width: 90%;
-    width: 156px;
     z-index: 1;
+}
+
+.msg-menu img{
+    vertical-align: top;
+    top: -3px;
+    position: relative;
+}
+
+.msg-menu.same-color img{
+    filter: brightness(0.55);
 }
 
 .icon {
@@ -168,28 +182,52 @@ export default {
     margin-left: 8px;
 }
 
-.message-in {
-    max-width: 65%;
+.message-container {
     padding: 0 9%;
-    margin-bottom: 8px;
+    margin-bottom: 2.5px;
     display: flex;
+}
+
+.message-container.message-in {
+    max-width: 65%;
+}
+
+.message-container.message-in {
     justify-content: flex-start;
 }
 
-.message-in-container {
+.message-container.message-out {
+    justify-content: flex-end;
+}
+
+.message-body {
     box-shadow: 0 1px 0.5px rgba(0, 0, 0, .13);
     position: relative;
-    background-color: #fff;
     border-radius: 7.5px;
 }
 
+.message-in .message-body{
+    background-color: #fff;
+}
+
+.message-out .message-body{
+    background-color: #DCF8C6;
+}
+
 .tail {
+    margin-top: 12px;
+}
+
+.message-in .tail {
     border-top-left-radius: 0;
+}
+
+.message-out .tail {
+    border-top-right-radius: 0;
 }
 
 .tail-container {
     position: absolute;
-    left: -12px;
     min-width: 12px;
     min-height: 19px;
     max-width: 12px;
@@ -197,6 +235,15 @@ export default {
     background-position: 50% 50%;
     background-repeat: no-repeat;
     background-size: contain;
+}
+
+.message-in .tail-container {
     background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAmCAMAAADp2asXAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAACQUExURUxpccPDw9ra2m9vbwAAAAAAADExMf///wAAABoaGk9PT7q6uqurqwsLCycnJz4+PtDQ0JycnIyMjPf3915eXvz8/E9PT/39/RMTE4CAgAAAAJqamv////////r6+u/v7yUlJeXl5f///5ycnOXl5XNzc/Hx8f///xUVFf///+zs7P///+bm5gAAAM7Ozv///2fVensAAAAvdFJOUwCow1cBCCnqAhNAnY0WIDW2f2/hSeo99g1lBYT87vDXG8/6d8oL4sgM5szrkgl660OiZwAAAHRJREFUKM/ty7cSggAABNFVUQFzwizmjPz/39k4YuFWtm55bw7eHR6ny63+alnswT3/rIDzUSC7CrAziPYCJCsB+gbVkgDtVIDh+DsE9OTBpCtAbSBAZSEQNgWIygJ0RgJMDWYNAdYbAeKtAHODlkHIv997AkLqIVOXVU84AAAAAElFTkSuQmCC");
+    left: -12px;
+}
+
+.message-out .tail-container {
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAmCAMAAADp2asXAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAADAUExURUxpcXmHa4maet/4yA0aDRMTE8fhsgAAAAAAAMDXrCsxJeX/z1xzXIiYetPsvGBsVUdPPuH8zOH8zNDrvMvmtrrOpwAAAAAAABUVFRoaGtnyxLTMozQ+MMfftFBeSR8nH5aoh6q/mW9+ZN/4yMjhtRwlHAAAAIOWd+r/06C1kkNLOwsLC9z4xur/0+n/0t76x9v4xeL9y+b/z+j/0d/7yeH8yuX/zeD8ytz5xt76yOP/zeH+y+b/zuD8yd35xuf/0MY9jkkAAAAsdFJOUwBvd/ATDZIBAsMp/At/11c9yPbizHoICQwT4bY1ykkgjahl6s8bBYT6nUAWOLbtFAAAAIhJREFUKM/tzbUWwlAURNFBE9zdg0NecLf//yvKUJyUdDnl7HXXletXqmXl9wPbQ9JCcC+VJsOj2mDwovzj3osjHGNFEVxNRAj7UR1hlx+I4FbuC8HkZBE8OwnRxamdFsEmUxCCGdoI51RLBK9xVwTvjyMEbzlDMJMp7lqseNc8YNc6CGyF/a0vcmwhZbCG+kEAAAAASUVORK5CYII=");
+    right: -12px;
 }
 </style>

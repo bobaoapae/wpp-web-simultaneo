@@ -1,25 +1,22 @@
 <template>
-   <div class="messages-private">
+   <div class="messages-list">
       <div :key="encodedMsgId(item)" :id="encodedMsgId(item)" v-for="(item, index) in msgs">
          <MessageDateFormatted v-if="!msgs[index-1] || msgs[index-1].fomattedDate !== item.fomattedDate" :formattedDate="item.fomattedDate"/>
          <MessageInfo :msg="item" v-if="isNotification(item.type)"/>
-         <MessageOut :msg="item" :previousMsg="msgs[index-1]" v-else-if="item.id.fromMe"/>
-         <MessageIn :msg="item" :previousMsg="msgs[index-1]" v-else/>
+         <MessageContainer :msg="item" :previousMsg="msgs[index-1]" v-else/>
       </div>
    </div>
 </template>
 
 <script>
-import MessageOut from '@/components/shared/messageOut/MessageOut.vue';
-import MessageIn from '@/components/shared/messageIn/MessageIn.vue';
+import MessageContainer from '@/components/shared/messageContainer/MessageContainer.vue';
 import MessageInfo from '@/components/shared/messageInfo/MessageInfo.vue';
 import MessageDateFormatted from '@/components/shared/messageDateFormatted/MessageDateFormatted.vue';
 
 export default {
     name: 'MessagesList',
     components: {
-        MessageOut,
-        MessageIn,
+        MessageContainer,
         MessageInfo,
         MessageDateFormatted
     },
