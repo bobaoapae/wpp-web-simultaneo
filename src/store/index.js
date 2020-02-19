@@ -248,15 +248,15 @@ const store = new Vuex.Store({
                     case 'init': {
                         const r = JSON.parse(responseData);
                         context.commit('SET_SELF', r.self);
-                        context.commit('SET_IS_LOADING_CHAT', false);
-                        context.dispatch('initPong');
-                        context.dispatch('initPresenceInterval');
 
                         context.dispatch('getAllChats').then(chats => {
+                            context.commit('SET_IS_LOADING_CHAT', false);
                             context.dispatch('handleSetChats', chats);
                             context.dispatch('sortChatsByTime');
                             context.state.poolContext.forEach(func => func());
                             context.state.poolContext = [];
+                            context.dispatch('initPong');
+                            context.dispatch('initPresenceInterval');
                         });
 
                         context.dispatch('getAllContacts').then(contacts => {

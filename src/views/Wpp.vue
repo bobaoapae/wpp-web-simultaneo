@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
+import { mapState } from 'vuex';
 
 import Loading from '@/views/Loading.vue';
 import QrCode from '@/views/QrCode.vue';
@@ -29,13 +29,6 @@ export default {
     },
     computed: {
         ...mapState(['isQrCodeLogged', 'isLoadingChat'])
-    },
-    created () {
-    // this.getChats();
-    },
-
-    methods: {
-        ...mapActions(['getChats'])
     }
 };
 </script>
