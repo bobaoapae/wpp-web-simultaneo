@@ -27,9 +27,9 @@ const store = new Vuex.Store({
         isLoadingChat: true,
         imgQrCode: '',
         QrCodeStatus: '',
-        self: null,
-        contacts: null,
-        chats: null,
+        self: {},
+        contacts: [],
+        chats: [],
         quickReplys: [],
         pictures: {},
         medias: {},
@@ -73,28 +73,25 @@ const store = new Vuex.Store({
             state.imgQrCode = payload;
         },
 
-        // chat que esta sendo visualizado
         SET_ACTIVE_CHAT (state, payload) {
             console.log('activeChat: ', payload);
             state.activeChat = payload;
         },
 
-        // define as informações do wpp logado
         SET_SELF (state, payload) {
-            state.self = payload;
+            Object.assign(state.self, payload);
         },
 
         SET_CONTACTS (state, payload) {
-            state.contacts = payload;
+            Vue.set(state, 'contacts', [...payload]);
         },
 
         SET_QUICK_REPLYS (state, payload) {
-            state.quickReplys = payload;
+            Vue.set(state, 'quickReplys', [...payload]);
         },
 
-        // define a lista com todos os chats
         SET_CHATS (state, payload) {
-            state.chats = payload;
+            Vue.set(state, 'chats', [...payload]);
         },
 
         SET_MODAL (state, payload) {
@@ -250,20 +247,27 @@ const store = new Vuex.Store({
 
                     case 'init': {
                         const r = JSON.parse(responseData);
-                        console.log('init', r);
-
-                        context.dispatch('handleSetChats', r.chats);
-                        context.dispatch('sortChatsByTime');
                         context.commit('SET_SELF', r.self);
-                        context.commit('SET_CONTACTS', r.contacts);
-                        if (r.quickReplys) {
-                            context.commit('SET_QUICK_REPLYS', r.quickReplys);
-                        }
                         context.commit('SET_IS_LOADING_CHAT', false);
-                        context.state.poolContext.forEach(func => func());
-                        context.state.poolContext = [];
                         context.dispatch('initPong');
                         context.dispatch('initPresenceInterval');
+
+                        context.dispatch('getAllChats').then(chats => {
+                            context.dispatch('handleSetChats', chats);
+                            context.dispatch('sortChatsByTime');
+                            context.state.poolContext.forEach(func => func());
+                            context.state.poolContext = [];
+                        });
+
+                        context.dispatch('getAllContacts').then(contacts => {
+                            context.commit('SET_CONTACTS', contacts);
+                        });
+
+                        if (r.isBussiness) {
+                            context.dispatch('getAllQuickReplys').then(quickReplys => {
+                                context.commit('SET_QUICK_REPLYS', quickReplys);
+                            });
+                        }
 
                         break;
                     }
@@ -444,6 +448,30 @@ const store = new Vuex.Store({
                 } else {
                     resolve(chat);
                 }
+            });
+        },
+
+        getAllChats (context, payload) {
+            return new Promise((resolve, reject) => {
+                context.dispatch('sendWsMessage', { event: 'getAllChats' }).then(chat => {
+                    resolve(chat);
+                }).catch(reason => reject(reason));
+            });
+        },
+
+        getAllContacts (context, payload) {
+            return new Promise((resolve, reject) => {
+                context.dispatch('sendWsMessage', { event: 'getAllContacts' }).then(chat => {
+                    resolve(chat);
+                }).catch(reason => reject(reason));
+            });
+        },
+
+        getAllQuickReplys (context, payload) {
+            return new Promise((resolve, reject) => {
+                context.dispatch('sendWsMessage', { event: 'getAllQuickReplys' }).then(chat => {
+                    resolve(chat);
+                }).catch(reason => reject(reason));
             });
         },
 

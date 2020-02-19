@@ -72,7 +72,7 @@ export const msg = {
                 href = `http://${url}`;
             }
 
-            return ` <a href="${href.toLowerCase()}" target="_blank">${unescape(url)}</a>`;
+            return ` <a href="${href}" target="_blank">${unescape(url)}</a>`;
         });
     },
 
