@@ -6,7 +6,7 @@
         <div class="box-wrapper">
             <div class="chat-profile">
                 <div class="box-img">
-                    <Picture :id="activeChat.id" :full="true" :key="activeChat.id"/>
+                    <Picture :id="activeChat.id" :full="true" :group="activeChat.isGroup" :key="activeChat.id"/>
                 </div>
                 <div class="chat-desc">
                     <span class="chat-title">{{activeChat.formattedTitle}}</span>
