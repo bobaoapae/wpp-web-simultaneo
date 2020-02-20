@@ -1,5 +1,5 @@
 <template>
-    <div class="contact" @click="handleClick">
+    <div @click="handleClick" class="contact">
         <Picture :id="contact.id"/>
 
         <div class="info">
@@ -21,6 +21,7 @@
 <script>
 import { mapActions, mapMutations, mapState } from 'vuex';
 import Picture from '@/components/shared/picture/Picture.vue';
+
 export default {
     name: 'Contact',
     components: { Picture },
@@ -57,7 +58,7 @@ export default {
     height: 72px;
     pointer-events: all;
     position: relative;
-    flex:1;
+    flex: 1;
     transition: background-color 0.2s;
 }
 
@@ -77,32 +78,32 @@ export default {
     justify-content: center;
 }
 
-    .name {
-        text-align: left;
-        align-items: center;
-        line-height: normal;
-        display: flex;
-    }
+.name {
+    text-align: left;
+    align-items: center;
+    line-height: normal;
+    display: flex;
+}
 
-    .name div {
-        color: #000;
-        display: flex;
-        flex-grow: 1;
-        font-weight: 400;
-        font-size: 17px;
-        line-height: 21px;
-        overflow: hidden;
-    }
+.name div {
+    color: #000;
+    display: flex;
+    flex-grow: 1;
+    font-weight: 400;
+    font-size: 17px;
+    line-height: 21px;
+    overflow: hidden;
+}
 
-    .name div span {
-        display: inherit;
-        white-space: inherit;
-        text-overflow: inherit;
-        overflow: inherit;
-        flex-grow: 1;
-        overflow: hidden;
-        position: relative;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
+.name div span {
+    display: inherit;
+    white-space: inherit;
+    text-overflow: inherit;
+    overflow: inherit;
+    flex-grow: 1;
+    overflow: hidden;
+    position: relative;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 </style>

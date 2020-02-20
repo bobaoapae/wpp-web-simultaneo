@@ -1,11 +1,11 @@
 <template>
-   <div
-      :class="{unread : isUnread}"
-      class="flex-grow-1"
-      id="name-chat"
-   >
-      <span :inner-html.prop="name | emojify"></span>
-   </div>
+    <div
+        :class="{unread : isUnread}"
+        class="flex-grow-1"
+        id="name-chat"
+    >
+        <span :inner-html.prop="name | emojify"></span>
+    </div>
 </template>
 
 <script>
@@ -32,17 +32,17 @@ export default {
 </script>
 
 <style scoped>
-   #name-chat {
-      font-size: 17px;
-      color: #000000;
+#name-chat {
+    font-size: 17px;
+    color: #000000;
 
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-   }
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 
-   .unread {
-      font-weight: 500 !important;
-      color: #262626 !important;
-   }
+.unread {
+    font-weight: 500 !important;
+    color: #262626 !important;
+}
 </style>

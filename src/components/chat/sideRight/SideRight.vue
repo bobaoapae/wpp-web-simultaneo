@@ -1,8 +1,10 @@
 <template>
-   <div :class="activeChat && activeChat.openChatInfo ? 'col-5 col-md-5 col-lg-5 col-xs-7 p-0' : 'col-8 col-md-8 col-lg-8 col-xs-9 p-0'" id="side-right">
-      <ChatIntro v-if="!activeChat"/>
-      <Conversation v-else/>
-   </div>
+    <div
+        :class="activeChat && activeChat.openChatInfo ? 'col-5 col-md-5 col-lg-5 col-xs-7 p-0' : 'col-8 col-md-8 col-lg-8 col-xs-9 p-0'"
+        id="side-right">
+        <ChatIntro v-if="!activeChat"/>
+        <Conversation v-else/>
+    </div>
 </template>
 
 <script>
@@ -24,8 +26,8 @@ export default {
 </script>
 
 <style scoped>
-   #side-right {
-      height: 100%;
-      background: blue;
-   }
+#side-right {
+    height: 100%;
+    background: blue;
+}
 </style>

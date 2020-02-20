@@ -1,16 +1,16 @@
 <template>
-    <a class="thumbnail" :href="msg.matchedText" target="_blank">
+    <a :href="msg.matchedText" class="thumbnail" target="_blank">
         <div class="image">
-            <img v-if="msg.thumbnail" :src="`data:image/jpeg;base64,${msg.thumbnail}`" :alt="msg.title">
+            <img :alt="msg.title" :src="`data:image/jpeg;base64,${msg.thumbnail}`" v-if="msg.thumbnail">
         </div>
 
         <a :href="msg.matchedText" target="_blank">
             <div class="content">
-                <div class="title" :title="msg.title">
+                <div :title="msg.title" class="title">
                     {{msg.title}}
                 </div>
 
-                <div class="description" :title="msg.description">
+                <div :title="msg.description" class="description">
                     {{msg.description}}
                 </div>
 
@@ -39,45 +39,45 @@ export default {
 </script>
 
 <style scoped>
-    .thumbnail {
-        background-color: rgba(0, 0, 0, 0.05);
-        border-radius: 6px;
-        display: flex;
-        text-decoration: none;
-    }
+.thumbnail {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 6px;
+    display: flex;
+    text-decoration: none;
+}
 
-    .image img {
-        width: 90px;
-        height: 90px;
-        border-top-left-radius: 6px;
-        border-bottom-left-radius: 6px;
-    }
+.image img {
+    width: 90px;
+    height: 90px;
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+}
 
-    .content {
-        padding: 6px 10px;
-        display: flex;
-        flex-direction: column;
-        max-height: 90px;
-    }
+.content {
+    padding: 6px 10px;
+    display: flex;
+    flex-direction: column;
+    max-height: 90px;
+}
 
-    .title {
-        font-size: 13px;
-        color: #000;
-    }
+.title {
+    font-size: 13px;
+    color: #000;
+}
 
-    .description {
-        font-size: 12px;
-        color: rgba(0, 0, 0, 0.45);
+.description {
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.45);
 
-        flex: 0 999 auto;
-        font-size: 12px;
-        overflow: hidden;
-        color: rgba(0,0,0,.45);
-        text-overflow: ellipsis;
-    }
+    flex: 0 999 auto;
+    font-size: 12px;
+    overflow: hidden;
+    color: rgba(0, 0, 0, .45);
+    text-overflow: ellipsis;
+}
 
-    .link {
-        font-size: 12px;
-        color: rgba(0, 0, 0, 0.8);
-    }
+.link {
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.8);
+}
 </style>

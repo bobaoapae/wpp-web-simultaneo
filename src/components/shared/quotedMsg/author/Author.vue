@@ -1,7 +1,7 @@
 <template>
-   <div class="author">
-      <span :style="{color:color}" class="name">{{autor}}</span>
-   </div>
+    <div class="author">
+        <span :style="{color:color}" class="name">{{autor}}</span>
+    </div>
 </template>
 
 <script>
@@ -37,9 +37,9 @@ export default {
 </script>
 
 <style scoped>
-   .name {
-      color: #35cd96;
-      font-size: 12.8px;
-      font-weight: 500;
-   }
+.name {
+    color: #35cd96;
+    font-size: 12.8px;
+    font-weight: 500;
+}
 </style>

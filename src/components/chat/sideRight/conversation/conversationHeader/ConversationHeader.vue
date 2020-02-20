@@ -1,30 +1,30 @@
 <template>
-   <div id="conversation-header">
-      <div class="box-img">
-         <Picture :id="activeChat.id" :key="activeChat.id" :group="activeChat.isGroup"/>
-      </div>
+    <div id="conversation-header">
+        <div class="box-img">
+            <Picture :group="activeChat.isGroup" :id="activeChat.id" :key="activeChat.id"/>
+        </div>
 
-      <div class="box-info" @click.prevent="openChatInfo">
-         <div class="nome" :inner-html.prop="nameEmojify | emojify"></div>
+        <div @click.prevent="openChatInfo" class="box-info">
+            <div :inner-html.prop="nameEmojify | emojify" class="nome"></div>
 
-         <div class="info">
-             <PresenceChat :chat="activeChat"
-                           v-if="activeChat.isChat" :key="activeChat.id"/>
-         </div>
-      </div>
+            <div class="info">
+                <PresenceChat :chat="activeChat"
+                              :key="activeChat.id" v-if="activeChat.isChat"/>
+            </div>
+        </div>
 
-      <div class="box-icons">
-         <img src="@/assets/images/wpp-icon-search.svg">
+        <div class="box-icons">
+            <img src="@/assets/images/wpp-icon-search.svg">
 
-         <label for="file">
-            <img src="@/assets/images/wpp-icon-clip.svg">
-            <input @change="onChange" id="file" type="file" ref="file" multiple/>
-         </label>
+            <label for="file">
+                <img src="@/assets/images/wpp-icon-clip.svg">
+                <input @change="onChange" id="file" multiple ref="file" type="file"/>
+            </label>
 
-         <img src="@/assets/images/wpp-icon-kebab-menu.svg">
-      </div>
+            <img src="@/assets/images/wpp-icon-kebab-menu.svg">
+        </div>
 
-   </div>
+    </div>
 </template>
 
 <script>
@@ -123,61 +123,61 @@ export default {
 </script>
 
 <style scoped>
-   #file {
-      display: none;
-   }
+#file {
+    display: none;
+}
 
-   label {
-      margin: 0;
-      padding: 0;
-   }
+label {
+    margin: 0;
+    padding: 0;
+}
 
-   #conversation-header {
-      background: #eee;
-      display: flex;
-      padding: 10px 16px;
-      height: 63px;
-      max-height: 63px;
-      cursor: pointer;
-      user-select: none;
-   }
+#conversation-header {
+    background: #eee;
+    display: flex;
+    padding: 10px 16px;
+    height: 63px;
+    max-height: 63px;
+    cursor: pointer;
+    user-select: none;
+}
 
-   .box-img {
-      padding-right: 15px;
-      display: flex;
-      align-items: center;
-   }
+.box-img {
+    padding-right: 15px;
+    display: flex;
+    align-items: center;
+}
 
-   .box-img >>> img {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-   }
+.box-img >>> img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
 
-   .box-img >>> .picture {
-       padding: 0;
-   }
+.box-img >>> .picture {
+    padding: 0;
+}
 
-   .box-info {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      flex-grow: 1;
-   }
+.box-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex-grow: 1;
+}
 
-   .box-info .nome {
-      font-size: 16px;
-      color: #000000;
-   }
+.box-info .nome {
+    font-size: 16px;
+    color: #000000;
+}
 
-   .box-info .info {
-      font-size: 13px;
-      color: rgba(0, 0, 0, 0.6);
-   }
+.box-info .info {
+    font-size: 13px;
+    color: rgba(0, 0, 0, 0.6);
+}
 
-   .box-icons img {
-      cursor: pointer;
-      padding: 8px;
-      margin-left: 10px
-   }
+.box-icons img {
+    cursor: pointer;
+    padding: 8px;
+    margin-left: 10px
+}
 </style>

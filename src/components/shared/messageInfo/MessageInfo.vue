@@ -1,39 +1,39 @@
 <template>
-   <div class="message-info">
-      <div :class="{ e2e : msg.type === 'e2e_notification' }" class="message-info-container">
+    <div class="message-info">
+        <div :class="{ e2e : msg.type === 'e2e_notification' }" class="message-info-container">
             <span v-if=" isEncrypt ">
                 As mensagens e chamadas desta conversa estão protegidas com a criptografia de ponta a ponta.
             </span>
 
-         <span v-else-if=" isIdentity ">
+            <span v-else-if=" isIdentity ">
                 O código de segurança de +{{ msg.body.replace('@c.us', '') }} mudou.
             </span>
 
-         <span v-else-if=" isCreate ">
+            <span v-else-if=" isCreate ">
                 {{ isMe }} criou o grupo "{{ activeChat.formattedTitle }}"
             </span>
 
-         <span v-else-if=" isAdd ">
+            <span v-else-if=" isAdd ">
                 {{ isMe }} adicionou {{ formatedNumbers }}
             </span>
 
-         <span v-else-if=" isRemove ">
+            <span v-else-if=" isRemove ">
                 {{ isMe }} removeu {{ formatedNumbers }}
             </span>
 
-         <span v-else-if=" isPromote ">
+            <span v-else-if=" isPromote ">
                 Você agora é um administrador
             </span>
 
-         <span v-else-if=" isDemote ">
+            <span v-else-if=" isDemote ">
                 Você não é mais um administrador
             </span>
 
-         <span v-else-if=" isLeave ">
+            <span v-else-if=" isLeave ">
                 {{ formatedNumbers }} saiu
             </span>
-      </div>
-   </div>
+        </div>
+    </div>
 </template>
 
 <script>
@@ -123,30 +123,30 @@ export default {
 </script>
 
 <style scoped>
-   .message-info {
-      padding: 0 9%;
-      margin-bottom: 8px;
-      display: flex;
-      justify-content: center;
-   }
+.message-info {
+    padding: 0 9%;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: center;
+}
 
-   .message-info-container {
-      background-color: rgba(225, 245, 254, .92);
-      border-radius: 7.5px;
-      box-shadow: 0 1px 0.5px rgba(0, 0, 0, .13);
-      padding: 5px 12px 6px;
-      text-align: center;
-      text-shadow: 0 1px 0 hsla(0, 0%, 100%, .4);
+.message-info-container {
+    background-color: rgba(225, 245, 254, .92);
+    border-radius: 7.5px;
+    box-shadow: 0 1px 0.5px rgba(0, 0, 0, .13);
+    padding: 5px 12px 6px;
+    text-align: center;
+    text-shadow: 0 1px 0 hsla(0, 0%, 100%, .4);
 
-      box-sizing: border-box;
-      color: rgba(74, 74, 74, .88);
-      display: inline-block;
-      flex: none;
-      font-size: 12.5px;
-      line-height: 21px;
-   }
+    box-sizing: border-box;
+    color: rgba(74, 74, 74, .88);
+    display: inline-block;
+    flex: none;
+    font-size: 12.5px;
+    line-height: 21px;
+}
 
-   .e2e {
-      background-color: rgba(255, 245, 196, .95);
-   }
+.e2e {
+    background-color: rgba(255, 245, 196, .95);
+}
 </style>

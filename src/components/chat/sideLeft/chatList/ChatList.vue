@@ -1,40 +1,40 @@
 <template>
-  <div id="chat-list">
-    <div class="box-input-search">
-      <input style="outline: none;" placeholder="Procurar" type="text" v-model="inputFilter"/>
+    <div id="chat-list">
+        <div class="box-input-search">
+            <input placeholder="Procurar" style="outline: none;" type="text" v-model="inputFilter"/>
+        </div>
+
+        <div class="box-list-group">
+            <transition-group class="list-group" name="flip-list" tag="ul">
+                <li
+                    :class="{ active : active_el === chat.id }"
+                    :key="chat.id"
+                    @click="handleClick(chat)"
+                    class="list-group-item d-flex"
+                    v-for="chat in chatsFiltered"
+                >
+                    <Picture :group="chat.isGroup" :id="chat.id"/>
+
+                    <div class="box-info-chat">
+                        <div class="d-flex">
+                            <NameChat :chat="chat"/>
+                            <TimeMsg :chat="chat"/>
+                        </div>
+
+                        <div class="d-flex presence-chat-container">
+                            <PresenceChat :chat="chat"
+                                          :class="{'d-flex align-items-center flex-grow-1': chat.isChat && (chat.isComposing || chat.isRecording)}"
+                                          :showLastTime="false"
+                                          :showOnline="false"
+                                          v-if="chat.isChat"/>
+                            <LastMsg :chat="chat" v-if="!chat.isChat || (!chat.isComposing && !chat.isRecording)"/>
+                            <Icons :chat="chat"/>
+                        </div>
+                    </div>
+                </li>
+            </transition-group>
+        </div>
     </div>
-
-    <div class="box-list-group">
-      <transition-group class="list-group" name="flip-list" tag="ul">
-        <li
-          :class="{ active : active_el === chat.id }"
-          :key="chat.id"
-          @click="handleClick(chat)"
-          class="list-group-item d-flex"
-          v-for="chat in chatsFiltered"
-        >
-          <Picture :id="chat.id" :group="chat.isGroup"/>
-
-          <div class="box-info-chat">
-            <div class="d-flex">
-              <NameChat :chat="chat"/>
-              <TimeMsg :chat="chat"/>
-            </div>
-
-            <div class="d-flex presence-chat-container">
-                <PresenceChat :chat="chat"
-                              :showOnline="false"
-                              :showLastTime="false"
-                              :class="{'d-flex align-items-center flex-grow-1': chat.isChat && (chat.isComposing || chat.isRecording)}"
-                              v-if="chat.isChat"/>
-              <LastMsg v-if="!chat.isChat || (!chat.isComposing && !chat.isRecording)" :chat="chat"/>
-              <Icons :chat="chat"/>
-            </div>
-          </div>
-        </li>
-      </transition-group>
-    </div>
-  </div>
 </template>
 
 <script>

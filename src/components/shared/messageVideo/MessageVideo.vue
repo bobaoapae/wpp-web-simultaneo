@@ -1,20 +1,20 @@
 <template>
-   <div class="message-video" v-b-visible.once="onVisible">
-      <div @click="handleClick" class="video-container">
-         <div class="box-preview blur">
-            <img :src=" 'data:image/jpeg;base64,'+ msg.body" alt="body">
-         </div>
+    <div class="message-video" v-b-visible.once="onVisible">
+        <div @click="handleClick" class="video-container">
+            <div class="box-preview blur">
+                <img :src=" 'data:image/jpeg;base64,'+ msg.body" alt="body">
+            </div>
 
-         <LoadingMedia v-if="!srcVideo"/>
-         <PlayMedia v-else/>
-      </div>
+            <LoadingMedia v-if="!srcVideo"/>
+            <PlayMedia v-else/>
+        </div>
 
-      <div class="box-caption" v-if="msg.hasCaption" @dblclick.prevent.stop>
-         <span v-html="caption"></span>
-      </div>
+        <div @dblclick.prevent.stop class="box-caption" v-if="msg.hasCaption">
+            <span v-html="caption"></span>
+        </div>
 
-      <MessageTime :class="{'no-caption' : !msg.hasCaption, 'custom-time' : !msg.hasCaption}" :msg="msg"/>
-   </div>
+        <MessageTime :class="{'no-caption' : !msg.hasCaption, 'custom-time' : !msg.hasCaption}" :msg="msg"/>
+    </div>
 </template>
 
 <script>
@@ -150,6 +150,6 @@ img {
 }
 
 .box-caption >>> .mention-symbol {
-    color: rgba(0,0,0,0.25);
+    color: rgba(0, 0, 0, 0.25);
 }
 </style>

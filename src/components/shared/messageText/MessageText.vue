@@ -1,14 +1,14 @@
 <template>
-   <div class="text-container">
-      <div class="message-text" @dblclick.prevent.stop>
-         <Thumbnail v-if="msg.matchedText" :msg="msg"/>
+    <div class="text-container">
+        <div @dblclick.prevent.stop class="message-text">
+            <Thumbnail :msg="msg" v-if="msg.matchedText"/>
 
-         <span class="message-body" v-html="body"></span>
-      </div>
+            <span class="message-body" v-html="body"></span>
+        </div>
 
-      <MessageTime :msg="msg"/>
+        <MessageTime :msg="msg"/>
 
-   </div>
+    </div>
 </template>
 
 <script>
@@ -81,6 +81,6 @@ export default {
 }
 
 .message-body >>> .mention-symbol {
-    color: rgba(0,0,0,0.25)
+    color: rgba(0, 0, 0, 0.25)
 }
 </style>

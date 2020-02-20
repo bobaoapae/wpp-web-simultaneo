@@ -1,7 +1,7 @@
 <template>
-   <div :class="{unread : isUnread}" id="timeMsg">
-      {{time}}
-   </div>
+    <div :class="{unread : isUnread}" id="timeMsg">
+        {{time}}
+    </div>
 </template>
 
 <script>
@@ -68,12 +68,12 @@ export default {
 </script>
 
 <style scoped>
-   #timeMsg {
-      font-size: 12px;
-      color: rgba(0, 0, 0, 0.4);
-   }
+#timeMsg {
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.4);
+}
 
-   .unread {
-      color: #333333 !important;
-   }
+.unread {
+    color: #333333 !important;
+}
 </style>

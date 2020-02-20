@@ -1,5 +1,5 @@
 <template>
-   <div :style="{borderColor: color}" class="quoted-msg" v-scroll-to="{
+    <div :style="{borderColor: color}" class="quoted-msg" v-scroll-to="{
      el: `#${encodedQuotedMsgId}`,
      container: '#messages-panel',
      duration: 500,
@@ -11,16 +11,16 @@
      x: false,
      y: true
  }">
-      <div class="box-content">
-         <Author :color="color" :senderObj="quotedMsg.senderObj"/>
-         <QuotedMsgContent :msg="quotedMsg"/>
-      </div>
+        <div class="box-content">
+            <Author :color="color" :senderObj="quotedMsg.senderObj"/>
+            <QuotedMsgContent :msg="quotedMsg"/>
+        </div>
 
-      <div class="box-media">
-         <QuotedMedia :body="quotedMsg.body" v-if="!quotedMsg.isChat && !quotedMsg.isVcard"/>
-         <Picture :id="vCardChatId" v-else-if="quotedMsg.isVcard" :key="vCardChatId"/>
-      </div>
-   </div>
+        <div class="box-media">
+            <QuotedMedia :body="quotedMsg.body" v-if="!quotedMsg.isChat && !quotedMsg.isVcard"/>
+            <Picture :id="vCardChatId" :key="vCardChatId" v-else-if="quotedMsg.isVcard"/>
+        </div>
+    </div>
 </template>
 
 <script>
@@ -73,24 +73,24 @@ export default {
 </script>
 
 <style scoped>
-   .quoted-msg {
-      display: flex;
-      flex-direction: row;
-      background-color: rgba(0, 0, 0, .05);
-      border-radius: 5px;
-      border-left: 4px solid #35cd96;
-      margin: 3px;
-      overflow-x: hidden;
-   }
+.quoted-msg {
+    display: flex;
+    flex-direction: row;
+    background-color: rgba(0, 0, 0, .05);
+    border-radius: 5px;
+    border-left: 4px solid #35cd96;
+    margin: 3px;
+    overflow-x: hidden;
+}
 
-   .box-content {
-      flex: 1;
+.box-content {
+    flex: 1;
 
-      display: flex;
-      flex-direction: column;
+    display: flex;
+    flex-direction: column;
 
-      padding: 4px 12px 8px 8px;
-       overflow-x: hidden;
-       text-overflow: ellipsis;
-   }
+    padding: 4px 12px 8px 8px;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+}
 </style>

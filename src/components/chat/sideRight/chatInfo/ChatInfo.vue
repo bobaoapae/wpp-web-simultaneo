@@ -1,19 +1,19 @@
 <template>
     <div class="col-3 col-md-3 col-lg-3 col-xs-2 p-0 chat-info">
         <div class="header">
-            <img class="mr-3 close-info" src="@/assets/images/wpp-icon-close-modal.svg" @click="handleClose"/>
+            <img @click="handleClose" class="mr-3 close-info" src="@/assets/images/wpp-icon-close-modal.svg"/>
             <span>Dados do {{activeChat.isChat ? 'Contato' :'Grupo'}}</span>
         </div>
         <div class="box-wrapper">
             <div class="chat-profile">
                 <div class="box-img">
-                    <Picture :id="activeChat.id" :full="true" :group="activeChat.isGroup" :key="activeChat.id"/>
+                    <Picture :full="true" :group="activeChat.isGroup" :id="activeChat.id" :key="activeChat.id"/>
                 </div>
                 <div class="chat-desc">
                     <span class="chat-title">{{activeChat.formattedTitle}}</span>
                     <div class="chat-sub-title">
                         <PresenceChat :chat="activeChat"
-                                      v-if="activeChat.isChat" :key="activeChat.id"/>
+                                      :key="activeChat.id" v-if="activeChat.isChat"/>
                         <div v-else>
                             <span>Criado em {{createdTime}}</span>
                         </div>
@@ -25,11 +25,11 @@
             <div class="box-chat-custom-properties">
                 <span class="title">Anotações</span>
                 <ul v-if="activeChat.customProperties">
-                    <li v-for="(value, name) in activeChat.customProperties" :key="value.key">
+                    <li :key="value.key" v-for="(value, name) in activeChat.customProperties">
                         <div class="col-12 chat-custom-properties" v-if="name !== 'initialized'">
                             <span class="col-5 p-0 mr-2" type="text">{{name}}:</span>
                             <span class="col-5 p-0" type="text">{{value}}</span>
-                            <button class="col-2 p-0" @click="deleteProperty(name)"></button>
+                            <button @click="deleteProperty(name)" class="col-2 p-0"></button>
                         </div>
                     </li>
                 </ul>
@@ -138,107 +138,107 @@ export default {
 
 <style scoped>
 
-    @keyframes animation {
-        0%, 30% {
-            transform: translateY(-50px);
-            opacity: 0;
-        }
-        100% {
-            transform: translateY(0);
-            opacity: 1;
-        }
+@keyframes animation {
+    0%, 30% {
+        transform: translateY(-50px);
+        opacity: 0;
     }
-
-    .header{
-        background: #eee;
-        padding: 10px 16px;
-        height: 63px;
-        max-height: 63px;
+    100% {
+        transform: translateY(0);
+        opacity: 1;
     }
+}
 
-    .box-wrapper{
-        padding-top: 5px;
-        padding-left: 30px;
-        padding-right: 30px;
-        padding-bottom: 20px;
-        background-color: white;
-        margin-bottom: 10px;
-        animation: animation 1s cubic-bezier(.1,.82,.25,1);
-        box-shadow: 0 1px 3px rgba(0,0,0,.08);
-    }
+.header {
+    background: #eee;
+    padding: 10px 16px;
+    height: 63px;
+    max-height: 63px;
+}
 
-    .chat-profile{
-        height: 40%;
-        background: white;
-    }
+.box-wrapper {
+    padding-top: 5px;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-bottom: 20px;
+    background-color: white;
+    margin-bottom: 10px;
+    animation: animation 1s cubic-bezier(.1, .82, .25, 1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+}
 
-    .chat-info{
-        height: 100%;
-        background: #eee;
-        color: #4a4a4a;
-        text-rendering: optimizeLegibility;
-        font-feature-settings: "kern";
+.chat-profile {
+    height: 40%;
+    background: white;
+}
 
-    }
+.chat-info {
+    height: 100%;
+    background: #eee;
+    color: #4a4a4a;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "kern";
 
-    .chat-title{
-        font-size: 19px;
-        line-height: 28px;
-    }
+}
 
-    .chat-sub-title{
-        font-size: 14px;
-        line-height: 20px;
-        color: rgba(0,0,0,.45);
-    }
+.chat-title {
+    font-size: 19px;
+    line-height: 28px;
+}
 
-    .box-chat-custom-properties ul{
-        margin: 0;
-        padding: 0;
-    }
+.chat-sub-title {
+    font-size: 14px;
+    line-height: 20px;
+    color: rgba(0, 0, 0, .45);
+}
 
-    .box-chat-custom-properties li{
-        list-style: none;
-    }
+.box-chat-custom-properties ul {
+    margin: 0;
+    padding: 0;
+}
 
-    .chat-custom-properties input{
-        border-style: none;
-    }
+.box-chat-custom-properties li {
+    list-style: none;
+}
 
-    .chat-custom-properties{
-        padding: 0;
-        margin: 0;
-    }
+.chat-custom-properties input {
+    border-style: none;
+}
 
-    .loading-properties{
-        max-width: 50px;
-        width: 50px;
-        margin: auto;
-    }
+.chat-custom-properties {
+    padding: 0;
+    margin: 0;
+}
 
-    .title{
-        color: #009688;
-        font-size: 14px;
-        line-height: normal;
-    }
+.loading-properties {
+    max-width: 50px;
+    width: 50px;
+    margin: auto;
+}
 
-    .box-img {
-        padding-top: 15px;
-        height: 212px;
-        width: 212px;
-        margin: auto;
-    }
+.title {
+    color: #009688;
+    font-size: 14px;
+    line-height: normal;
+}
 
-    .box-img >>> img {
-        display: block;
-        margin: 0 auto;
-        height: 100%;
-        width: 100%;
-        border-radius: 50%;
-    }
+.box-img {
+    padding-top: 15px;
+    height: 212px;
+    width: 212px;
+    margin: auto;
+}
 
-    .close-info {
-        filter: opacity(0.6);
-        cursor: pointer;
-    }
+.box-img >>> img {
+    display: block;
+    margin: 0 auto;
+    height: 100%;
+    width: 100%;
+    border-radius: 50%;
+}
+
+.close-info {
+    filter: opacity(0.6);
+    cursor: pointer;
+}
 </style>

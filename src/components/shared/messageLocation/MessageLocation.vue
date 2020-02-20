@@ -3,13 +3,13 @@
         <a :href="link" target="_blank">
             <MglMap
                 :accessToken="mapboxAccessToken"
-                :mapStyle.sync="mapStyle"
-                :center="[msg.lng, msg.lat]"
-                :zoom="14"
-                :interactive="false"
                 :attributionControl="false"
+                :center="[msg.lng, msg.lat]"
+                :interactive="false"
+                :mapStyle.sync="mapStyle"
+                :zoom="14"
             >
-                <MglMarker :coordinates="[msg.lng, msg.lat]" color="red" />
+                <MglMarker :coordinates="[msg.lng, msg.lat]" color="red"/>
             </MglMap>
         </a>
         <MessageTime :class="{'no-caption' : !msg.hasCaption, 'custom-time' : !msg.hasCaption}" :msg="msg"/>
@@ -47,22 +47,22 @@ export default {
 </script>
 
 <style scoped>
-    .location {
-        width: 270px;
-        height: 203px;
-        object-fit: contain;
-        padding: 3px;
-    }
+.location {
+    width: 270px;
+    height: 203px;
+    object-fit: contain;
+    padding: 3px;
+}
 
-    .custom-time {
-        right: 5px;
-        bottom: 6px;
-    }
+.custom-time {
+    right: 5px;
+    bottom: 6px;
+}
 
-    .no-caption {
-        color: #FFF;
-        background: rgba(0, 0, 0, 0.3);
-        padding: 0 5px;
-        border-radius: 3px;
-    }
+.no-caption {
+    color: #FFF;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 0 5px;
+    border-radius: 3px;
+}
 </style>

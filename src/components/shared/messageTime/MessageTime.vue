@@ -1,5 +1,5 @@
 <template>
-    <span class="time" :class="{bgWhite : msg.isSticker, bgGreen : msg.id.fromMe}">
+    <span :class="{bgWhite : msg.isSticker, bgGreen : msg.id.fromMe}" class="time">
         <span :class="{'mr-1' : msg.id.fromMe}">{{timeConverted}}</span>
         <MessageIconStatus :ack="msg.ack" v-if="msg.id.fromMe && msg.type !== 'revoked' "/>
     </span>
@@ -58,7 +58,7 @@ export default {
     background-color: white;
 }
 
-.bgGreen{
+.bgGreen {
     background-color: #DCF8C6;
 }
 </style>

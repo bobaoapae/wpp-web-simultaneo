@@ -41,8 +41,9 @@
         </b-collapse>
 
         <b-collapse id="collapse-answer-msg" v-model="quickReplysVisible">
-            <div v-if="showQuickReplys" class="quick-replys">
-                <div class="quick-reply" v-for="quickReply in filteredQuickReplys" :key="quickReply.id" @click="handleClickQuickReply(quickReply)">
+            <div class="quick-replys" v-if="showQuickReplys">
+                <div :key="quickReply.id" @click="handleClickQuickReply(quickReply)" class="quick-reply"
+                     v-for="quickReply in filteredQuickReplys">
                     /<span class="quick-reply-name">{{quickReply.shortcut}}</span> <span class="quick-reply-msg">{{quickReply.message}}</span>
                 </div>
             </div>
@@ -77,14 +78,14 @@
 
             <div class="box-icon-send">
                 <div>
-                    <img src="@/assets/images/wpp-icon-send.svg" v-if="mensagem" @click="handleSendMsg" />
-                    <img src="@/assets/images/wpp-icon-mic.svg" v-else-if="!gravando" @click="startRecording" />
+                    <img @click="handleSendMsg" src="@/assets/images/wpp-icon-send.svg" v-if="mensagem"/>
+                    <img @click="startRecording" src="@/assets/images/wpp-icon-mic.svg" v-else-if="!gravando"/>
                 </div>
 
                 <div v-if="gravando">
-                    <img src="@/assets/images/wpp-icon-cancel-ptt-outline.svg" @click="stopRecording" />
+                    <img @click="stopRecording" src="@/assets/images/wpp-icon-cancel-ptt-outline.svg"/>
                     <span class="recorder-time">{{timeConverter}}</span>
-                    <img src="@/assets/images/wpp-icon-send-ptt-outline.svg"  @click="sendPtt" />
+                    <img @click="sendPtt" src="@/assets/images/wpp-icon-send-ptt-outline.svg"/>
                 </div>
             </div>
         </div>
@@ -99,6 +100,7 @@ import { rageSave } from '@/rangeSelectionSaveRestore.js';
 import QuotedMsg from '../../../../shared/quotedMsg/QuotedMsg';
 import OpusMediaRecorder from 'opus-media-recorder';
 import Worker from 'worker-loader!opus-media-recorder/encoderWorker.js';
+
 const OggOpusWasm = import('opus-media-recorder/OggOpusEncoder.wasm');
 const WebMOpusWasm = import('opus-media-recorder/WebMOpusEncoder.wasm');
 
@@ -195,7 +197,9 @@ export default {
                     audio: true
                 })
                     .then(async (stream) => {
-                        this.interval = setInterval(() => { this.time++; }, 1000);
+                        this.interval = setInterval(() => {
+                            this.time++;
+                        }, 1000);
 
                         this.gumStream = stream;
                         const options = { mimeType: 'audio/ogg' };
@@ -433,7 +437,7 @@ export default {
 
 .quick-replys {
     background-color: #f0f0f0;
-    box-shadow: 0 -5px 7px -5px rgba(0,0,0,.04);
+    box-shadow: 0 -5px 7px -5px rgba(0, 0, 0, .04);
     border-left: 1px solid #e0e0e0;
     padding-top: 3px;
     position: relative;
@@ -442,7 +446,7 @@ export default {
 
 .quick-reply {
     margin-left: 3px;
-    color: rgba(0,0,0,.45);
+    color: rgba(0, 0, 0, .45);
     font-size: 14px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -457,7 +461,7 @@ export default {
 }
 
 .quick-reply-msg {
-    color: rgba(0,0,0,.45);
+    color: rgba(0, 0, 0, .45);
     font-size: 14px;
     height: 20px;
     overflow: hidden;

@@ -1,57 +1,59 @@
 <template>
-   <div class="message-container" :class="{'message-in' : !msg.id.fromMe, 'message-out': msg.id.fromMe}">
-      <div v-b-hover="handleHover" class="message-body" :class="showTail ? 'tail' : ''">
-         <div v-if="showTail" class="tail-container"></div>
-         <div
-            :class="{'same-color' : msg.isSameColor}"
-            class="msg-menu"
-            v-show="showMenuIcon || menuAberto">
-            <b-dropdown
-               @hide="handleHideMenu"
-               @show="handleShowMenu"
-               lazy
-               no-caret
-               toggle-class="text-decoration-none p-0"
-               variant="link"
-            >
-               <template v-slot:button-content>
-                  <img src="@/assets/images/wpp-message-arrow-down.svg">
-               </template>
+    <div :class="{'message-in' : !msg.id.fromMe, 'message-out': msg.id.fromMe}" class="message-container">
+        <div :class="showTail ? 'tail' : ''" class="message-body" v-b-hover="handleHover">
+            <div class="tail-container" v-if="showTail"></div>
+            <div
+                :class="{'same-color' : msg.isSameColor}"
+                class="msg-menu"
+                v-show="showMenuIcon || menuAberto">
+                <b-dropdown
+                    @hide="handleHideMenu"
+                    @show="handleShowMenu"
+                    lazy
+                    no-caret
+                    toggle-class="text-decoration-none p-0"
+                    variant="link"
+                >
+                    <template v-slot:button-content>
+                        <img src="@/assets/images/wpp-message-arrow-down.svg">
+                    </template>
 
-               <b-dropdown-item @click="handleClickAnswer">Responder</b-dropdown-item>
-               <b-dropdown-item @click="handleClickDelete">Apagar mensagem</b-dropdown-item>
-            </b-dropdown>
-         </div>
-
-         <!-- Identificador de mensagens no grupo -->
-         <div class="identify-msg-group pb-0 pt-2 pl-2 pr-2" v-if="activeChat.isGroup && !msg.id.fromMe && showTail">
-            <div v-if="msg.senderObj.name" class="btn-link" :style="{color: activeChat.getColor(msg.senderObj.id)}" @click="handleClick">
-               {{msg.senderObj.name | emojify}}
+                    <b-dropdown-item @click="handleClickAnswer">Responder</b-dropdown-item>
+                    <b-dropdown-item @click="handleClickDelete">Apagar mensagem</b-dropdown-item>
+                </b-dropdown>
             </div>
 
-            <div class="d-flex justify-content-between" v-else>
-               <span class="btn-link number" :style="{color: activeChat.getColor(msg.senderObj.id)}" @click="handleClick">{{msg.senderObj.formattedName | emojify}}</span>
-               <span class="name">~{{msg.senderObj.pushname}}</span>
+            <!-- Identificador de mensagens no grupo -->
+            <div class="identify-msg-group pb-0 pt-2 pl-2 pr-2" v-if="activeChat.isGroup && !msg.id.fromMe && showTail">
+                <div :style="{color: activeChat.getColor(msg.senderObj.id)}" @click="handleClick" class="btn-link"
+                     v-if="msg.senderObj.name">
+                    {{msg.senderObj.name | emojify}}
+                </div>
+
+                <div class="d-flex justify-content-between" v-else>
+                    <span :style="{color: activeChat.getColor(msg.senderObj.id)}" @click="handleClick"
+                          class="btn-link number">{{msg.senderObj.formattedName | emojify}}</span>
+                    <span class="name">~{{msg.senderObj.pushname}}</span>
+                </div>
             </div>
-         </div>
 
-         <!-- Mensagem Encaminhada -->
-         <ForwardedIndicator v-if="msg.isForwarded"/>
+            <!-- Mensagem Encaminhada -->
+            <ForwardedIndicator v-if="msg.isForwarded"/>
 
-         <QuotedMsg :quotedMsg="msg.quotedMsgObject" v-if="msg.hasQuotedMsg"/>
+            <QuotedMsg :quotedMsg="msg.quotedMsgObject" v-if="msg.hasQuotedMsg"/>
 
-         <MessageText :msg="msg" v-if="msg.isChat"/>
-         <MessagePhoto :msg="msg" v-else-if="msg.isImage"/>
-         <MessageSticker :msg="msg" v-else-if="msg.isSticker"/>
-         <MessageGif :msg="msg" v-else-if="msg.isGif"/>
-         <MessageVideo :msg="msg" v-else-if="msg.isVideo"/>
-         <MessageDocument :msg="msg" v-else-if="msg.isDocument"/>
-         <MessageAudio :msg="msg" v-else-if="msg.isAudio || msg.isPtt"/>
-         <MessageRevoked :msg="msg" v-else-if="msg.isRevoked"/>
-         <MessageLocation :msg="msg" v-else-if="msg.isLocation"/>
-         <MessageContact :msg="msg" v-else-if="msg.isVcard"/>
-      </div>
-   </div>
+            <MessageText :msg="msg" v-if="msg.isChat"/>
+            <MessagePhoto :msg="msg" v-else-if="msg.isImage"/>
+            <MessageSticker :msg="msg" v-else-if="msg.isSticker"/>
+            <MessageGif :msg="msg" v-else-if="msg.isGif"/>
+            <MessageVideo :msg="msg" v-else-if="msg.isVideo"/>
+            <MessageDocument :msg="msg" v-else-if="msg.isDocument"/>
+            <MessageAudio :msg="msg" v-else-if="msg.isAudio || msg.isPtt"/>
+            <MessageRevoked :msg="msg" v-else-if="msg.isRevoked"/>
+            <MessageLocation :msg="msg" v-else-if="msg.isLocation"/>
+            <MessageContact :msg="msg" v-else-if="msg.isVcard"/>
+        </div>
+    </div>
 </template>
 
 <script>
@@ -154,13 +156,13 @@ export default {
     z-index: 1;
 }
 
-.msg-menu img{
+.msg-menu img {
     vertical-align: top;
     top: -3px;
     position: relative;
 }
 
-.msg-menu.same-color img{
+.msg-menu.same-color img {
     filter: brightness(0.55);
 }
 
@@ -206,11 +208,11 @@ export default {
     border-radius: 7.5px;
 }
 
-.message-in .message-body{
+.message-in .message-body {
     background-color: #fff;
 }
 
-.message-out .message-body{
+.message-out .message-body {
     background-color: #DCF8C6;
 }
 

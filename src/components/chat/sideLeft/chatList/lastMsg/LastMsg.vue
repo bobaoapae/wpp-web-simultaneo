@@ -1,11 +1,12 @@
 <template>
-   <div :class="{unread : chat.isUnread}" class="last-msg flex-grow-1 d-flex align-items-center" v-if="chat.lastMsg">
-      <MessageIconStatus :ack="chat.lastMsg.ack" class="icon-status" v-if="chat.lastMsg.id.fromMe"/>
+    <div :class="{unread : chat.isUnread}" class="last-msg flex-grow-1 d-flex align-items-center" v-if="chat.lastMsg">
+        <MessageIconStatus :ack="chat.lastMsg.ack" class="icon-status" v-if="chat.lastMsg.id.fromMe"/>
 
-      <span v-if="chat.isGroup && chat.lastMsg && chat.lastMsg.senderObj && !chat.lastMsg.id.fromMe" :inner-html.prop="`${chat.lastMsg.senderObj.formattedName}: ` | emojify"></span>
+        <span :inner-html.prop="`${chat.lastMsg.senderObj.formattedName}: ` | emojify"
+              v-if="chat.isGroup && chat.lastMsg && chat.lastMsg.senderObj && !chat.lastMsg.id.fromMe"></span>
 
-      <MessageBody :lastMsg="chat.lastMsg"/>
-   </div>
+        <MessageBody :lastMsg="chat.lastMsg"/>
+    </div>
 </template>
 
 <script>
@@ -36,27 +37,27 @@ export default {
 </script>
 
 <style scoped>
-   .last-msg {
-      overflow: hidden;
-   }
+.last-msg {
+    overflow: hidden;
+}
 
-   .last-msg span {
-      color: rgba(0, 0, 0, 0.4);
-      font-size: 14px;
-      white-space: nowrap;
-      margin-right: 3px;
-   }
+.last-msg span {
+    color: rgba(0, 0, 0, 0.4);
+    font-size: 14px;
+    white-space: nowrap;
+    margin-right: 3px;
+}
 
-   img {
-      width: 20px;
-   }
+img {
+    width: 20px;
+}
 
-   .icon-status {
-      margin-right: 3px;
-   }
+.icon-status {
+    margin-right: 3px;
+}
 
-   .unread span {
-      color: rgba(0, 0, 0, 0.8) !important;
-      font-weight: 500 !important;
-   }
+.unread span {
+    color: rgba(0, 0, 0, 0.8) !important;
+    font-weight: 500 !important;
+}
 </style>

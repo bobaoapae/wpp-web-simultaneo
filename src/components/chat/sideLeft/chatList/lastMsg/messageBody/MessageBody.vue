@@ -1,12 +1,12 @@
 <template>
-   <span :inner-html.prop="lastMsg.body | emojify" v-if="lastMsg.isChat"></span>
+    <span :inner-html.prop="lastMsg.body | emojify" v-if="lastMsg.isChat"></span>
 
-   <span v-else-if="lastMsg.isImage">
+    <span v-else-if="lastMsg.isImage">
         <img src="@/assets/images/wpp-type-foto.svg">
         Foto
     </span>
 
-   <span v-else-if="lastMsg.isSticker">
+    <span v-else-if="lastMsg.isSticker">
         <img src="@/assets/images/wpp-type-sticker.svg">
         Figurinha
     </span>
@@ -16,17 +16,17 @@
         GIF
     </span>
 
-   <span v-else-if="lastMsg.isVideo">
+    <span v-else-if="lastMsg.isVideo">
         <img src="@/assets/images/wpp-type-video.svg">
         Video
     </span>
 
-   <span v-else-if="lastMsg.isDocument">
+    <span v-else-if="lastMsg.isDocument">
         <img src="@/assets/images/wpp-type-document.svg">
         {{lastMsg.filename}}
     </span>
 
-   <span v-else-if="lastMsg.isPtt">
+    <span v-else-if="lastMsg.isPtt">
         <img src="@/assets/images/wpp-type-ptt-gray.svg" v-if="lastMsg.id.fromMe">
         <img src="@/assets/images/wpp-type-ptt-blue.svg" v-else-if="lastMsg.ack === 4">
         <img src="@/assets/images/wpp-type-ptt-green.svg" v-else>
@@ -48,10 +48,12 @@
         Localização
     </span>
 
-    <span v-else-if="lastMsg.isRevoked" class="msgRevoked">
+    <span class="msgRevoked" v-else-if="lastMsg.isRevoked">
         <span data-icon="recalled-in">
-            <svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 17 19" width="17" height="19">
-                <path fill="#9BA3A7" d="M12.629 12.463a5.17 5.17 0 0 0-7.208-7.209l7.208 7.209zm-1.23 1.229L4.191 6.484a5.17 5.17 0 0 0 7.208 7.208zM8.41 2.564a6.91 6.91 0 1 1 0 13.82 6.91 6.91 0 0 1 0-13.82z">
+            <svg height="19" id="Layer_1" viewBox="0 0 17 19" width="17" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M12.629 12.463a5.17 5.17 0 0 0-7.208-7.209l7.208 7.209zm-1.23 1.229L4.191 6.484a5.17 5.17 0 0 0 7.208 7.208zM8.41 2.564a6.91 6.91 0 1 1 0 13.82 6.91 6.91 0 0 1 0-13.82z"
+                    fill="#9BA3A7">
                 </path>
             </svg>
         </span>
@@ -91,21 +93,21 @@ export default {
 </script>
 
 <style scoped>
-   span {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-   }
+span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 
-   span img {
-       vertical-align: top;
-   }
+span img {
+    vertical-align: top;
+}
 
-    .msgRevoked {
-        font-style: italic;
-    }
+.msgRevoked {
+    font-style: italic;
+}
 
-    .msgRevoked span:nth-child(1) {
-        margin-right: 2px;
-    }
+.msgRevoked span:nth-child(1) {
+    margin-right: 2px;
+}
 </style>

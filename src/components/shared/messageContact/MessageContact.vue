@@ -1,12 +1,13 @@
 <template>
     <div class="contact-container">
         <div class="contact">
-            <Picture :id="vCardChatId"/> <div class="contact-name" :inner-html.prop="msg.vCard.fn[0].value | emojify"></div>
+            <Picture :id="vCardChatId"/>
+            <div :inner-html.prop="msg.vCard.fn[0].value | emojify" class="contact-name"></div>
             <MessageTime :msg="msg"/>
         </div>
         <hr/>
         <div class="buttons">
-            <button class="btn btn-link" @click="handleClick">Enviar mensagem</button>
+            <button @click="handleClick" class="btn btn-link">Enviar mensagem</button>
         </div>
     </div>
 </template>
@@ -15,6 +16,7 @@
 import Picture from '../picture/Picture';
 import MessageTime from '../messageTime/MessageTime';
 import { mapActions, mapMutations } from 'vuex';
+
 export default {
     name: 'MessageContact',
     components: {

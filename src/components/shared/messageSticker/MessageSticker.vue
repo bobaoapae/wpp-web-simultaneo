@@ -1,12 +1,12 @@
 <template>
-   <div class="sticker-container" v-b-visible.once="onVisible" ref="stickerContainer">
-      <div class="box-sticker">
-         <img :src="this.sticker" alt="sticker" class="sticker" v-if="this.sticker"/>
-         <LoadingMedia v-else/>
-      </div>
+    <div class="sticker-container" ref="stickerContainer" v-b-visible.once="onVisible">
+        <div class="box-sticker">
+            <img :src="this.sticker" alt="sticker" class="sticker" v-if="this.sticker"/>
+            <LoadingMedia v-else/>
+        </div>
 
-      <MessageTime :msg="msg"/>
-   </div>
+        <MessageTime :msg="msg"/>
+    </div>
 </template>
 
 <script>
@@ -58,22 +58,22 @@ export default {
 </script>
 
 <style scoped>
-   .sticker-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-   }
+.sticker-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-   .box-sticker {
-      min-width: 125px;
-      max-width: 125px;
-      min-height: 125px;
-      max-height: 125px;
-      margin-bottom: 30px;
-   }
+.box-sticker {
+    min-width: 125px;
+    max-width: 125px;
+    min-height: 125px;
+    max-height: 125px;
+    margin-bottom: 30px;
+}
 
-   img {
-      width: 100%;
-      height: 100%;
-   }
+img {
+    width: 100%;
+    height: 100%;
+}
 </style>

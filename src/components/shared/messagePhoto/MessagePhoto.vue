@@ -1,26 +1,26 @@
 <template>
-   <div class="message-photo" v-b-visible.once="onVisible">
-      <div class="photo-container">
-         <div class="box-image">
-            <img
-               :src="imageFull"
-               @click="handleClick"
-               class="imageFull"
-               v-if="imageFull"
-            />
+    <div class="message-photo" v-b-visible.once="onVisible">
+        <div class="photo-container">
+            <div class="box-image">
+                <img
+                    :src="imageFull"
+                    @click="handleClick"
+                    class="imageFull"
+                    v-if="imageFull"
+                />
 
-            <img :class="{blur : !imageFull}" :src="preview" class="preview" v-else/>
-         </div>
+                <img :class="{blur : !imageFull}" :src="preview" class="preview" v-else/>
+            </div>
 
-         <LoadingMedia v-if="!imageFull"/>
-      </div>
+            <LoadingMedia v-if="!imageFull"/>
+        </div>
 
-      <div class="box-caption" v-if="msg.caption" @dblclick.prevent.stop>
-         <span :inner-html.prop="caption"></span>
-      </div>
+        <div @dblclick.prevent.stop class="box-caption" v-if="msg.caption">
+            <span :inner-html.prop="caption"></span>
+        </div>
 
-      <MessageTime :class="{'no-caption' : !haveCaption, 'custom-time' : !haveCaption}" :msg="msg"/>
-   </div>
+        <MessageTime :class="{'no-caption' : !haveCaption, 'custom-time' : !haveCaption}" :msg="msg"/>
+    </div>
 </template>
 
 <script>
@@ -165,6 +165,6 @@ img {
 }
 
 .box-caption >>> .mention-symbol {
-    color: rgba(0,0,0,0.25);
+    color: rgba(0, 0, 0, 0.25);
 }
 </style>

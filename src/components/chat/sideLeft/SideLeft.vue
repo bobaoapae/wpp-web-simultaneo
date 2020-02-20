@@ -1,13 +1,13 @@
 <template>
-   <div class="col-4 col-md-4 col-lg-4 col-xs-3 p-0" id="side-left">
-       <NewChat />
+    <div class="col-4 col-md-4 col-lg-4 col-xs-3 p-0" id="side-left">
+        <NewChat/>
 
-       <div id="list-chat">
-          <LeftHeader/>
+        <div id="list-chat">
+            <LeftHeader/>
 
-          <ChatList/>
-       </div>
-   </div>
+            <ChatList/>
+        </div>
+    </div>
 </template>
 
 <script>
@@ -26,10 +26,10 @@ export default {
 </script>
 
 <style scoped>
-   #side-left {
-      height: 100%;
-      /* padding: 0; */
-      display: flex;
-      flex-direction: column;
-   }
+#side-left {
+    height: 100%;
+    /* padding: 0; */
+    display: flex;
+    flex-direction: column;
+}
 </style>

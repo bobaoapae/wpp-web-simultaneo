@@ -1,9 +1,9 @@
 <template>
-  <div @scroll="handleScroll" id="messages-panel">
-    <LoadingEarlyMsg v-show="loadingEarly"/>
+    <div @scroll="handleScroll" id="messages-panel">
+        <LoadingEarlyMsg v-show="loadingEarly"/>
 
-    <MessagesList :msgs="activeChat.msgs"/>
-  </div>
+        <MessagesList :msgs="activeChat.msgs"/>
+    </div>
 </template>
 
 <script>
@@ -83,11 +83,11 @@ export default {
 </script>
 
 <style scoped>
-  #messages-panel {
+#messages-panel {
     padding: 10px 0;
     flex: 1;
     background-image: url("../../../../../assets/images/bg-chat.png");
     overflow: scroll;
     overflow-x: hidden;
-  }
+}
 </style>

@@ -1,11 +1,11 @@
 <template>
-   <div id="conversation">
-      <ConversationHeader/>
+    <div id="conversation">
+        <ConversationHeader/>
 
-      <MessagesPanel/>
+        <MessagesPanel/>
 
-      <InputMessage/>
-   </div>
+        <InputMessage/>
+    </div>
 </template>
 
 <script>
@@ -24,10 +24,10 @@ export default {
 </script>
 
 <style scoped>
-   #conversation {
-      height: 100%;
-      background: #fff;
-      display: flex;
-      flex-direction: column;
-   }
+#conversation {
+    height: 100%;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+}
 </style>
