@@ -18,7 +18,7 @@
 
       <div class="box-media">
          <QuotedMedia :body="quotedMsg.body" v-if="!quotedMsg.isChat && !quotedMsg.isVcard"/>
-         <Picture :id="vCardChatId" v-else-if="quotedMsg.isVcard"/>
+         <Picture :id="vCardChatId" v-else-if="quotedMsg.isVcard" :key="vCardChatId"/>
       </div>
    </div>
 </template>

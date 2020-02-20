@@ -6,7 +6,7 @@
         <div class="box-wrapper">
             <div class="chat-profile">
                 <div class="box-img">
-                    <ChatActivePhoto :full="true"/>
+                    <Picture :id="activeChat.id" :full="true" :key="activeChat.id"/>
                 </div>
                 <div class="chat-desc">
                     <span class="chat-title">{{activeChat.formattedTitle}}</span>
@@ -45,13 +45,13 @@
 </template>
 
 <script>
-import ChatActivePhoto from '../conversation/conversationHeader/chatActivePhoto/ChatActivePhoto';
 import { mapState } from 'vuex';
 import LoadginSpinner from '../../../shared/loadingSpinner/LoadingSpinner';
+import Picture from '../../sideLeft/newChat/listContact/contact/picture/Picture';
 
 export default {
     name: 'ChatInfo',
-    components: { LoadginSpinner, ChatActivePhoto },
+    components: { Picture, LoadginSpinner },
     watch: {
         'activeChat': function () {
             this.loadProperties();
@@ -239,10 +239,11 @@ export default {
         margin: auto;
     }
 
-    .box-img img {
+    .box-img >>> img {
         display: block;
         margin: 0 auto;
         height: 100%;
+        width: 100%;
         border-radius: 50%;
     }
 </style>

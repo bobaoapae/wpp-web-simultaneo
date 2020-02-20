@@ -978,7 +978,6 @@ const store = new Vuex.Store({
                     });
                     context.dispatch('sortChatsByTime');
                     if (!payload.id.fromMe && chat.muteExpiration <= 0 && payload.isNewMsg && (chat !== context.state.activeChat || !context.state.visible)) {
-                        console.log('playSound');
                         context.dispatch('playNewMsgNotification');
                     }
                 }

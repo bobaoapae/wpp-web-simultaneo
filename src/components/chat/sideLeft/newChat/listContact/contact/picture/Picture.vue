@@ -1,9 +1,14 @@
 <template>
     <div class="picture" v-b-visible.once="handleChatVisible">
-        <transition mode="out-in" name="component-fade">
-            <img key="user" src="@/assets/images/wpp-photo-user.svg" v-if="!picture"/>
+        <transition mode="out-in" name="component-fade" v-if="!group">
+            <img :key="'user'" src="@/assets/images/wpp-photo-user.svg" v-if="!picture"/>
 
-            <img key="original" :src="picture" v-else/>
+            <img :key="'original'" :src="picture" v-else/>
+        </transition>
+        <transition mode="out-in" name="component-fade" v-else>
+            <img :key="'group'" src="@/assets/images/wpp-photo-group.svg" v-if="!picture"/>
+
+            <img :key="'original'" :src="picture" v-else/>
         </transition>
     </div>
 </template>
@@ -16,6 +21,14 @@ export default {
         id: {
             type: String,
             required: true
+        },
+        group: {
+            type: Boolean,
+            required: false
+        },
+        full: {
+            type: Boolean,
+            required: false
         }
     },
     data () {
@@ -30,6 +43,11 @@ export default {
             if (visible) {
                 this.findPictureFromId({ id: this.id }).then(value => {
                     this.picture = value;
+                    if (this.full) {
+                        this.findPictureFromId({ id: this.id, full: this.full }).then(value => {
+                            this.picture = value;
+                        });
+                    }
                 });
             }
         }
@@ -40,16 +58,16 @@ export default {
 <style scoped>
 .picture {
     display: flex;
-    padding: 0 15px 0 13px;
     align-items: center;
+    padding: 0 15px 0 13px;
 }
 
-    img {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        object-fit: cover;
-    }
+img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+}
 
 .component-fade-enter-active, .component-fade-leave-active {
     transition: opacity 0.08s ease;

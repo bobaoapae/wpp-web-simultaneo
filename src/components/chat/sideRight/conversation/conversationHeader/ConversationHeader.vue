@@ -1,7 +1,7 @@
 <template>
    <div id="conversation-header">
       <div class="box-img">
-         <ChatActivePhoto/>
+         <Picture :id="activeChat.id" :key="activeChat.id" :group="activeChat.isGroup"/>
       </div>
 
       <div class="box-info" @click.prevent="openChatInfo">
@@ -36,12 +36,12 @@
 
 <script>
 import { mapState, mapActions } from 'vuex';
-import ChatActivePhoto from './chatActivePhoto/ChatActivePhoto.vue';
+import Picture from '../../../sideLeft/newChat/listContact/contact/picture/Picture';
 
 export default {
     name: 'ConversationHeader',
     components: {
-        ChatActivePhoto
+        Picture
     },
     data () {
         return {
@@ -153,10 +153,14 @@ export default {
       align-items: center;
    }
 
-   .box-img img {
+   .box-img >>> img {
       width: 40px;
       height: 40px;
       border-radius: 50%;
+   }
+
+   .box-img >>> .picture {
+       padding: 0;
    }
 
    .box-info {

@@ -13,7 +13,7 @@
           class="list-group-item d-flex"
           v-for="chat in chatsFiltered"
         >
-          <ChatPhoto :chat="chat"/>
+          <Picture :id="chat.id"/>
 
           <div class="box-info-chat">
             <div class="d-flex">
@@ -37,18 +37,18 @@
 </template>
 
 <script>
-import ChatPhoto from './chatPhoto/ChatPhoto.vue';
 import TimeMsg from './timeMsg/TimeMsg.vue';
 import LastMsg from './lastMsg/LastMsg.vue';
 import Icons from './icons/Icons.vue';
 import NameChat from './nameChat/NameChat.vue';
 
 import { mapState, mapMutations, mapActions } from 'vuex';
+import Picture from '../newChat/listContact/contact/picture/Picture';
 
 export default {
     name: 'ChatList',
     components: {
-        ChatPhoto,
+        Picture,
         TimeMsg,
         LastMsg,
         Icons,
@@ -101,56 +101,56 @@ export default {
 </script>
 
 <style scoped>
-  .active {
+.active {
     background: #e9ebeb !important;
-  }
+}
 
-  .flip-list-move {
+.flip-list-move {
     transition: transform 0.3s !important;
-  }
+}
 
-  .presenceInfo {
+.presenceInfo {
     color: #07bc4c;
-  }
+}
 
-  #chat-list {
+#chat-list {
     background: #fff;
     flex-grow: 1;
-  }
+}
 
-  .box-input-search {
+.box-input-search {
     background: #f8f8f8;
     padding: 5px 15px;
-  }
+}
 
-  .box-input-search input {
+.box-input-search input {
     width: 100%;
     background: #fff;
     border-radius: 18px;
     height: 35px;
     border: none;
     padding: 0 25px;
-  }
+}
 
-  .box-list-group {
+.box-list-group {
     max-height: calc(100vh - 105px);
     overflow-y: scroll;
     overflow-x: hidden;
     transition: transform 0.2s;
-  }
+}
 
-  .list-group-item {
+.list-group-item {
     padding: 0;
     cursor: pointer;
     border: none;
     transition: background 0.1s;
-  }
+}
 
-  .list-group-item:hover {
+.list-group-item:hover {
     background: #f4f5f5;
-  }
+}
 
-  .box-info-chat {
+.box-info-chat {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
@@ -158,13 +158,26 @@ export default {
     overflow: hidden;
     padding-right: 15px;
     border-top: 1px solid #f2f2f2 !important;
-  }
+}
 
-  @media screen and (min-width: 1441px) {
+.list-group-item >>> .picture {
+    padding: 0 13px 0 15px;
+    height: 73px;
+    display: flex;
+    align-items: center;
+}
+
+.list-group-item >>> .picture img {
+    height: 50px;
+    width: 50px;
+    border-radius: 50%;
+}
+
+@media screen and (min-width: 1441px) {
     .box-list-group {
-      max-height: calc(100vh - 147px);
-      overflow-y: scroll;
-      overflow-x: hidden;
+        max-height: calc(100vh - 147px);
+        overflow-y: scroll;
+        overflow-x: hidden;
     }
-  }
+}
 </style>
