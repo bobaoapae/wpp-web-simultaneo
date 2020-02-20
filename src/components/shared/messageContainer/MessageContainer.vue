@@ -189,6 +189,7 @@ export default {
     padding: 0 9%;
     margin-bottom: 2.5px;
     display: flex;
+    user-select: none;
 }
 
 .message-container.message-in {

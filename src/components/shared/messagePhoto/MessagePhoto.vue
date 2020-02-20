@@ -15,7 +15,7 @@
          <LoadingMedia v-if="!imageFull"/>
       </div>
 
-      <div class="box-caption" v-if="msg.caption">
+      <div class="box-caption" v-if="msg.caption" @dblclick.prevent.stop>
          <span :inner-html.prop="caption"></span>
       </div>
 
@@ -106,66 +106,65 @@ export default {
 </script>
 
 <style scoped>
-   .message-photo {
-      padding: 5px;
-   }
+.message-photo {
+    padding: 5px;
+}
 
-   .photo-container {
-      max-width: 330px;
-      min-width: 330px;
+.photo-container {
+    max-width: 330px;
+    min-width: 330px;
+    max-height: 330px;
+    min-height: 100px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+}
 
-      max-height: 330px;
-      min-height: 100px;
+.box-caption {
+    max-width: 330px;
+    min-width: 330px;
+    word-wrap: break-word;
+    user-select: text;
+}
 
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 6px;
-   }
+.box-image {
+    min-width: 100%;
+    min-height: 100%;
+}
 
-   .box-caption {
-      max-width: 330px;
-      min-width: 330px;
-      word-wrap: break-word;
-   }
+.blur {
+    filter: blur(8px);
+}
 
-   .box-image {
-      min-width: 100%;
-      min-height: 100%;
-   }
+img {
+    width: 100%;
+    height: 100%;
+}
 
-   .blur {
-      filter: blur(8px);
-   }
+.imageFull {
+    cursor: pointer;
+}
 
-   img {
-      width: 100%;
-      height: 100%;
-   }
+.no-caption {
+    color: #FFF;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 0 5px;
+    border-radius: 3px;
+}
 
-   .imageFull {
-      cursor: pointer;
-   }
+.box-caption span {
+    font-size: 14.2px;
+    color: #262626;
+}
 
-   .no-caption {
-      color: #FFF;
-      background: rgba(0, 0, 0, 0.3);
-      padding: 0 5px;
-      border-radius: 3px;
-   }
+.custom-time {
+    right: 5px;
+    bottom: 6px;
+}
 
-   .box-caption span {
-      font-size: 14.2px;
-      color: #262626;
-   }
-
-   .custom-time {
-       right: 5px;
-       bottom: 6px;
-   }
-
-   .box-caption >>> .mention-symbol {
-       color: rgba(0,0,0,0.25)
-   }
+.box-caption >>> .mention-symbol {
+    color: rgba(0,0,0,0.25);
+}
 </style>

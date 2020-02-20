@@ -9,7 +9,7 @@
          <PlayMedia v-else/>
       </div>
 
-      <div class="box-caption" v-if="msg.hasCaption">
+      <div class="box-caption" v-if="msg.hasCaption" @dblclick.prevent.stop>
          <span v-html="caption"></span>
       </div>
 
@@ -96,61 +96,60 @@ export default {
 </script>
 
 <style scoped>
-   .message-video {
-      padding: 3px;
-   }
+.message-video {
+    padding: 3px;
+}
 
-   .video-container {
-      max-width: 220px;
-      min-width: 220px;
+.video-container {
+    max-width: 220px;
+    min-width: 220px;
+    max-height: 160px;
+    min-height: 160px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+}
 
-      max-height: 160px;
-      min-height: 160px;
+.box-caption {
+    max-width: 220px;
+    min-width: 220px;
+    user-select: text;
+}
 
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 6px;
-   }
+.box-preview {
+    min-width: 100%;
+    min-height: 100%;
+}
 
-   .box-caption {
-      max-width: 220px;
-      min-width: 220px;
-   }
+.blur {
+    filter: blur(8px);
+}
 
-   .box-preview {
-      min-width: 100%;
-      min-height: 100%;
-   }
+img {
+    width: 100%;
+    height: 100%;
+}
 
-   .blur {
-      filter: blur(8px);
-   }
+.no-caption {
+    color: #FFF;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 0 5px;
+    border-radius: 3px;
+}
 
-   img {
-      width: 100%;
-      height: 100%;
-   }
+.box-caption span {
+    font-size: 14.2px;
+    color: #262626;
+}
 
-   .no-caption {
-      color: #FFF;
-      background: rgba(0, 0, 0, 0.3);
-      padding: 0 5px;
-      border-radius: 3px;
-   }
+.custom-time {
+    right: 3px;
+    bottom: 3px;
+}
 
-   .box-caption span {
-      font-size: 14.2px;
-      color: #262626;
-   }
-
-   .custom-time {
-       right: 3px;
-       bottom: 3px;
-   }
-
-   .box-caption >>> .mention-symbol {
-       color: rgba(0,0,0,0.25)
-   }
+.box-caption >>> .mention-symbol {
+    color: rgba(0,0,0,0.25);
+}
 </style>

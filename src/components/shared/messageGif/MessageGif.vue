@@ -1,6 +1,6 @@
 <template>
    <div class="message-gif" v-b-visible.once="onVisible">
-      <div @click="handleClick" class="gif-container">
+      <div class="gif-container">
          <div class="box-preview blur" v-if="!srcVideo">
             <img :src=" 'data:image/jpeg;base64,'+ msg.body" alt="body">
          </div>
@@ -8,7 +8,7 @@
          <LoadingMedia v-if="!srcVideo"/>
       </div>
 
-      <div class="box-caption" v-if="msg.hasCaption">
+      <div class="box-caption" v-if="msg.hasCaption" @dblclick.prevent.stop>
          <span v-html="caption"></span>
       </div>
 
@@ -71,11 +71,6 @@ export default {
                 this.srcVideo = e.base64;
             });
         },
-        handleClick () {
-            if (this.srcVideo) {
-
-            }
-        },
         onVisible (visible) {
             if (visible && !this.srcVideo) {
                 this.getVideo();
@@ -86,61 +81,60 @@ export default {
 </script>
 
 <style scoped>
-   .message-gif {
-      padding: 3px;
-   }
+.message-gif {
+    padding: 3px;
+}
 
-   .gif-container {
-      max-width: 220px;
-      min-width: 220px;
+.gif-container {
+    max-width: 220px;
+    min-width: 220px;
+    max-height: 160px;
+    min-height: 160px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+}
 
-      max-height: 160px;
-      min-height: 160px;
+.box-caption {
+    max-width: 220px;
+    min-width: 220px;
+    user-select: text;
+}
 
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 6px;
-   }
+.box-preview {
+    min-width: 100%;
+    min-height: 100%;
+}
 
-   .box-caption {
-      max-width: 220px;
-      min-width: 220px;
-   }
+.blur {
+    filter: blur(8px);
+}
 
-   .box-preview {
-      min-width: 100%;
-      min-height: 100%;
-   }
+video {
+    width: 100%;
+    height: 100%;
+}
 
-   .blur {
-      filter: blur(8px);
-   }
+.no-caption {
+    color: #FFF;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 0 5px;
+    border-radius: 3px;
+}
 
-   video {
-      width: 100%;
-      height: 100%;
-   }
+.box-caption span {
+    font-size: 14.2px;
+    color: #262626;
+}
 
-   .no-caption {
-      color: #FFF;
-      background: rgba(0, 0, 0, 0.3);
-      padding: 0 5px;
-      border-radius: 3px;
-   }
+.custom-time {
+    right: 3px;
+    bottom: 3px;
+}
 
-   .box-caption span {
-      font-size: 14.2px;
-      color: #262626;
-   }
-
-   .custom-time {
-       right: 3px;
-       bottom: 3px;
-   }
-
-   .box-caption >>> .mention-symbol {
-       color: rgba(0,0,0,0.25)
-   }
+.box-caption >>> .mention-symbol {
+    color: rgba(0,0,0,0.25)
+}
 </style>

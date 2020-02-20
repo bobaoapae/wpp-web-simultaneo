@@ -1,6 +1,6 @@
 <template>
    <div class="text-container">
-      <div class="message-text">
+      <div class="message-text" @dblclick.prevent.stop>
          <Thumbnail v-if="msg.matchedText" :msg="msg"/>
 
          <span class="message-body" v-html="body"></span>
@@ -64,6 +64,7 @@ export default {
 .text-container {
     min-width: 100px;
     max-width: 500px;
+    user-select: text;
 }
 
 .message-text {
