@@ -606,10 +606,9 @@ const store = new Vuex.Store({
 
         findCustomProperties (context, payload) {
             return new Promise((resolve, reject) => {
-                resolve([]);
-                /* context.dispatch('sendWsMessage', { event: 'findChatCustomProperties', payload: payload.id }).then(data => {
+                context.dispatch('sendWsMessage', { event: 'findCustomProperty', payload: { id: payload.id, type: payload.type } }).then(data => {
                     resolve(data);
-                }).catch(reason => reject(reason)); */
+                }).catch(reason => reject(reason));
             });
         },
 
@@ -640,23 +639,22 @@ const store = new Vuex.Store({
                 context.dispatch('setMsgsProperties', el.msgs);
                 el.quotedMsg = undefined;
                 el.openChatInfo = false;
-                el.customProperties = {
-                    properties: [],
-                    loaded: false,
-                    loadProperties: function () {
-                        this.loaded = false;
-                        return context.dispatch('findCustomProperties', { id: el.id }).then(value => {
-                            this.properties = value;
-                            this.loaded = true;
-                        });
-                    }
-                };
+                el.customProperties = { };
                 el.sendQueue = [];
                 el.sendMessage = function (payload) {
                     Object.assign(payload, {
                         chatId: this.id
                     });
                     return context.dispatch('sendMsg', payload);
+                };
+                el.seeChat = function () {
+                    return context.dispatch('seeChat', { chatId: this.id });
+                };
+                el.subscribePresence = function () {
+                    return context.dispatch('subscribePresence', { chatId: this.id });
+                };
+                el.loadEarly = function () {
+                    return context.dispatch('loadEarly', { chatId: this.id });
                 };
                 Object.defineProperty(el, 'lastMsg', {
                     get () {
@@ -860,6 +858,29 @@ const store = new Vuex.Store({
                 if (msg.isVcard) {
                     msg.vCard = vCardParse.parse(msg.body);
                 }
+                msg.customProperties = { };
+                msg.delete = function () {
+                    let payload = {
+                        msgId: this.id._serialized,
+                        fromAll: false
+                    };
+                    return context.dispatch('deleteMsg', payload);
+                };
+                msg.revoke = function () {
+                    let payload = {
+                        msgId: this.id._serialized,
+                        fromAll: true
+                    };
+                    return context.dispatch('deleteMsg', payload);
+                };
+                if (msg.isAudio || msg.isPtt) {
+                    msg.markPlayed = function () {
+                        let payload = {
+                            msgId: this.id._serialized
+                        };
+                        return context.dispatch('markPlayed', payload);
+                    };
+                }
             }
         },
 
@@ -1020,6 +1041,9 @@ const store = new Vuex.Store({
                     msg.ack = payload.ack;
                     msg.type = payload.type;
                     msg.id = payload.id;
+                    if (payload.customProperties) {
+                        Object.assign(msg.customProperties, payload.customProperties);
+                    }
                 }
             }
         }

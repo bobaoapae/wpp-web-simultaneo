@@ -20,7 +20,7 @@
 
 <script>
 import { mapActions, mapMutations, mapState } from 'vuex';
-import Picture from './picture/Picture';
+import Picture from '@/components/shared/picture/Picture.vue';
 export default {
     name: 'Contact',
     components: { Picture },

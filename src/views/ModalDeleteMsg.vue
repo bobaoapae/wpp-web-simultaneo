@@ -22,7 +22,6 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
 export default {
     name: 'ModalDeleteMsg',
     data () {
@@ -38,14 +37,12 @@ export default {
         });
     },
     methods: {
-        ...mapActions(['deleteMsg']),
-
         handleClick (fromAll) {
-            this.deleteMsg({
-                msgId: this.msg.id._serialized,
-                fromAll: fromAll
-            });
-
+            if (fromAll) {
+                this.msg.revoke();
+            } else {
+                this.msg.delete();
+            }
             this.show = false;
         }
     }

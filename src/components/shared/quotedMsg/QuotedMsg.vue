@@ -28,7 +28,7 @@ import { mapState } from 'vuex';
 import Author from './author/Author';
 import QuotedMsgContent from './quotedMsgContent/quotedMsgContent';
 import QuotedMedia from './quotedMedia/QuotedMedia';
-import Picture from '../../chat/sideLeft/newChat/listContact/contact/picture/Picture';
+import Picture from '@/components/shared/picture/Picture.vue';
 
 export default {
     name: 'QuotedMsg',

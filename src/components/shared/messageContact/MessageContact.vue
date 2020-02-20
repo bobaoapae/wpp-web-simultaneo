@@ -12,7 +12,7 @@
 </template>
 
 <script>
-import Picture from '../../chat/sideLeft/newChat/listContact/contact/picture/Picture';
+import Picture from '../picture/Picture';
 import MessageTime from '../messageTime/MessageTime';
 import { mapActions, mapMutations } from 'vuex';
 export default {

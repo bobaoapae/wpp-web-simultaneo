@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
+import { mapState } from 'vuex';
 import MessagesList from './messagesList/MessagesList';
 import LoadingEarlyMsg from '@/components/shared/loadingEarlyMsg/LoadingEarlyMsg';
 
@@ -59,8 +59,6 @@ export default {
         }
     },
     methods: {
-        ...mapActions(['loadEarly']),
-
         scrollToBottom () {
             const element = this.$el;
             const maxScrollTop = element.scrollHeight - element.clientHeight - 200;
@@ -76,10 +74,9 @@ export default {
         },
         handleLoadEarly () {
             this.loadingEarly = true;
-
-            this.loadEarly({ chatId: this.activeChat.id });
-
-            setTimeout(() => { this.loadingEarly = false; }, 7000);
+            this.activeChat.loadEarly().then(() => {
+                this.loadingEarly = false;
+            });
         }
     }
 };

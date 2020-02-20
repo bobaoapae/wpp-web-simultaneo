@@ -13,7 +13,7 @@
           class="list-group-item d-flex"
           v-for="chat in chatsFiltered"
         >
-          <Picture :id="chat.id"/>
+          <Picture :id="chat.id" :group="chat.isGroup"/>
 
           <div class="box-info-chat">
             <div class="d-flex">
@@ -21,11 +21,12 @@
               <TimeMsg :chat="chat"/>
             </div>
 
-            <div class="d-flex">
-              <div v-if="chat.isChat && (chat.isComposing || chat.isRecording)" class="flex-grow-1 d-flex align-items-center presenceInfo">
-                <span v-if="chat.isComposing">digitando...</span>
-                <span v-if="chat.isRecording">gravando áudio...</span>
-              </div>
+            <div class="d-flex presence-chat-container">
+                <PresenceChat :chat="chat"
+                              :showOnline="false"
+                              :showLastTime="false"
+                              :class="{'d-flex align-items-center flex-grow-1': chat.isChat && (chat.isComposing || chat.isRecording)}"
+                              v-if="chat.isChat"/>
               <LastMsg v-if="!chat.isChat || (!chat.isComposing && !chat.isRecording)" :chat="chat"/>
               <Icons :chat="chat"/>
             </div>
@@ -41,9 +42,10 @@ import TimeMsg from './timeMsg/TimeMsg.vue';
 import LastMsg from './lastMsg/LastMsg.vue';
 import Icons from './icons/Icons.vue';
 import NameChat from './nameChat/NameChat.vue';
+import Picture from '@/components/shared/picture/Picture.vue';
+import PresenceChat from '@/components/shared/presenceChat/PresenceChat.vue';
 
-import { mapState, mapMutations, mapActions } from 'vuex';
-import Picture from '../newChat/listContact/contact/picture/Picture';
+import { mapState, mapMutations } from 'vuex';
 
 export default {
     name: 'ChatList',
@@ -52,7 +54,8 @@ export default {
         TimeMsg,
         LastMsg,
         Icons,
-        NameChat
+        NameChat,
+        PresenceChat
     },
     data () {
         return {
@@ -80,7 +83,6 @@ export default {
     },
     methods: {
         ...mapMutations(['SET_ACTIVE_CHAT']),
-        ...mapActions(['seeChat']),
 
         handleClick (chat) {
             // seta o chat que sera visto
@@ -89,12 +91,8 @@ export default {
             this.active_el = chat.id;
 
             if (chat.unreadCount > 0) {
-                this.visualizarMsgs(chat.id);
+                chat.seeChat();
             }
-        },
-
-        visualizarMsgs (id) {
-            this.seeChat({ chatId: id });
         }
     }
 };
@@ -109,7 +107,7 @@ export default {
     transition: transform 0.3s !important;
 }
 
-.presenceInfo {
+.presence-chat-container {
     color: #07bc4c;
 }
 

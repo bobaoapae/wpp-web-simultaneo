@@ -58,11 +58,11 @@ export default {
         };
     },
     methods: {
-        ...mapActions(['markPlayed', 'downloadMedia']),
+        ...mapActions(['downloadMedia']),
 
         handleMarkPlayed () {
             if (this.msg.ack !== 4) {
-                this.markPlayed({ msgId: this.msg.id._serialized });
+                this.msg.markPlayed();
             }
         },
         getAudio () {

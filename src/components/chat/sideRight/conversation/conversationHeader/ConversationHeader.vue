@@ -8,15 +8,8 @@
          <div class="nome" :inner-html.prop="nameEmojify | emojify"></div>
 
          <div class="info">
-            <div v-if="activeChat.isChat">
-               <span v-if="activeChat.isOffline && activeChat.hasLastTimeAvailable">{{this.lastTimeAvailable}}</span>
-               <span v-else-if="activeChat.isOnline">online</span>
-               <span v-else-if="activeChat.isComposing">escrevendo...</span>
-               <span v-else-if="activeChat.isRecording">gravando áudio...</span>
-            </div>
-            <div v-else>
-
-            </div>
+             <PresenceChat :chat="activeChat"
+                           v-if="activeChat.isChat" :key="activeChat.id"/>
          </div>
       </div>
 
@@ -36,12 +29,14 @@
 
 <script>
 import { mapState, mapActions } from 'vuex';
-import Picture from '../../../sideLeft/newChat/listContact/contact/picture/Picture';
+import Picture from '@/components/shared/picture/Picture.vue';
+import PresenceChat from '@/components/shared/presenceChat/PresenceChat';
 
 export default {
     name: 'ConversationHeader',
     components: {
-        Picture
+        Picture,
+        PresenceChat
     },
     data () {
         return {

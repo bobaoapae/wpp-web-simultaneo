@@ -1,5 +1,5 @@
 <template>
-   <div class="message-container" :class="{'message-in' : !msg.id.fromMe, 'message-out': msg.id.fromMe}" @dblclick.left.prevent="handleDoubleClick">
+   <div class="message-container" :class="{'message-in' : !msg.id.fromMe, 'message-out': msg.id.fromMe}">
       <div v-b-hover="handleHover" class="message-body" :class="showTail ? 'tail' : ''">
          <div v-if="showTail" class="tail-container"></div>
          <div
@@ -138,10 +138,6 @@ export default {
             });
 
             this.$root.$emit('showNewChat', false);
-        },
-
-        handleDoubleClick () {
-            this.activeChat.quotedMsg = this.msg;
         }
     }
 };

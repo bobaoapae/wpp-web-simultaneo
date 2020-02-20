@@ -1,6 +1,7 @@
 <template>
     <div class="col-3 col-md-3 col-lg-3 col-xs-2 p-0 chat-info">
         <div class="header">
+            <img class="mr-3 close-info" src="@/assets/images/wpp-icon-close-modal.svg" @click="handleClose"/>
             <span>Dados do {{activeChat.isChat ? 'Contato' :'Grupo'}}</span>
         </div>
         <div class="box-wrapper">
@@ -11,12 +12,8 @@
                 <div class="chat-desc">
                     <span class="chat-title">{{activeChat.formattedTitle}}</span>
                     <div class="chat-sub-title">
-                        <div v-if="activeChat.isChat">
-                            <span v-if="activeChat.isOffline && activeChat.hasLastTimeAvailable">{{this.lastTimeAvailable}}</span>
-                            <span v-else-if="activeChat.isOnline">online</span>
-                            <span v-else-if="activeChat.isComposing">escrevendo...</span>
-                            <span v-else-if="activeChat.isRecording">gravando áudio...</span>
-                        </div>
+                        <PresenceChat :chat="activeChat"
+                                      v-if="activeChat.isChat" :key="activeChat.id"/>
                         <div v-else>
                             <span>Criado em {{createdTime}}</span>
                         </div>
@@ -27,12 +24,12 @@
         <div class="box-wrapper">
             <div class="box-chat-custom-properties">
                 <span class="title">Anotações</span>
-                <ul v-if="activeChat.customProperties.loaded">
-                    <li v-for="(value, index) in activeChat.customProperties.properties" :key="value.key">
-                        <div class="col-12 chat-custom-properties">
-                            <input class="col-5 p-0" type="text" v-model="value.key">
-                            <input class="col-5 p-0" type="text" v-model="value.value">
-                            <button class="col-2 p-0" @click="deleteRow(index)"></button>
+                <ul v-if="activeChat.customProperties">
+                    <li v-for="(value, name) in activeChat.customProperties" :key="value.key">
+                        <div class="col-12 chat-custom-properties" v-if="name !== 'initialized'">
+                            <span class="col-5 p-0 mr-2" type="text">{{name}}:</span>
+                            <span class="col-5 p-0" type="text">{{value}}</span>
+                            <button class="col-2 p-0" @click="deleteProperty(name)"></button>
                         </div>
                     </li>
                 </ul>
@@ -46,20 +43,13 @@
 
 <script>
 import { mapState } from 'vuex';
-import LoadginSpinner from '../../../shared/loadingSpinner/LoadingSpinner';
-import Picture from '../../sideLeft/newChat/listContact/contact/picture/Picture';
+import LoadginSpinner from '@/components/shared/loadingSpinner/LoadingSpinner';
+import Picture from '@/components/shared/picture/Picture.vue';
+import PresenceChat from '@/components/shared/presenceChat/PresenceChat';
 
 export default {
     name: 'ChatInfo',
-    components: { Picture, LoadginSpinner },
-    watch: {
-        'activeChat': function () {
-            this.loadProperties();
-        }
-    },
-    mounted () {
-        this.loadProperties();
-    },
+    components: { Picture, LoadginSpinner, PresenceChat },
     computed: {
         ...mapState(['activeChat']),
 
@@ -72,10 +62,6 @@ export default {
         }
     },
     methods: {
-        loadProperties () {
-            this.activeChat.customProperties.loadProperties();
-        },
-
         timeConverterPresence (unixTimeStamp) {
             let a = new Date(unixTimeStamp * 1000);
             let year = a.getFullYear();
@@ -140,6 +126,10 @@ export default {
             time = hour + ':' + min;
 
             return completeDate + ' ' + time;
+        },
+
+        handleClose () {
+            this.activeChat.openChatInfo = false;
         }
     }
 };
@@ -245,5 +235,10 @@ export default {
         height: 100%;
         width: 100%;
         border-radius: 50%;
+    }
+
+    .close-info {
+        filter: opacity(0.6);
+        cursor: pointer;
     }
 </style>
