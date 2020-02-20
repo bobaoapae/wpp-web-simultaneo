@@ -758,6 +758,11 @@ const store = new Vuex.Store({
                         return this.type === 'video';
                     }
                 });
+                Object.defineProperty(msg, 'isGif', {
+                    get () {
+                        return this.type === 'video' && this.gifAttribution >= 1;
+                    }
+                });
                 Object.defineProperty(msg, 'isDocument', {
                     get () {
                         return this.type === 'document';
@@ -795,7 +800,12 @@ const store = new Vuex.Store({
                 });
                 Object.defineProperty(msg, 'isSameColor', {
                     get () {
-                        return this.isChat && !this.hasQuotedMsg;
+                        return this.hasCaption || (this.isChat && !this.hasQuotedMsg);
+                    }
+                });
+                Object.defineProperty(msg, 'hasCaption', {
+                    get () {
+                        return !!this.caption;
                     }
                 });
                 Object.defineProperty(msg, 'fomattedDate', {

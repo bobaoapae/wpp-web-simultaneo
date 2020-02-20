@@ -2,9 +2,15 @@
    <div class="msg-type">
       <span v-if="msg.isImage">Foto</span>
 
+      <span v-else-if="msg.isGif">GIF</span>
+
       <span v-else-if="msg.isVideo">Video</span>
 
       <span v-else-if="msg.isAudio || msg.isPtt">Audio</span>
+
+      <span v-else-if="msg.isLocation">Localização</span>
+
+      <span v-else-if="msg.isVcard">Contato: {{msg.vCard.fn[0].value}}</span>
    </div>
 </template>
 

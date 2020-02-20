@@ -138,7 +138,8 @@ export default {
         'activeChat.quotedMsg': function (val) {
             if (val) {
                 this.$refs.input.focus();
-                this.answerVisible = true;
+                this.answerVisible = false;
+                setTimeout(() => { this.answerVisible = true; }, 200);
             } else {
                 this.answerVisible = false;
             }

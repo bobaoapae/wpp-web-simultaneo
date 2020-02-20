@@ -1,32 +1,29 @@
 <template>
-   <div class="message-video" v-b-visible.once="onVisible">
-      <div @click="handleClick" class="video-container">
-         <div class="box-preview blur">
+   <div class="message-gif" v-b-visible.once="onVisible">
+      <div @click="handleClick" class="gif-container">
+         <div class="box-preview blur" v-if="!srcVideo">
             <img :src=" 'data:image/jpeg;base64,'+ msg.body" alt="body">
          </div>
-
+         <video :src="srcVideo" loop autoplay v-else/>
          <LoadingMedia v-if="!srcVideo"/>
-         <PlayMedia v-else/>
       </div>
 
-      <div class="box-caption" v-if="haveCaption">
+      <div class="box-caption" v-if="msg.hasCaption">
          <span v-html="caption"></span>
       </div>
 
-      <MessageTime :class="{'no-caption' : !haveCaption, 'custom-time' : !haveCaption}" :msg="msg"/>
+      <MessageTime :class="{'no-caption' : !msg.hasCaption, 'custom-time' : !msg.hasCaption}" :msg="msg"/>
    </div>
 </template>
 
 <script>
-import { mapActions, mapMutations } from 'vuex';
+import { mapActions } from 'vuex';
 import LoadingMedia from '../loadingMedia/LoadingMedia.vue';
 import MessageTime from '../messageTime/MessageTime.vue';
-import PlayMedia from '../playMedia/PlayMedia';
 
 export default {
-    name: 'VideoMessage',
+    name: 'MessageGif',
     components: {
-        PlayMedia,
         LoadingMedia,
         MessageTime
     },
@@ -40,11 +37,6 @@ export default {
         return {
             srcVideo: ''
         };
-    },
-    computed: {
-        haveCaption () {
-            return this.msg.caption !== undefined;
-        }
     },
     asyncComputed: {
         caption: {
@@ -74,8 +66,6 @@ export default {
     },
     methods: {
         ...mapActions(['downloadMedia', 'findChatFromId']),
-        ...mapMutations(['SET_MODAL']),
-
         getVideo () {
             this.downloadMedia({ id: this.msg.id._serialized }).then(e => {
                 this.srcVideo = e.base64;
@@ -83,12 +73,7 @@ export default {
         },
         handleClick () {
             if (this.srcVideo) {
-                this.SET_MODAL({
-                    show: true,
-                    type: 'video',
-                    media: this.srcVideo,
-                    id: this.msg.id._serialized
-                });
+
             }
         },
         onVisible (visible) {
@@ -101,11 +86,11 @@ export default {
 </script>
 
 <style scoped>
-   .message-video {
+   .message-gif {
       padding: 3px;
    }
 
-   .video-container {
+   .gif-container {
       max-width: 220px;
       min-width: 220px;
 
@@ -133,7 +118,7 @@ export default {
       filter: blur(8px);
    }
 
-   img {
+   video {
       width: 100%;
       height: 100%;
    }

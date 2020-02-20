@@ -17,7 +17,8 @@
       </div>
 
       <div class="box-media">
-         <QuotedMedia :body="quotedMsg.body" v-if="!quotedMsg.isChat"/>
+         <QuotedMedia :body="quotedMsg.body" v-if="!quotedMsg.isChat && !quotedMsg.isVcard"/>
+         <Picture :id="vCardChatId" v-else-if="quotedMsg.isVcard"/>
       </div>
    </div>
 </template>
@@ -27,10 +28,11 @@ import { mapState } from 'vuex';
 import Author from './author/Author';
 import QuotedMsgContent from './quotedMsgContent/quotedMsgContent';
 import QuotedMedia from './quotedMedia/QuotedMedia';
+import Picture from '../../chat/sideLeft/newChat/listContact/contact/picture/Picture';
 
 export default {
     name: 'QuotedMsg',
-    components: { QuotedMedia, QuotedMsgContent, Author },
+    components: { Picture, QuotedMedia, QuotedMsgContent, Author },
     props: {
         quotedMsg: {
             required: true,
@@ -51,6 +53,15 @@ export default {
 
         encodedQuotedMsgId () {
             return this.quotedMsg.id._serialized.replace(/[^\w\s]/gi, '').replace(/[_]/gi, '');
+        },
+
+        vCardChatId () {
+            for (let tel in this.quotedMsg.vCard.tel) {
+                if (this.quotedMsg.vCard.tel[tel].meta && this.quotedMsg.vCard.tel[tel].meta.waid) {
+                    return this.quotedMsg.vCard.tel[tel].meta.waid[0] + '@c.us';
+                }
+            }
+            return '';
         }
     },
     methods: {

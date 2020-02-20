@@ -43,6 +43,7 @@
          <MessageText :msg="msg" v-if="msg.isChat"/>
          <MessagePhoto :msg="msg" v-else-if="msg.isImage"/>
          <MessageSticker :msg="msg" v-else-if="msg.isSticker"/>
+         <MessageGif :msg="msg" v-else-if="msg.isGif"/>
          <MessageVideo :msg="msg" v-else-if="msg.isVideo"/>
          <MessageDocument :msg="msg" v-else-if="msg.isDocument"/>
          <MessageAudio :msg="msg" v-else-if="msg.isAudio || msg.isPtt"/>
@@ -58,7 +59,8 @@ import { mapActions, mapMutations, mapState } from 'vuex';
 import MessageText from '@/components/shared/messageText/MessageText.vue';
 import MessagePhoto from '@/components/shared/messagePhoto/MessagePhoto.vue';
 import MessageSticker from '@/components/shared/messageSticker/MessageSticker.vue';
-import MessageVideo from '@/components/shared/messageVideo/VideoMessage.vue';
+import MessageVideo from '@/components/shared/messageVideo/MessageVideo.vue';
+import MessageGif from '@/components/shared/messageGif/MessageGif.vue';
 import MessageDocument from '@/components/shared/messageDocument/MessageDocument';
 import ForwardedIndicator from '@/components/shared/forwardedIndicator/ForwardedIndicator';
 import MessageAudio from '@/components/shared/messageAudio/MessageAudio';
@@ -80,7 +82,8 @@ export default {
         MessageVideo,
         MessageDocument,
         MessageLocation,
-        MessageContact
+        MessageContact,
+        MessageGif
     },
     data () {
         return {

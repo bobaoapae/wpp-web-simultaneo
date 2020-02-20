@@ -1,13 +1,37 @@
 <template>
     <div class="location">
         <a :href="link" target="_blank">
-            <img :src="'data:image/jpeg;base64,'+msg.body" alt="">
+            <MglMap
+                :accessToken="mapboxAccessToken"
+                :mapStyle.sync="mapStyle"
+                :center="[msg.lng, msg.lat]"
+                :zoom="14"
+                :interactive="false"
+                :attributionControl="false"
+            >
+                <MglMarker :coordinates="[msg.lng, msg.lat]" color="red" />
+            </MglMap>
         </a>
+        <MessageTime :class="{'no-caption' : !msg.hasCaption, 'custom-time' : !msg.hasCaption}" :msg="msg"/>
     </div>
 </template>
 
 <script>
+import { MglMap, MglMarker } from 'vue-mapbox';
+import MessageTime from '../messageTime/MessageTime';
+
 export default {
+    components: {
+        MglMap,
+        MglMarker,
+        MessageTime
+    },
+    data () {
+        return {
+            mapboxAccessToken: 'pk.eyJ1IjoiYm9iYW9hcGFlIiwiYSI6ImNrNnR6ZG56djA0bHozbG4yZDMxMW42YjMifQ.iR0-urBMWuzYfqW2-St0gA',
+            mapStyle: 'mapbox://styles/mapbox/light-v9'
+        };
+    },
     props: {
         msg: {
             type: Object,
@@ -23,9 +47,22 @@ export default {
 </script>
 
 <style scoped>
-    img {
+    .location {
         width: 270px;
-        height: 150px;
+        height: 203px;
         object-fit: contain;
+        padding: 3px;
+    }
+
+    .custom-time {
+        right: 5px;
+        bottom: 6px;
+    }
+
+    .no-caption {
+        color: #FFF;
+        background: rgba(0, 0, 0, 0.3);
+        padding: 0 5px;
+        border-radius: 3px;
     }
 </style>

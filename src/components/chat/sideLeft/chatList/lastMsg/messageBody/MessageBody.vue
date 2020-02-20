@@ -11,14 +11,14 @@
         Figurinha
     </span>
 
+    <span v-else-if="lastMsg.isGif">
+        <img src="@/assets/images/wpp-type-gif.svg">
+        GIF
+    </span>
+
    <span v-else-if="lastMsg.isVideo">
         <img src="@/assets/images/wpp-type-video.svg">
         Video
-    </span>
-
-   <span v-else-if="lastMsg.isGif">
-        <img src="@/assets/images/wpp-type-gif.svg">
-        GIF
     </span>
 
    <span v-else-if="lastMsg.isDocument">
@@ -41,6 +41,11 @@
     <span v-else-if="lastMsg.isVcard">
         <img src="@/assets/images/wpp-type-vcard.svg">
         <span :inner-html.prop="lastMsg.vCard.fn[0].value | emojify"></span>
+    </span>
+
+    <span v-else-if="lastMsg.isLocation">
+        <img src="@/assets/images/wpp-type-location.svg">
+        Localização
     </span>
 
     <span v-else-if="lastMsg.isRevoked" class="msgRevoked">

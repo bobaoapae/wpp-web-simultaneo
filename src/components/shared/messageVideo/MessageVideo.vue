@@ -1,0 +1,156 @@
+<template>
+   <div class="message-video" v-b-visible.once="onVisible">
+      <div @click="handleClick" class="video-container">
+         <div class="box-preview blur">
+            <img :src=" 'data:image/jpeg;base64,'+ msg.body" alt="body">
+         </div>
+
+         <LoadingMedia v-if="!srcVideo"/>
+         <PlayMedia v-else/>
+      </div>
+
+      <div class="box-caption" v-if="msg.hasCaption">
+         <span v-html="caption"></span>
+      </div>
+
+      <MessageTime :class="{'no-caption' : !msg.hasCaption, 'custom-time' : !msg.hasCaption}" :msg="msg"/>
+   </div>
+</template>
+
+<script>
+import { mapActions, mapMutations } from 'vuex';
+import LoadingMedia from '../loadingMedia/LoadingMedia.vue';
+import MessageTime from '../messageTime/MessageTime.vue';
+import PlayMedia from '../playMedia/PlayMedia';
+
+export default {
+    name: 'MessageVideo',
+    components: {
+        PlayMedia,
+        LoadingMedia,
+        MessageTime
+    },
+    props: {
+        msg: {
+            type: Object,
+            required: true
+        }
+    },
+    data () {
+        return {
+            srcVideo: ''
+        };
+    },
+    asyncComputed: {
+        caption: {
+            async get () {
+                let caption = this.$options.filters.emojify(this.$options.filters.formatMsg(this.msg.caption));
+                if (this.msg.mentionedJidList && this.msg.mentionedJidList.length > 0) {
+                    let promises = [];
+                    let results = {};
+                    for (let x = 0; x < this.msg.mentionedJidList.length; x++) {
+                        promises.push(this.findChatFromId({ id: this.msg.mentionedJidList[x] }).then(value => {
+                            results[this.msg.mentionedJidList[x]] = value;
+                        }));
+                    }
+                    await Promise.all(promises);
+                    for (let x = 0; x < this.msg.mentionedJidList.length; x++) {
+                        let chat = results[this.msg.mentionedJidList[x]];
+                        let name = chat.contact.formattedName || chat.contact.verifiedName || chat.contact.pushname;
+                        caption = caption.replace('@' + this.msg.mentionedJidList[x].split('@')[0], `<span class='mention-symbol'>@</span><span class='btn-link' dir="ltr">${name}</span>`);
+                    }
+                }
+                return caption;
+            },
+            default () {
+                return this.msg.caption;
+            }
+        }
+    },
+    methods: {
+        ...mapActions(['downloadMedia', 'findChatFromId']),
+        ...mapMutations(['SET_MODAL']),
+
+        getVideo () {
+            this.downloadMedia({ id: this.msg.id._serialized }).then(e => {
+                this.srcVideo = e.base64;
+            });
+        },
+        handleClick () {
+            if (this.srcVideo) {
+                this.SET_MODAL({
+                    show: true,
+                    type: 'video',
+                    media: this.srcVideo,
+                    id: this.msg.id._serialized
+                });
+            }
+        },
+        onVisible (visible) {
+            if (visible && !this.srcVideo) {
+                this.getVideo();
+            }
+        }
+    }
+};
+</script>
+
+<style scoped>
+   .message-video {
+      padding: 3px;
+   }
+
+   .video-container {
+      max-width: 220px;
+      min-width: 220px;
+
+      max-height: 160px;
+      min-height: 160px;
+
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+   }
+
+   .box-caption {
+      max-width: 220px;
+      min-width: 220px;
+   }
+
+   .box-preview {
+      min-width: 100%;
+      min-height: 100%;
+   }
+
+   .blur {
+      filter: blur(8px);
+   }
+
+   img {
+      width: 100%;
+      height: 100%;
+   }
+
+   .no-caption {
+      color: #FFF;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 0 5px;
+      border-radius: 3px;
+   }
+
+   .box-caption span {
+      font-size: 14.2px;
+      color: #262626;
+   }
+
+   .custom-time {
+       right: 3px;
+       bottom: 3px;
+   }
+
+   .box-caption >>> .mention-symbol {
+       color: rgba(0,0,0,0.25)
+   }
+</style>
