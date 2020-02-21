@@ -1,5 +1,6 @@
 <template>
-    <div :class="{'message-in' : !msg.id.fromMe, 'message-out': msg.id.fromMe}" class="message-container">
+    <div :class="{'message-in' : !msg.id.fromMe, 'message-out': msg.id.fromMe, 'blink' : blink}"
+         class="message-container">
         <div :class="showTail ? 'tail' : ''" class="message-body" v-b-hover="handleHover">
             <div class="tail-container" v-if="showTail"></div>
             <div
@@ -90,8 +91,19 @@ export default {
     data () {
         return {
             showMenuIcon: false,
-            menuAberto: false
+            menuAberto: false,
+            blink: false
         };
+    },
+    watch: {
+        'activeChat.quotedMsg': function (val) {
+            if (val === this.msg) {
+                this.blink = true;
+                setTimeout(() => {
+                    this.blink = false;
+                }, 1000);
+            }
+        }
     },
     props: {
         msg: {
@@ -247,5 +259,56 @@ export default {
 .message-out .tail-container {
     background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAmCAMAAADp2asXAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAADAUExURUxpcXmHa4maet/4yA0aDRMTE8fhsgAAAAAAAMDXrCsxJeX/z1xzXIiYetPsvGBsVUdPPuH8zOH8zNDrvMvmtrrOpwAAAAAAABUVFRoaGtnyxLTMozQ+MMfftFBeSR8nH5aoh6q/mW9+ZN/4yMjhtRwlHAAAAIOWd+r/06C1kkNLOwsLC9z4xur/0+n/0t76x9v4xeL9y+b/z+j/0d/7yeH8yuX/zeD8ytz5xt76yOP/zeH+y+b/zuD8yd35xuf/0MY9jkkAAAAsdFJOUwBvd/ATDZIBAsMp/At/11c9yPbizHoICQwT4bY1ykkgjahl6s8bBYT6nUAWOLbtFAAAAIhJREFUKM/tzbUWwlAURNFBE9zdg0NecLf//yvKUJyUdDnl7HXXletXqmXl9wPbQ9JCcC+VJsOj2mDwovzj3osjHGNFEVxNRAj7UR1hlx+I4FbuC8HkZBE8OwnRxamdFsEmUxCCGdoI51RLBK9xVwTvjyMEbzlDMJMp7lqseNc8YNc6CGyF/a0vcmwhZbCG+kEAAAAASUVORK5CYII=");
     right: -12px;
+}
+
+.message-out.blink .message-body, .message-out.blink >>> .time {
+    animation-name: blink-out;
+    animation-duration: 1s;
+    animation-timing-function: ease-in-out;
+    animation-direction: reverse;
+    animation-play-state: running;
+}
+
+.message-in.blink .message-body, .message-in.blink .identify-msg-group, .message-in.blink >>> .time {
+    animation-name: blink-in;
+    animation-duration: 1s;
+    animation-timing-function: ease-in-out;
+    animation-direction: reverse;
+    animation-play-state: running;
+}
+
+.blink .tail-container {
+    animation-name: blink-tail;
+    animation-duration: 1s;
+    animation-timing-function: ease-in-out;
+    animation-direction: reverse;
+    animation-play-state: running;
+}
+
+@keyframes blink-out {
+    from {
+        background-color: #DCF8C6;
+    }
+    to {
+        background-color: rgb(179, 203, 161);
+    }
+}
+
+@keyframes blink-in {
+    from {
+        background-color: #fff;
+    }
+    to {
+        background-color: rgb(204, 204, 204);
+    }
+}
+
+@keyframes blink-tail {
+    from {
+        filter: brightness(1);
+    }
+    to {
+        filter: brightness(0.8);
+    }
 }
 </style>

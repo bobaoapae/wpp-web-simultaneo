@@ -47,7 +47,6 @@ export default {
         },
 
         handleDoubleClick (msg) {
-            console.log('double click');
             if (!this.isNotification(msg)) {
                 this.activeChat.quotedMsg = msg;
             }
