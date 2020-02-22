@@ -1,5 +1,5 @@
 <template>
-    <div :class="{'message-in' : !msg.id.fromMe, 'message-out': msg.id.fromMe, 'blink' : blink}"
+    <div :class="{'message-in' : !msg.id.fromMe, 'message-out': msg.id.fromMe, 'blink' : msg.blink}"
          class="message-container">
         <div :class="showTail ? 'tail' : ''" class="message-body" v-b-hover="handleHover">
             <div class="tail-container" v-if="showTail"></div>
@@ -91,17 +91,16 @@ export default {
     data () {
         return {
             showMenuIcon: false,
-            menuAberto: false,
-            blink: false
+            menuAberto: false
         };
     },
     watch: {
         'activeChat.quotedMsg': function (val) {
             if (val === this.msg) {
-                this.blink = true;
+                this.msg.blink = true;
                 setTimeout(() => {
-                    this.blink = false;
-                }, 1000);
+                    this.msg.blink = false;
+                }, 1500);
             }
         }
     },
@@ -119,7 +118,7 @@ export default {
         ...mapState(['activeChat']),
 
         showTail () {
-            return !this.previousMsg || !this.msg.senderObj || !this.previousMsg.senderObj || (this.previousMsg.isSticker && !this.msg.isSticker) || this.msg.senderObj.id !== this.previousMsg.senderObj.id;
+            return !this.previousMsg || !this.msg.senderObj || !this.previousMsg.senderObj || (this.previousMsg.isSticker && !this.msg.isSticker) || this.msg.senderObj.id !== this.previousMsg.senderObj.id || this.msg.hasQuotedMsg || this.msg.isSticker;
         }
     },
     methods: {
@@ -263,7 +262,7 @@ export default {
 
 .message-out.blink .message-body, .message-out.blink >>> .time {
     animation-name: blink-out;
-    animation-duration: 1s;
+    animation-duration: 1500ms;
     animation-timing-function: ease-in-out;
     animation-direction: reverse;
     animation-play-state: running;
@@ -271,7 +270,7 @@ export default {
 
 .message-in.blink .message-body, .message-in.blink .identify-msg-group, .message-in.blink >>> .time {
     animation-name: blink-in;
-    animation-duration: 1s;
+    animation-duration: 1500ms;
     animation-timing-function: ease-in-out;
     animation-direction: reverse;
     animation-play-state: running;
@@ -279,7 +278,7 @@ export default {
 
 .blink .tail-container {
     animation-name: blink-tail;
-    animation-duration: 1s;
+    animation-duration: 1500ms;
     animation-timing-function: ease-in-out;
     animation-direction: reverse;
     animation-play-state: running;

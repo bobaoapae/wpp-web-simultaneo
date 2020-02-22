@@ -1,7 +1,7 @@
 <template>
     <div :style="{borderColor: color}" class="quoted-msg" v-scroll-to="{
      el: `#${encodedQuotedMsgId}`,
-     container: '#messages-panel',
+     container: '.messages-list',
      duration: 500,
      easing: 'linear',
      offset: -200,
@@ -24,7 +24,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 import Author from './author/Author';
 import QuotedMsgContent from './quotedMsgContent/quotedMsgContent';
 import QuotedMedia from './quotedMedia/QuotedMedia';
@@ -65,8 +65,15 @@ export default {
         }
     },
     methods: {
+        ...mapActions(['updateMsg']),
+
         onDone (element) {
-            // fazer piscar
+            this.quotedMsg.blink = true;
+            this.updateMsg(this.quotedMsg);
+            setTimeout(() => {
+                this.quotedMsg.blink = false;
+                this.updateMsg(this.quotedMsg);
+            }, 1500);
         }
     }
 };

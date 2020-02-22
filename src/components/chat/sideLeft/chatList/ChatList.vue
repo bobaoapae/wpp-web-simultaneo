@@ -131,7 +131,7 @@ export default {
 }
 
 .box-list-group {
-    max-height: calc(100vh - 105px);
+    max-height: calc(100vh - 109px);
     overflow-y: scroll;
     overflow-x: hidden;
     transition: transform 0.2s;

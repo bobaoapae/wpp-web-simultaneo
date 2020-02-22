@@ -52,7 +52,8 @@ const store = new Vuex.Store({
     },
 
     mutations: {
-        reset: (state) => {},
+        reset: (state) => {
+        },
 
         SET_CURRENT_USER (state, payload) {
             state.user = payload;
@@ -183,7 +184,10 @@ const store = new Vuex.Store({
             if (!state.pictures[payload.type]) {
                 state.pictures[payload.type] = [];
             }
-            state.pictures[payload.full === true ? 'full' : 'min'][payload.id] = { picture: payload.picture, t: payload.t };
+            state.pictures[payload.full === true ? 'full' : 'min'][payload.id] = {
+                picture: payload.picture,
+                t: payload.t
+            };
         },
 
         ADD_MEDIA_TO_CACHE (state, payload) {
@@ -461,7 +465,9 @@ const store = new Vuex.Store({
                     } else {
                         resolve('+' + (payload.id.split('@')[0]));
                     }
-                }).catch(reason => { reject(reason); });
+                }).catch(reason => {
+                    reject(reason);
+                });
             });
         },
 
@@ -517,7 +523,8 @@ const store = new Vuex.Store({
         },
 
         initPresenceInterval (context) {
-            if (visibility.hidden()) {
+            context.commit('SET_VISIBLE', !visibility.hidden());
+            if (!context.state.visible) {
                 context.dispatch('sendPresenceStatus', { type: 'Unavailable' });
             } else {
                 context.dispatch('sendPresenceStatus', { type: 'Available' });
@@ -552,11 +559,19 @@ const store = new Vuex.Store({
                 if (context.state.pictures[type] && context.state.pictures[type][payload.id] && new Date().getTime() - context.state.pictures[type][payload.id].t <= 10800000) {
                     resolve(context.state.pictures[type][payload.id].picture);
                 } else {
-                    context.dispatch('sendWsMessage', { event: 'findPicture', payload: { id: payload.id, full: payload.full === true } }).then(data => {
+                    context.dispatch('sendWsMessage', {
+                        event: 'findPicture',
+                        payload: { id: payload.id, full: payload.full === true }
+                    }).then(data => {
                         if (data !== '') {
                             api.get(`/api/downloadFile/${data}`, { responseType: 'blob' }).then(value => {
                                 context.dispatch('convertToBase64', { file: value.data }).then(base64 => {
-                                    context.commit('ADD_PICTURE_TO_CACHE', { id: payload.id, picture: base64, t: new Date().getTime(), type: type });
+                                    context.commit('ADD_PICTURE_TO_CACHE', {
+                                        id: payload.id,
+                                        picture: base64,
+                                        t: new Date().getTime(),
+                                        type: type
+                                    });
                                     resolve(base64);
                                 });
                             });
@@ -606,7 +621,10 @@ const store = new Vuex.Store({
 
         findCustomProperties (context, payload) {
             return new Promise((resolve, reject) => {
-                context.dispatch('sendWsMessage', { event: 'findCustomProperty', payload: { id: payload.id, type: payload.type } }).then(data => {
+                context.dispatch('sendWsMessage', {
+                    event: 'findCustomProperty',
+                    payload: { id: payload.id, type: payload.type }
+                }).then(data => {
                     resolve(data);
                 }).catch(reason => reject(reason));
             });
@@ -635,11 +653,12 @@ const store = new Vuex.Store({
                     setProperties(el);
                 });
             }
+
             function setProperties (el) {
                 context.dispatch('setMsgsProperties', el.msgs);
                 el.quotedMsg = undefined;
                 el.openChatInfo = false;
-                el.customProperties = { };
+                el.customProperties = {};
                 el.sendQueue = [];
                 el.sendMessage = function (payload) {
                     Object.assign(payload, {
@@ -858,7 +877,7 @@ const store = new Vuex.Store({
                 if (msg.isVcard) {
                     msg.vCard = vCardParse.parse(msg.body);
                 }
-                msg.customProperties = { };
+                msg.customProperties = {};
                 msg.delete = function () {
                     let payload = {
                         msgId: this.id._serialized,
@@ -881,6 +900,7 @@ const store = new Vuex.Store({
                         return context.dispatch('markPlayed', payload);
                     };
                 }
+                msg.blink = false;
             }
         },
 
@@ -913,7 +933,9 @@ const store = new Vuex.Store({
                 chats.sort(function (a, b) {
                     let n = a.pin || 0;
                     let r = b.pin || 0;
-                    if (n || r) { return n !== r ? n > r ? -1 : 1 : a.id._serialized < b.id._serialized ? -1 : 1; }
+                    if (n || r) {
+                        return n !== r ? n > r ? -1 : 1 : a.id._serialized < b.id._serialized ? -1 : 1;
+                    }
 
                     if (a.lastMsg === undefined && b.lastMsg === undefined) {
                         return 0;
@@ -1041,6 +1063,9 @@ const store = new Vuex.Store({
                     msg.ack = payload.ack;
                     msg.type = payload.type;
                     msg.id = payload.id;
+                    if (payload.blink !== undefined) {
+                        msg.blink = payload.blink;
+                    }
                     if (payload.customProperties) {
                         Object.assign(msg.customProperties, payload.customProperties);
                     }

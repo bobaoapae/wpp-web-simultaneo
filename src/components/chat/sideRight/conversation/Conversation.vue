@@ -2,7 +2,7 @@
     <div id="conversation">
         <ConversationHeader/>
 
-        <MessagesPanel/>
+        <MessagesList :chat="activeChat"/>
 
         <InputMessage/>
     </div>
@@ -10,15 +10,19 @@
 
 <script>
 import ConversationHeader from './conversationHeader/ConversationHeader.vue';
-import MessagesPanel from './messagesPanel/MessagesPanel.vue';
 import InputMessage from './inputMessage/InputMessage';
+import MessagesList from './messagesList/MessagesList';
+import { mapState } from 'vuex';
 
 export default {
     name: 'Conversation',
     components: {
+        MessagesList,
         InputMessage,
-        ConversationHeader,
-        MessagesPanel
+        ConversationHeader
+    },
+    computed: {
+        ...mapState(['activeChat'])
     }
 };
 </script>
