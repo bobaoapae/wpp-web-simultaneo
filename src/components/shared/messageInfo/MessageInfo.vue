@@ -32,6 +32,10 @@
             <span v-else-if=" isLeave ">
                 {{ formatedNumbers }} saiu
             </span>
+
+            <span v-else-if=" isInvite ">
+                {{ formatedNumbers }} entrou usando o link de convite deste grupo
+            </span>
         </div>
     </div>
 </template>
@@ -41,7 +45,7 @@
 // e2e_notification encrypt
 
 // gp2
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 
 export default {
     name: 'MessageInfo',
@@ -52,46 +56,17 @@ export default {
         }
     },
     computed: {
-        ...mapState(['activeChat', 'self', 'contacts']),
+        ...mapState(['activeChat', 'self']),
 
         isMe () {
             if (this.msg.senderObj && this.msg.senderObj.id === this.self.id) {
                 return 'Você';
-            } else if (this.msg.senderObj && this.msg.senderObj.name) {
-                return this.msg.senderObj.name;
+            } else if (this.msg.senderObj && this.msg.senderObj.formattedName) {
+                return this.msg.senderObj.formattedName;
             } else if (this.msg.senderObj) {
                 return '+' + this.msg.senderObj.id.replace('@c.us', '');
             }
             return 'Você';
-        },
-
-        formatedNumbers () {
-            if (this.msg.recipients.length > 1) {
-                return this.msg.recipients.map(e => {
-                    const el = this.contacts.find(el => el.id === e);
-
-                    if (el) {
-                        return el.formattedName;
-                    }
-                    return '+' + (e.split('@')[0]);
-                })
-                    .slice(0, -1)
-                    .join(', ') + ' e ' + this.msg.recipients.map(e => {
-                    const el = this.contacts.find(el => el.id === e);
-
-                    if (el) {
-                        return el.formattedName;
-                    }
-                    return '+' + (e.split('@')[0]);
-                })
-                    .slice(-1);
-            }
-            const el = this.contacts.find(el => el.id === this.msg.recipients[0]);
-
-            if (el && el.formattedName) {
-                return el.formattedName;
-            }
-            return '+' + this.msg.recipients[0].replace('@c.us', '');
         },
 
         isEncrypt () {
@@ -117,6 +92,33 @@ export default {
         },
         isLeave () {
             return this.msg.type === 'gp2' && this.msg.subtype === 'leave';
+        },
+        isInvite () {
+            return this.msg.type === 'gp2' && this.msg.subtype === 'invite';
+        }
+    },
+    methods: {
+        ...mapActions(['findFormattedNameFromId'])
+    },
+    asyncComputed: {
+        formatedNumbers: {
+            async get () {
+                if (this.msg.recipients && this.msg.recipients.length >= 1) {
+                    let promises = this.msg.recipients.map((e) => {
+                        return this.findFormattedNameFromId({ id: e });
+                    });
+                    let results = await Promise.all(promises);
+                    return results.join(', ');
+                }
+                return '';
+            },
+            default () {
+                if (this.msg.recipients) {
+                    return this.msg.recipients.join(', ');
+                }
+                console.log(this.msg);
+                return '';
+            }
         }
     }
 };
@@ -126,6 +128,7 @@ export default {
 .message-info {
     padding: 0 9%;
     margin-bottom: 8px;
+    margin-top: 8px;
     display: flex;
     justify-content: center;
 }

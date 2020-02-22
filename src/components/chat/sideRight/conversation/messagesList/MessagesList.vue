@@ -1,14 +1,13 @@
 <template>
     <div class="messages-list" @scroll="handleScroll">
-        <LoadingEarlyMsg v-show="loadingEarly"/>
         <div :id="encodedMsgId(item)" :key="encodedMsgId(item)" @dblclick.left.prevent="handleDoubleClick(item)"
-             v-for="(item, index) in chat.msgs"
-             v-for-callback="{key: index, array: chat.msgs, callback: handleLoadMsgFinish}">
+             v-for="(item, index) in reverseMsgs">
             <MessageDateFormatted :formattedDate="item.fomattedDate"
-                                  v-if="!chat.msgs[index-1] || chat.msgs[index-1].fomattedDate !== item.fomattedDate"/>
+                                  v-if="!reverseMsgs[index+1] || reverseMsgs[index+1].fomattedDate !== item.fomattedDate"/>
             <MessageInfo :msg="item" v-if="isNotification(item.type)"/>
-            <MessageContainer :msg="item" :previousMsg="chat.msgs[index-1]" v-else/>
+            <MessageContainer :msg="item" :previousMsg="reverseMsgs[index+1]" v-else/>
         </div>
+        <LoadingEarlyMsg v-show="loadingEarly"/>
     </div>
 </template>
 
@@ -40,11 +39,13 @@ export default {
         };
     },
     computed: {
-        ...mapState(['visible'])
+        ...mapState(['visible']),
+        reverseMsgs () {
+            return this.chat.msgs.slice().reverse();
+        }
     },
     watch: {
         'chat.id': function () {
-            this.msgsLoaded = false;
             this.$nextTick(() => {
                 this.scrollToBottom();
             });
@@ -53,7 +54,7 @@ export default {
             }
         },
         'chat.lastMsg': function (val) {
-            if (this.visible && (val.id.fromMe || this.isInBottom())) {
+            if (!this.loadingEarly && this.visible && (val.id.fromMe || this.isInBottom())) {
                 this.scrollToBottom();
             } else if (this.visible && this.isInBottom()) {
                 this.chat.seeChat();
@@ -149,5 +150,7 @@ export default {
     background-image: url("../../../../../assets/images/bg-chat.png");
     overflow: scroll;
     overflow-x: hidden;
+    display: flex;
+    flex-direction: column-reverse;
 }
 </style>

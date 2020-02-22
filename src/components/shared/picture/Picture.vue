@@ -41,7 +41,7 @@ export default {
         ...mapActions(['findPictureFromId']),
 
         handleChatVisible (visible) {
-            if (visible) {
+            if (visible && this.id && this.id) {
                 this.findPictureFromId({ id: this.id }).then(value => {
                     this.picture = value;
                     if (this.full) {

@@ -995,11 +995,10 @@ const store = new Vuex.Store({
         },
 
         addNewMsgInChat (context, payload) {
+            let idSearch = payload.id.fromMe ? payload.to : payload.from;
+
             const chat = context.state.chats.find((element) => {
-                if (payload.id.fromMe) {
-                    return element.id === payload.to;
-                }
-                return element.id === payload.from;
+                return element.id === idSearch;
             });
 
             if (chat) {

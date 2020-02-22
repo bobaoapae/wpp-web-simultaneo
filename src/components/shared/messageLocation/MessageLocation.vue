@@ -1,7 +1,8 @@
 <template>
     <div class="location">
-        <a :href="link" target="_blank">
+        <a :href="link" target="_blank" v-b-visible="handleVisible">
             <MglMap
+                v-if="visible"
                 :accessToken="mapboxAccessToken"
                 :attributionControl="false"
                 :center="[msg.lng, msg.lat]"
@@ -29,7 +30,8 @@ export default {
     data () {
         return {
             mapboxAccessToken: 'pk.eyJ1IjoiYm9iYW9hcGFlIiwiYSI6ImNrNnR6ZG56djA0bHozbG4yZDMxMW42YjMifQ.iR0-urBMWuzYfqW2-St0gA',
-            mapStyle: 'mapbox://styles/mapbox/light-v9'
+            mapStyle: 'mapbox://styles/mapbox/light-v9',
+            visible: false
         };
     },
     props: {
@@ -41,6 +43,11 @@ export default {
     computed: {
         link () {
             return `https://maps.google.com/maps?q=${this.msg.lat}%2C${this.msg.lng}&z=17&hl=pt-BR`;
+        }
+    },
+    methods: {
+        handleVisible (visible) {
+            this.visible = visible;
         }
     }
 };
