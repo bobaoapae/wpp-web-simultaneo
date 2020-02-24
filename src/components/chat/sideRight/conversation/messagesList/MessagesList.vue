@@ -103,9 +103,13 @@ export default {
         };
     },
     computed: {
-        ...mapState(['visible']),
+        ...mapState(['visible', 'idle']),
         msgs () {
             return this.chat.msgsParted;
+        },
+
+        active () {
+            return this.visible && !this.idle;
         }
     },
     watch: {
@@ -127,7 +131,7 @@ export default {
                 this.scrollToBottom();
             }
         },
-        'visible': function (val) {
+        'active': function (val) {
             if (val && this.isInBottom()) {
                 this.chat.seeChat();
             }
@@ -155,9 +159,6 @@ export default {
 
         scrollToBottom () {
             this.$nextTick(() => {
-                if (this.visible) {
-                    this.chat.seeChat();
-                }
                 this.$el.scrollTop = this.$el.scrollHeight - this.$el.clientHeight;
             });
         },
@@ -176,7 +177,7 @@ export default {
                 e.preventDefault();
             } else if (!this.loadingEarly && !this.chat.noEarlierMsgs && ((props.scrollHeight > 1050 && props.calc <= 1050) || props.scrollTop === 0)) {
                 this.handleLoadEarly();
-            } else if (this.isInBottom() && this.chat.isUnread) {
+            } else if (this.active && this.isInBottom() && this.chat.isUnread) {
                 this.chat.seeChat();
             }
         },

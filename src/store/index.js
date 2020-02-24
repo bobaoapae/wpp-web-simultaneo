@@ -46,11 +46,12 @@ const store = new Vuex.Store({
         wsEvents: {},
         promisesWsEvents: {},
         intervalPong: -1,
-        intervalPresence: -1,
+        timeoutPresence: -1,
+        timeoutIdle: -1,
         audio: null,
-        visible: true
+        visible: true,
+        idle: false
     },
-
     mutations: {
         reset: (state) => {
         },
@@ -201,11 +202,18 @@ const store = new Vuex.Store({
             state.intervalPong = payload;
         },
 
-        INTERVAL_PRESENCE (state, payload) {
-            if (state.intervalPresence !== -1) {
-                clearInterval(state.intervalPresence);
+        TIMEOUT_PRESENCE (state, payload) {
+            if (state.timeoutPresence !== -1) {
+                clearTimeout(state.timeoutPresence);
             }
-            state.intervalPresence = payload;
+            state.timeoutPresence = payload;
+        },
+
+        TIMEOUT_IDLE (state, payload) {
+            if (state.timeoutIdle !== -1) {
+                clearTimeout(state.timeoutIdle);
+            }
+            state.timeoutIdle = payload;
         },
 
         SET_AUDIO (state, payload) {
@@ -221,6 +229,10 @@ const store = new Vuex.Store({
 
         SET_VISIBLE (state, payload) {
             state.visible = payload;
+        },
+
+        SET_IDLE (state, payload) {
+            state.idle = payload;
         }
     },
 
@@ -289,7 +301,8 @@ const store = new Vuex.Store({
                             context.state.poolContext.forEach(func => func());
                             context.state.poolContext = [];
                             context.dispatch('initPong');
-                            context.dispatch('initPresenceInterval');
+                            context.dispatch('initPresenceTimeout');
+                            context.dispatch('appActive');
                         });
 
                         context.dispatch('getAllContacts').then(contacts => {
@@ -519,7 +532,19 @@ const store = new Vuex.Store({
             }, 10000));
         },
 
-        initPresenceInterval (context) {
+        appActive (context) {
+            console.log('appActive');
+            if (context.state.idle && context.state.visible) {
+                context.dispatch('sendPresenceStatus', { type: 'Available' });
+            }
+            context.commit('SET_IDLE', false);
+            context.commit('TIMEOUT_IDLE', setTimeout(() => {
+                context.commit('SET_IDLE', true);
+                context.dispatch('sendPresenceStatus', { type: 'Unavailable' });
+            }, 10000));
+        },
+
+        initPresenceTimeout (context) {
             context.commit('SET_VISIBLE', !visibility.hidden());
             if (!context.state.visible) {
                 context.dispatch('sendPresenceStatus', { type: 'Unavailable' });
@@ -529,12 +554,12 @@ const store = new Vuex.Store({
             visibility.change((evt, hidden) => {
                 context.commit('SET_VISIBLE', !hidden);
                 if (hidden) {
-                    context.commit('INTERVAL_PRESENCE', setInterval(() => {
+                    context.commit('TIMEOUT_PRESENCE', setTimeout(() => {
                         context.dispatch('sendPresenceStatus', { type: 'Unavailable' });
                     }, 5000));
                 } else {
                     context.dispatch('sendPresenceStatus', { type: 'Available' });
-                    context.commit('INTERVAL_PRESENCE', setInterval(() => {
+                    context.commit('TIMEOUT_PRESENCE', setTimeout(() => {
                         context.dispatch('sendPresenceStatus', { type: 'Available' });
                     }, 5000));
                 }
@@ -609,6 +634,7 @@ const store = new Vuex.Store({
         },
 
         sendPresenceStatus (context, payload) {
+            console.log('sendPresenceStatus::', payload);
             return new Promise((resolve, reject) => {
                 context.dispatch('sendWsMessage', { event: `sendPresence${payload.type}` }).then(data => {
                     resolve(data);

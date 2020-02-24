@@ -26,7 +26,8 @@
                                           :class="{'d-flex align-items-center flex-grow-1': chat.isChat && (chat.isComposing || chat.isRecording)}"
                                           :showLastTime="false"
                                           :showOnline="false"
-                                          v-if="chat.isChat"/>
+                                          v-if="chat.isChat"
+                                          :key="chat.id"/>
                             <LastMsg :chat="chat" v-if="!chat.isChat || (!chat.isComposing && !chat.isRecording)"/>
                             <Icons :chat="chat"/>
                         </div>

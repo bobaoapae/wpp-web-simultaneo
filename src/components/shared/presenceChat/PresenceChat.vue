@@ -8,6 +8,8 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
+
 export default {
     name: 'Picture',
     props: {
@@ -27,8 +29,21 @@ export default {
         }
     },
     computed: {
+        ...mapState(['visible', 'idle']),
+
         lastTimeAvailable () {
             return this.timeConverter(this.chat.lastPresenceAvailableTime);
+        },
+
+        active () {
+            return this.visible && !this.idle;
+        }
+    },
+    watch: {
+        'active': function (val) {
+            if (val) {
+                this.chat.subscribePresence();
+            }
         }
     },
     methods: {
