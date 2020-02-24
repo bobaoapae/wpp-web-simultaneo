@@ -89,12 +89,16 @@ export default {
 <style scoped>
 .message-audio {
     padding: 3px;
+    width: 306px;
+    min-height: 85px;
 }
 
 .audio-container {
     display: flex;
     align-items: center;
     margin-bottom: 25px;
+    width: 100%;
+    height: 100%;
 }
 
 .box-spinner {

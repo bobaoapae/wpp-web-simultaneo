@@ -1,6 +1,7 @@
 <template>
-    <div>
-        <b-collapse id="collapse-emoji" v-model="emojiVisible">
+    <div ref="container">
+        <b-collapse id="collapse-emoji" v-model="emojiVisible" @show="handleEmojiOpening"
+                    @shown="handleEmojiOpened" @hide="handleEmojiClosing" @hidden="handleEmojiClosed">
             <picker
                 :color="'#009688'"
                 :data="emojiIndex"
@@ -128,12 +129,10 @@ export default {
             emojiVisible: false
         };
     },
-    created () {
+    mounted () {
         this.$root.$on('focusInput', () => {
             this.$refs.input.focus();
         });
-    },
-    mounted () {
         this.$refs.input.focus();
     },
     watch: {
@@ -313,6 +312,22 @@ export default {
             this.$refs.input.innerHTML = '';
             this.mensagem = '';
             document.execCommand('insertHTML', false, quickReply.message);
+        },
+
+        handleEmojiOpening () {
+            this.$root.$emit('startOpenEmoji');
+        },
+
+        handleEmojiOpened () {
+            this.$root.$emit('finishOpenEmoji');
+        },
+
+        handleEmojiClosing () {
+            this.$root.$emit('startCloseEmoji');
+        },
+
+        handleEmojiClosed () {
+            this.$root.$emit('finishCloseEmoji');
         },
 
         formatar (domElement) {

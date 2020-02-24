@@ -410,7 +410,7 @@ const store = new Vuex.Store({
         },
 
         sendWsMessage (context, payload) {
-            let promise = new Promise(async (resolve, reject) => {
+            return new Promise(async (resolve, reject) => {
                 let payLoadSend = {
                     tag: uniqueid(),
                     webSocketRequestPayLoad: payload
@@ -420,15 +420,12 @@ const store = new Vuex.Store({
                 }
                 context.commit('ADD_NEW_LISTENNER', { tag: payLoadSend.tag, resolve: resolve, reject: reject });
                 setTimeout(() => reject(new Error('Time-Out')), 60000);
-                await context.dispatch('waitResultPreviousWSEvent', payload.event);
-                context.commit('ADD_PROMISE_WS_EVENT', { event: payload.event, promise: promise });
                 if (context.state.ws.readyState === WebSocket.OPEN) {
                     context.state.ws.send(JSON.stringify(payLoadSend));
                 } else {
                     reject(new Error('WebSocket Not Open'));
                 }
             });
-            return promise;
         },
 
         waitResultPreviousWSEvent (context, payload) {
@@ -518,7 +515,7 @@ const store = new Vuex.Store({
 
         initPong (context) {
             context.commit('INTERVAL_PONG', setInterval(() => {
-                context.dispatch('checkDelayToServer').then(value => console.log('delay::', value, 'ms'));
+                context.dispatch('checkDelayToServer');
             }, 10000));
         },
 
@@ -660,6 +657,33 @@ const store = new Vuex.Store({
                 el.openChatInfo = false;
                 el.customProperties = {};
                 el.sendQueue = [];
+                el.__x_msgsIndex = 1;
+                el.__x_poolAddMsgs = [];
+                el.__x_intervalPool = setInterval(() => {
+                    let msgs = el.__x_poolAddMsgs;
+                    el.__x_poolAddMsgs = [];
+                    if (msgs && msgs.length > 0) {
+                        context.dispatch('setMsgsProperties', msgs);
+                        el.msgs.push(...msgs);
+                        el.msgs.sort(function (a, b) {
+                            if (a.t > b.t) {
+                                return 1;
+                            }
+                            if (a.t < b.t) {
+                                return -1;
+                            }
+                            return 0;
+                        });
+                        context.dispatch('sortChatsByTime');
+                        let newMsgIn = msgs.find(value => !value.id.fromMe && value.isNewMsg);
+                        if (newMsgIn && el.muteExpiration <= 0 && (el !== context.state.activeChat || !context.state.visible)) {
+                            context.dispatch('playNewMsgNotification');
+                        }
+                    }
+                }, 150);
+                el.addMsg = function (msg) {
+                    el.__x_poolAddMsgs.push(msg);
+                };
                 el.sendMessage = function (payload) {
                     Object.assign(payload, {
                         chatId: this.id
@@ -673,6 +697,10 @@ const store = new Vuex.Store({
                     return context.dispatch('subscribePresence', { chatId: this.id });
                 };
                 el.loadEarly = function () {
+                    if (this.__x_msgsIndex * 50 < this.msgs.length) {
+                        this.__x_msgsIndex++;
+                        return Promise.resolve(this.msgsParted);
+                    }
                     return context.dispatch('loadEarly', { chatId: this.id });
                 };
                 Object.defineProperty(el, 'lastMsg', {
@@ -690,6 +718,15 @@ const store = new Vuex.Store({
                             return array[0];
                         }
                         return undefined;
+                    }
+                });
+                Object.defineProperty(el, 'msgsParted', {
+                    get () {
+                        let msgs = [];
+                        for (let x = 0; x < this.__x_msgsIndex * 50 && x < this.msgs.length; x++) {
+                            msgs.push(this.msgs[this.msgs.length - 1 - x]);
+                        }
+                        return msgs.reverse();
                     }
                 });
                 Object.defineProperty(el, 'isChat', {
@@ -1007,21 +1044,7 @@ const store = new Vuex.Store({
                 });
 
                 if (!msg) {
-                    context.dispatch('setMsgsProperties', payload);
-                    chat.msgs.push(payload);
-                    chat.msgs.sort(function (a, b) {
-                        if (a.t > b.t) {
-                            return 1;
-                        }
-                        if (a.t < b.t) {
-                            return -1;
-                        }
-                        return 0;
-                    });
-                    context.dispatch('sortChatsByTime');
-                    if (!payload.id.fromMe && chat.muteExpiration <= 0 && payload.isNewMsg && (chat !== context.state.activeChat || !context.state.visible)) {
-                        context.dispatch('playNewMsgNotification');
-                    }
+                    chat.addMsg(payload);
                 }
             }
         },

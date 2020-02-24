@@ -34,12 +34,14 @@ export default {
     background-color: #fff;
     border-radius: 50%;
     margin: 0 auto;
-    margin-bottom: 15px;
     align-items: center;
     display: flex;
     width: 44px;
     height: 44px;
     justify-content: center;
+    position: absolute;
+    left: 50%;
+    z-index: 10;
 }
 
 svg {

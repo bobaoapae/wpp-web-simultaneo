@@ -116,7 +116,6 @@ export default {
                 if (this.msg.recipients) {
                     return this.msg.recipients.join(', ');
                 }
-                console.log(this.msg);
                 return '';
             }
         }

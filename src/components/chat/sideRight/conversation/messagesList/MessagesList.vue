@@ -1,13 +1,14 @@
 <template>
-    <div class="messages-list" @scroll="handleScroll">
-        <div :id="encodedMsgId(item)" :key="encodedMsgId(item)" @dblclick.left.prevent="handleDoubleClick(item)"
-             v-for="(item, index) in reverseMsgs">
-            <MessageDateFormatted :formattedDate="item.fomattedDate"
-                                  v-if="!reverseMsgs[index+1] || reverseMsgs[index+1].fomattedDate !== item.fomattedDate"/>
-            <MessageInfo :msg="item" v-if="isNotification(item.type)"/>
-            <MessageContainer :msg="item" :previousMsg="reverseMsgs[index+1]" v-else/>
-        </div>
+    <div class="messages-list" @scroll="handleScroll" @mousewheel="handleScroll" @touchmove="handleScroll"
+         ref="messageList">
         <LoadingEarlyMsg v-show="loadingEarly"/>
+        <div :id="encodedMsgId(item)" :key="encodedMsgId(item)" @dblclick.left.prevent="handleDoubleClick(item)"
+             v-for="(item, index) in msgs" v-for-callback="{key: index, array: msgs, callback: handleLoadMsgFinish}">
+            <MessageDateFormatted :formattedDate="item.fomattedDate"
+                                  v-if="!msgs[index-1] || msgs[index-1].fomattedDate !== item.fomattedDate"/>
+            <MessageInfo :msg="item" v-if="isNotification(item.type)"/>
+            <MessageContainer :msg="item" :previousMsg="msgs[index-1]" v-else/>
+        </div>
     </div>
 </template>
 
@@ -32,32 +33,98 @@ export default {
             required: true
         }
     },
+    mounted () {
+        this.$root.$on('startOpenEmoji', () => {
+            if (this.isInBottom()) {
+                this.isBottomWhenOpening = true;
+                this.intervalBottom = setInterval(() => {
+                    this.scrollToBottom();
+                }, 10);
+            } else {
+                this.isBottomWhenOpening = false;
+            }
+        });
+        this.$root.$on('finishOpenEmoji', () => {
+            if (this.isBottomWhenOpening) {
+                this.scrollToBottom();
+            }
+            clearInterval(this.intervalBottom);
+        });
+        this.$root.$on('startCloseEmoji', () => {
+            if (this.isInBottom()) {
+                this.isBottomWhenClosing = true;
+                this.intervalBottom = setInterval(this.scrollToBottom, 10);
+            } else {
+                this.isBottomWhenClosing = false;
+            }
+        });
+        this.$root.$on('finishCloseEmoji', () => {
+            if (this.isBottomWhenClosing) {
+                this.scrollToBottom();
+            }
+            clearInterval(this.intervalBottom);
+        });
+        this.clientHeight = this.$el.clientHeight;
+        this.scrollTop = this.$el.scrollTop;
+        this.scrollHeight = this.$el.scrollHeight;
+        if (!this.resizeObserver) {
+            this.resizeObserver = new ResizeObserver(() => {
+                let isInBotton = this.scrollHeight - this.scrollTop <= this.clientHeight + 15;
+                this.clientHeight = this.$el.clientHeight;
+                this.scrollTop = this.$el.scrollTop;
+                this.scrollHeight = this.$el.scrollHeight;
+                if (isInBotton) {
+                    this.scrollToBottom();
+                }
+            }).observe(this.$refs.messageList);
+        }
+        this.$nextTick(() => {
+            this.scrollToBottom();
+            if (!this.chat.noEarlierMsgs && this.chat.msgsParted.length <= 10) {
+                this.handleLoadEarly().then((val) => {
+                    if (val) {
+                        this.scrollToBottom();
+                    }
+                });
+            }
+        });
+    },
     data () {
         return {
             loadingEarly: false,
-            msgsLoaded: false
+            msgsLoaded: false,
+            resizeObeserver: null,
+            clientHeight: -1,
+            scrollTop: -1,
+            scrollHeight: -1,
+            calc: -1,
+            isBottomWhenOpening: false,
+            isBottomWhenClosing: false
         };
     },
     computed: {
         ...mapState(['visible']),
-        reverseMsgs () {
-            return this.chat.msgs.slice().reverse();
+        msgs () {
+            return this.chat.msgsParted;
         }
     },
     watch: {
         'chat.id': function () {
+            this.chat.__x_msgsIndex = 1;
             this.$nextTick(() => {
                 this.scrollToBottom();
             });
-            if (!this.chat.noEarlierMsgs && this.chat.msgs.length <= 10) {
-                this.handleLoadEarly();
+            if (!this.chat.noEarlierMsgs && this.chat.msgsParted.length <= 10) {
+                this.handleLoadEarly().then((val) => {
+                    if (val) {
+                        this.scrollToBottom();
+                    }
+                });
             }
         },
-        'chat.lastMsg': function (val) {
-            if (!this.loadingEarly && this.visible && (val.id.fromMe || this.isInBottom())) {
+        'chat.lastMsg.id': function (val) {
+            if (!this.loadingEarly && this.visible && (val.fromMe || this.isInBottom())) {
                 this.scrollToBottom();
-            } else if (this.visible && this.isInBottom()) {
-                this.chat.seeChat();
             }
         },
         'visible': function (val) {
@@ -88,23 +155,40 @@ export default {
 
         scrollToBottom () {
             this.$nextTick(() => {
-                this.$el.scrollTop = Number.MAX_SAFE_INTEGER;
+                if (this.visible) {
+                    this.chat.seeChat();
+                }
+                this.$el.scrollTop = this.$el.scrollHeight - this.$el.clientHeight;
             });
         },
 
         handleScroll (e) {
-            if (this.$el.scrollTop === 0 && !this.chat.noEarlierMsgs) {
+            let props = {
+                scrollHeight: this.$el.scrollHeight,
+                scrollTop: this.$el.scrollTop,
+                clientHeight: this.$el.clientHeight,
+                calc: this.$el.scrollHeight - (this.$el.scrollHeight - this.$el.scrollTop)
+            };
+            this.scrollHeight = props.scrollHeight;
+            this.scrollTop = props.scrollTop;
+            this.clientHeight = props.clientHeight;
+            if (this.loadingEarly) {
+                e.preventDefault();
+            } else if (!this.loadingEarly && !this.chat.noEarlierMsgs && ((props.scrollHeight > 1050 && props.calc <= 1050) || props.scrollTop === 0)) {
                 this.handleLoadEarly();
             } else if (this.isInBottom() && this.chat.isUnread) {
                 this.chat.seeChat();
             }
         },
 
-        handleLoadEarly () {
-            this.loadingEarly = true;
-            this.chat.loadEarly().then(() => {
+        async handleLoadEarly () {
+            if (!this.loadingEarly) {
+                this.loadingEarly = true;
+                await this.chat.loadEarly();
                 this.loadingEarly = false;
-            });
+                return true;
+            }
+            return Promise.resolve(false);
         },
 
         handleLoadMsgFinish () {
@@ -134,7 +218,9 @@ export default {
 
             if (key === len - 1) {
                 if (typeof element.callback === 'function') {
-                    element.callback();
+                    window.setTimeout(() => {
+                        element.callback();
+                    }, 40);
                 }
             }
         }
@@ -150,7 +236,5 @@ export default {
     background-image: url("../../../../../assets/images/bg-chat.png");
     overflow: scroll;
     overflow-x: hidden;
-    display: flex;
-    flex-direction: column-reverse;
 }
 </style>
