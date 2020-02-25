@@ -1,3 +1,5 @@
+// eslint-disable-next-line no-unused-vars
+import hackTime from 'hacktimer';
 import Vue from 'vue';
 import App from './App.vue';
 import router from './router';

@@ -7,6 +7,7 @@ import VuexPersistence from 'vuex-persist';
 import vCardParse from 'vcard-parser';
 import api from '@/api';
 import randomColor from 'random-color';
+import WebSocketWorker from 'worker-loader!@/webSocketWorker';
 
 const vuexLocal = new VuexPersistence({
     storage: window.sessionStorage,
@@ -42,7 +43,6 @@ const store = new Vuex.Store({
             show: false,
             id: ''
         },
-        ws: null,
         wsEvents: {},
         promisesWsEvents: {},
         intervalPong: -1,
@@ -50,7 +50,8 @@ const store = new Vuex.Store({
         timeoutIdle: -1,
         audio: null,
         visible: true,
-        idle: false
+        idle: false,
+        wsWorker: null
     },
     mutations: {
         reset: (state) => {
@@ -114,11 +115,11 @@ const store = new Vuex.Store({
             state.chats[payload.indexChat].shouldAppearInList = payload.chat.shouldAppearInList;
         },
 
-        SET_WS (state, payload) {
-            if (state.ws) {
-                state.ws.close();
+        SET_WS_WORKER (state, payload) {
+            if (state.wsWorker) {
+                state.wsWorker.terminate();
             }
-            state.ws = payload;
+            state.wsWorker = payload;
         },
 
         ADD_NEW_CHAT (state, payload) {
@@ -238,192 +239,201 @@ const store = new Vuex.Store({
 
     actions: {
         setNewEvent (context) {
-            context.commit('SET_WS', new WebSocket(`${localStorage.baseURL.replace('http', 'ws')}/api/ws`));
+            context.commit('SET_WS_WORKER', new WebSocketWorker());
+            const wsWorker = context.state.wsWorker;
 
-            const ws = context.state.ws;
+            wsWorker.postMessage({ cmd: 'ws-init', data: `${localStorage.baseURL.replace('http', 'ws')}/api/ws` });
 
-            ws.onopen = function (e) {
-                context.dispatch('sendWsMessage', { event: 'token', payload: sessionStorage.TOKEN }).catch(reason => {
-                    sessionStorage.removeItem('TOKEN');
-                    sessionStorage.removeItem('USER');
-                    window.location.reload();
-                });
-            };
-            ws.onclose = function (e) {
-                console.log('Ws Close', e);
-                if (e.code !== 4000) {
-                    window.location.reload();
-                }
-            };
-            ws.onerror = function (e) {
-                console.log('Ws Error', e);
-                window.location.reload();
-            };
-
-            ws.onmessage = function (e) {
-                const response = e.data.split(/,(.+)/);
-
-                const responseType = response[0];
-                const responseData = response[1];
-                switch (responseType) {
-                    case 'need-qrcode': {
-                        context.commit('SET_IMG_QRCODE', responseData);
-
-                        break;
-                    }
-
-                    case 'update-estado': {
-                        if (responseData === 'QR_CODE_SCANNED') {
-                            context.commit('SET_QR_CODE_LOGGED', true);
-                        } else if (responseData === 'LOADING_STORE') {
-                            context.commit('SET_QR_CODE_LOGGED', true);
-                        } else if (responseData === 'LOGGED') {
-                            context.commit('SET_QR_CODE_LOGGED', true);
-                        } else if (responseData === 'WAITING_QR_CODE_SCAN') {
-                            context.commit('SET_QR_CODE_LOGGED', false);
-                            context.commit('SET_IS_LOADING_CHAT', true);
-                        }
-
-                        break;
-                    }
-
-                    case 'init': {
-                        const r = JSON.parse(responseData);
-                        context.commit('SET_SELF', r.self);
-
-                        let init = performance.now();
-                        context.dispatch('getAllChats').then(chats => {
-                            console.log('chats::', chats);
-                            console.log('time get all chats::', performance.now() - init);
-                            context.commit('SET_IS_LOADING_CHAT', false);
-                            context.dispatch('handleSetChats', chats);
-                            context.dispatch('sortChatsByTime');
-                            context.state.poolContext.forEach(func => func());
-                            context.state.poolContext = [];
-                            context.dispatch('initPong');
-                            context.dispatch('initPresenceTimeout');
-                            context.dispatch('appActive');
+            wsWorker.addEventListener('message', (event) => {
+                let cmd = event.data.cmd;
+                let data = event.data.data;
+                switch (cmd) {
+                    case 'ws-open': {
+                        context.dispatch('sendWsMessage', {
+                            event: 'token',
+                            payload: sessionStorage.TOKEN
+                        }).catch(reason => {
+                            sessionStorage.removeItem('TOKEN');
+                            sessionStorage.removeItem('USER');
+                            window.location.reload();
                         });
-
-                        context.dispatch('getAllContacts').then(contacts => {
-                            context.commit('SET_CONTACTS', contacts);
-                        });
-
-                        if (r.isBussiness) {
-                            context.dispatch('getAllQuickReplys').then(quickReplys => {
-                                context.commit('SET_QUICK_REPLYS', quickReplys);
-                            });
-                        }
-
                         break;
                     }
-
-                    case 'new-chat': {
-                        const r = JSON.parse(responseData);
-
-                        let funcao = () => {
-                            context.dispatch('newChat', r);
-                        };
-
-                        if (context.state.isLoadingChat) {
-                            context.state.poolContext.push(funcao);
-                        } else {
-                            funcao();
+                    case 'ws-close': {
+                        if (data.code !== 4000) {
+                            window.location.reload();
                         }
-
                         break;
                     }
-
-                    case 'update-chat': {
-                        const r = JSON.parse(responseData);
-
-                        let funcao = () => {
-                            context.dispatch('updateChat', r);
-                        };
-
-                        if (context.state.isLoadingChat) {
-                            context.state.poolContext.push(funcao);
-                        } else {
-                            funcao();
-                        }
-
+                    case 'ws-error': {
+                        console.log('wsError::', data);
+                        window.location.reload();
                         break;
                     }
+                    case 'ws-message': {
+                        let payload = data.data;
+                        let eventOrTag = data.cmd;
+                        switch (eventOrTag) {
+                            case 'need-qrcode': {
+                                context.commit('SET_IMG_QRCODE', payload);
 
-                    case 'remove-chat': {
-                        const r = JSON.parse(responseData);
+                                break;
+                            }
 
-                        let funcao = () => {
-                            context.commit('REMOVE_CHAT', r);
-                        };
+                            case 'update-estado': {
+                                if (payload === 'QR_CODE_SCANNED') {
+                                    context.commit('SET_QR_CODE_LOGGED', true);
+                                } else if (payload === 'LOADING_STORE') {
+                                    context.commit('SET_QR_CODE_LOGGED', true);
+                                } else if (payload === 'LOGGED') {
+                                    context.commit('SET_QR_CODE_LOGGED', true);
+                                } else if (payload === 'WAITING_QR_CODE_SCAN') {
+                                    context.commit('SET_QR_CODE_LOGGED', false);
+                                    context.commit('SET_IS_LOADING_CHAT', true);
+                                }
 
-                        if (context.state.isLoadingChat) {
-                            context.state.poolContext.push(funcao);
-                        } else {
-                            funcao();
+                                break;
+                            }
+
+                            case 'init': {
+                                const r = JSON.parse(payload);
+                                context.commit('SET_SELF', r.self);
+
+                                let init = performance.now();
+                                context.dispatch('getAllChats').then(chats => {
+                                    console.log('chats::', chats);
+                                    console.log('time get all chats::', performance.now() - init);
+                                    context.dispatch('handleSetChats', chats);
+                                    context.dispatch('sortChatsByTime');
+                                    context.state.poolContext.forEach(func => func());
+                                    context.state.poolContext = [];
+                                    context.dispatch('initPong');
+                                    context.dispatch('initPresenceTimeout');
+                                    context.dispatch('appActive');
+                                    context.commit('SET_IS_LOADING_CHAT', false);
+                                });
+
+                                context.dispatch('getAllContacts').then(contacts => {
+                                    context.commit('SET_CONTACTS', contacts);
+                                });
+
+                                if (r.isBussiness) {
+                                    context.dispatch('getAllQuickReplys').then(quickReplys => {
+                                        context.commit('SET_QUICK_REPLYS', quickReplys);
+                                    });
+                                }
+
+                                break;
+                            }
+
+                            case 'new-chat': {
+                                const r = JSON.parse(payload);
+
+                                let funcao = () => {
+                                    context.dispatch('newChat', r);
+                                };
+
+                                if (context.state.isLoadingChat) {
+                                    context.state.poolContext.push(funcao);
+                                } else {
+                                    funcao();
+                                }
+
+                                break;
+                            }
+
+                            case 'update-chat': {
+                                const r = JSON.parse(payload);
+
+                                let funcao = () => {
+                                    context.dispatch('updateChat', r);
+                                };
+
+                                if (context.state.isLoadingChat) {
+                                    context.state.poolContext.push(funcao);
+                                } else {
+                                    funcao();
+                                }
+
+                                break;
+                            }
+
+                            case 'remove-chat': {
+                                const r = JSON.parse(payload);
+
+                                let funcao = () => {
+                                    context.commit('REMOVE_CHAT', r);
+                                };
+
+                                if (context.state.isLoadingChat) {
+                                    context.state.poolContext.push(funcao);
+                                } else {
+                                    funcao();
+                                }
+
+                                break;
+                            }
+
+                            case 'remove-msg': {
+                                const r = JSON.parse(payload);
+
+                                let funcao = () => {
+                                    context.dispatch('removeMsgFromChat', r);
+                                };
+
+                                if (context.state.isLoadingChat) {
+                                    context.state.poolContext.push(funcao);
+                                } else {
+                                    funcao();
+                                }
+
+                                break;
+                            }
+
+                            case 'new-msg': {
+                                const r = JSON.parse(payload);
+
+                                let funcao = () => {
+                                    context.dispatch('addNewMsgInChat', r);
+                                };
+
+                                if (context.state.isLoadingChat) {
+                                    context.state.poolContext.push(funcao);
+                                } else {
+                                    funcao();
+                                }
+
+                                break;
+                            }
+
+                            case 'update-msg': {
+                                const r = JSON.parse(payload);
+
+                                let funcao = () => {
+                                    context.dispatch('updateMsg', r);
+                                };
+
+                                if (context.state.isLoadingChat) {
+                                    context.state.poolContext.push(funcao);
+                                } else {
+                                    funcao();
+                                }
+
+                                break;
+                            }
+
+                            default: {
+                                context.commit('NEW_MSG_WS', { tag: eventOrTag, data: payload });
+                            }
                         }
-
                         break;
-                    }
-
-                    case 'remove-msg': {
-                        const r = JSON.parse(responseData);
-
-                        let funcao = () => {
-                            context.dispatch('removeMsgFromChat', r);
-                        };
-
-                        if (context.state.isLoadingChat) {
-                            context.state.poolContext.push(funcao);
-                        } else {
-                            funcao();
-                        }
-
-                        break;
-                    }
-
-                    case 'new-msg': {
-                        const r = JSON.parse(responseData);
-
-                        let funcao = () => {
-                            context.dispatch('addNewMsgInChat', r);
-                        };
-
-                        if (context.state.isLoadingChat) {
-                            context.state.poolContext.push(funcao);
-                        } else {
-                            funcao();
-                        }
-
-                        break;
-                    }
-
-                    case 'update-msg': {
-                        const r = JSON.parse(responseData);
-
-                        let funcao = () => {
-                            context.dispatch('updateMsg', r);
-                        };
-
-                        if (context.state.isLoadingChat) {
-                            context.state.poolContext.push(funcao);
-                        } else {
-                            funcao();
-                        }
-
-                        break;
-                    }
-
-                    default: {
-                        context.commit('NEW_MSG_WS', { tag: responseType, data: responseData });
                     }
                 }
-                return false;
-            };
+            });
         },
 
         sendWsMessage (context, payload) {
-            return new Promise(async (resolve, reject) => {
+            return new Promise((resolve, reject) => {
                 let payLoadSend = {
                     tag: uniqueid(),
                     webSocketRequestPayLoad: payload
@@ -433,28 +443,10 @@ const store = new Vuex.Store({
                 }
                 context.commit('ADD_NEW_LISTENNER', { tag: payLoadSend.tag, resolve: resolve, reject: reject });
                 setTimeout(() => reject(new Error('Time-Out')), 60000);
-                if (context.state.ws.readyState === WebSocket.OPEN) {
-                    context.state.ws.send(JSON.stringify(payLoadSend));
-                } else {
-                    reject(new Error('WebSocket Not Open'));
-                }
-            });
-        },
-
-        waitResultPreviousWSEvent (context, payload) {
-            return new Promise(async (resolve, reject) => {
-                let promises = context.state.promisesWsEvents[payload];
-                if (promises) {
-                    let promisesWait = [];
-                    for (let x = 0; x < 10 && x < promises.length; x++) {
-                        promisesWait.push(promises.shift());
-                    }
-                    Promise.all(promisesWait).finally(() => {
-                        resolve();
-                    });
-                } else {
-                    resolve();
-                }
+                context.state.wsWorker.postMessage({
+                    cmd: 'ws-send',
+                    data: payLoadSend
+                });
             });
         },
 
@@ -521,8 +513,8 @@ const store = new Vuex.Store({
         },
 
         closeWs (context) {
-            if (context.state.ws) {
-                context.state.ws.close(4000);
+            if (context.state.wsWorker) {
+                context.state.wsWorker.postMessage({ cmd: 'close' });
             }
         },
 
@@ -533,7 +525,6 @@ const store = new Vuex.Store({
         },
 
         appActive (context) {
-            console.log('appActive');
             if (context.state.idle && context.state.visible) {
                 context.dispatch('sendPresenceStatus', { type: 'Available' });
             }
@@ -634,7 +625,6 @@ const store = new Vuex.Store({
         },
 
         sendPresenceStatus (context, payload) {
-            console.log('sendPresenceStatus::', payload);
             return new Promise((resolve, reject) => {
                 context.dispatch('sendWsMessage', { event: `sendPresence${payload.type}` }).then(data => {
                     resolve(data);
@@ -681,7 +671,6 @@ const store = new Vuex.Store({
                 context.dispatch('setMsgsProperties', el.msgs);
                 el.quotedMsg = undefined;
                 el.openChatInfo = false;
-                el.customProperties = {};
                 el.sendQueue = [];
                 el.__x_msgsIndex = 1;
                 el.__x_poolAddMsgs = [];
@@ -940,7 +929,6 @@ const store = new Vuex.Store({
                 if (msg.isVcard) {
                     msg.vCard = vCardParse.parse(msg.body);
                 }
-                msg.customProperties = {};
                 msg.delete = function () {
                     let payload = {
                         msgId: this.id._serialized,
