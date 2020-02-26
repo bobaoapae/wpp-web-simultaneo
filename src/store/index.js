@@ -23,6 +23,7 @@ const store = new Vuex.Store({
     plugins: [VuexReset(), vuexLocal.plugin],
     state: {
         user: {},
+        token: '',
         isLogged: false,
         isQrCodeLogged: false,
         isLoadingChat: true,
@@ -59,6 +60,10 @@ const store = new Vuex.Store({
 
         SET_CURRENT_USER (state, payload) {
             state.user = payload;
+        },
+
+        SET_TOKEN (state, payload) {
+            state.token = payload;
         },
 
         SET_IS_LOGGED (state, payload) {
@@ -150,15 +155,13 @@ const store = new Vuex.Store({
                 let webSocketResponse = JSON.parse(payload.data);
                 if (webSocketResponse.status === 200 || webSocketResponse.status === 201) {
                     if (webSocketResponse.frameId) {
-                        if (webSocketResponse.frameId >= 1) {
-                            wsEvent.frames.push(webSocketResponse);
-                        } else if (webSocketResponse.frameId === -1) {
+                        wsEvent.frames.push(webSocketResponse);
+                        if (wsEvent.frames.length === webSocketResponse.qtdFrames) {
                             let frames = wsEvent.frames.sort((a, b) => a.frameId - b.frameId);
                             let response = '';
                             for (let x = 0; x < frames.length; x++) {
                                 response += frames[x].response;
                             }
-                            response += webSocketResponse.response;
                             try {
                                 response = JSON.parse(response);
                             } catch (e) {
@@ -239,6 +242,7 @@ const store = new Vuex.Store({
 
     actions: {
         setNewEvent (context) {
+            context.commit('SET_TOKEN', sessionStorage.TOKEN);
             context.commit('SET_WS_WORKER', new WebSocketWorker());
             const wsWorker = context.state.wsWorker;
 
@@ -260,6 +264,7 @@ const store = new Vuex.Store({
                         break;
                     }
                     case 'ws-close': {
+                        console.log('wsClose::', data);
                         if (data !== 4000) {
                             window.location.reload();
                         }
@@ -489,27 +494,15 @@ const store = new Vuex.Store({
         },
 
         getAllChats (context, payload) {
-            return new Promise((resolve, reject) => {
-                context.dispatch('sendWsMessage', { event: 'getAllChats' }).then(chat => {
-                    resolve(chat);
-                }).catch(reason => reject(reason));
-            });
+            return context.dispatch('sendWsMessage', { event: 'getAllChats' });
         },
 
         getAllContacts (context, payload) {
-            return new Promise((resolve, reject) => {
-                context.dispatch('sendWsMessage', { event: 'getAllContacts' }).then(chat => {
-                    resolve(chat);
-                }).catch(reason => reject(reason));
-            });
+            return context.dispatch('sendWsMessage', { event: 'getAllContacts' });
         },
 
         getAllQuickReplys (context, payload) {
-            return new Promise((resolve, reject) => {
-                context.dispatch('sendWsMessage', { event: 'getAllQuickReplys' }).then(chat => {
-                    resolve(chat);
-                }).catch(reason => reject(reason));
-            });
+            return context.dispatch('sendWsMessage', { event: 'getAllQuickReplys' });
         },
 
         closeWs (context) {
@@ -598,18 +591,27 @@ const store = new Vuex.Store({
 
         downloadMedia (context, payload) {
             return new Promise((resolve, reject) => {
-                if (context.state.medias[payload.id]) {
-                    resolve(context.state.medias[payload.id]);
+                if (payload.base64 !== false) {
+                    if (context.state.medias[payload.id]) {
+                        resolve(context.state.medias[payload.id]);
+                    } else {
+                        context.dispatch('sendWsMessage', {
+                            event: 'downloadMedia',
+                            payload: payload.id
+                        }).then(data => {
+                            api.get(`/api/downloadFile/${data}`, { responseType: 'blob' }).then(async value => {
+                                let result = {
+                                    fileName: value.headers.filename,
+                                    base64: await context.dispatch('convertToBase64', { file: value.data })
+                                };
+                                context.commit('ADD_MEDIA_TO_CACHE', { id: payload.id, data: result });
+                                resolve(result);
+                            });
+                        }).catch(reason => reject(reason));
+                    }
                 } else {
                     context.dispatch('sendWsMessage', { event: 'downloadMedia', payload: payload.id }).then(data => {
-                        api.get(`/api/downloadFile/${data}`, { responseType: 'blob' }).then(async value => {
-                            let result = {
-                                fileName: value.headers.filename,
-                                base64: await context.dispatch('convertToBase64', { file: value.data })
-                            };
-                            context.commit('ADD_MEDIA_TO_CACHE', { id: payload.id, data: result });
-                            resolve(result);
-                        });
+                        resolve(`${localStorage.baseURL}/api/downloadFile/${data}?token=${context.state.token}`);
                     }).catch(reason => reject(reason));
                 }
             });

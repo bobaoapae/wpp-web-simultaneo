@@ -91,10 +91,10 @@ export default {
         ...mapActions(['downloadMedia']),
 
         downloadDocument () {
-            this.downloadMedia({ id: this.msg.id._serialized }).then(e => {
+            this.downloadMedia({ id: this.msg.id._serialized, base64: false }).then(e => {
                 const element = document.createElement('a');
-                element.setAttribute('href', e.base64);
-                element.setAttribute('download', e.fileName);
+                element.setAttribute('href', e);
+                element.toggleAttribute('download');
 
                 element.style.display = 'none';
                 document.body.appendChild(element);
