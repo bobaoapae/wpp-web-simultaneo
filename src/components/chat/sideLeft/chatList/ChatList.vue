@@ -1,11 +1,12 @@
 <template>
     <div id="chat-list">
         <div class="box-input-search">
-            <input placeholder="Procurar" style="outline: none;" type="text" v-model="inputFilter"/>
+            <input placeholder="Procurar" style="outline: none;" type="text" v-model.trim="inputData"
+                   @keydown.exact.esc="handleEscPress" v-debounce:200ms.lock="handleInput"/>
         </div>
 
         <div class="box-list-group">
-            <transition-group class="list-group" name="flip-list" tag="ul">
+            <transition-group class="list-group" tag="ul" v-if="!inputFilter">
                 <li
                     :class="{ active : active_el === chat.id }"
                     :key="chat.id"
@@ -34,6 +35,35 @@
                     </div>
                 </li>
             </transition-group>
+            <ul class="list-group" v-else>
+                <li
+                    :class="{ active : active_el === chat.id }"
+                    :key="chat.id"
+                    @click="handleClick(chat)"
+                    class="list-group-item d-flex"
+                    v-for="chat in chatsFiltered"
+                >
+                    <Picture :group="chat.isGroup" :id="chat.id"/>
+
+                    <div class="box-info-chat">
+                        <div class="d-flex">
+                            <NameChat :chat="chat"/>
+                            <TimeMsg :chat="chat"/>
+                        </div>
+
+                        <div class="d-flex presence-chat-container">
+                            <PresenceChat :chat="chat"
+                                          :class="{'d-flex align-items-center flex-grow-1': chat.isChat && (chat.isComposing || chat.isRecording)}"
+                                          :showLastTime="false"
+                                          :showOnline="false"
+                                          v-if="chat.isChat"
+                                          :key="chat.id"/>
+                            <LastMsg :chat="chat" v-if="!chat.isChat || (!chat.isComposing && !chat.isRecording)"/>
+                            <Icons :chat="chat"/>
+                        </div>
+                    </div>
+                </li>
+            </ul>
         </div>
     </div>
 </template>
@@ -61,7 +91,8 @@ export default {
     data () {
         return {
             active_el: null,
-            inputFilter: ''
+            inputFilter: '',
+            inputData: ''
         };
     },
     computed: {
@@ -94,6 +125,15 @@ export default {
             if (chat.unreadCount > 0) {
                 chat.seeChat();
             }
+        },
+
+        handleInput () {
+            this.inputFilter = this.inputData;
+        },
+
+        handleEscPress () {
+            this.inputData = '';
+            this.inputFilter = '';
         }
     }
 };

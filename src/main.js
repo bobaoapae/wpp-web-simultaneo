@@ -12,6 +12,7 @@ import AsyncComputed from 'vue-async-computed';
 import VueScrollTo from 'vue-scrollto';
 import VueTelInput from 'vue-tel-input';
 import { msg } from '@/helper.js';
+import vueDebounce from 'vue-debounce';
 
 Vue.config.productionTip = false;
 
@@ -20,6 +21,7 @@ Vue.use(IconsPlugin);
 Vue.use(AsyncComputed);
 Vue.use(VueScrollTo);
 Vue.use(VueTelInput);
+Vue.use(vueDebounce);
 
 Vue.filter('uppercase', function (value) {
     if (!value) return '';
