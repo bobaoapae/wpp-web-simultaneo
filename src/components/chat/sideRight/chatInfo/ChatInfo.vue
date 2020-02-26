@@ -61,6 +61,15 @@ export default {
             return this.timeConverterCreated(this.activeChat.id.split('@')[0].split('-')[1]);
         }
     },
+    mounted () {
+        this.$root.$on('keyDown', (evt) => {
+            if (this.activeChat && this.activeChat.openChatInfo) {
+                if (evt.key === 'Escape') {
+                    this.handleClose();
+                }
+            }
+        });
+    },
     methods: {
         timeConverterPresence (unixTimeStamp) {
             let a = new Date(unixTimeStamp * 1000);

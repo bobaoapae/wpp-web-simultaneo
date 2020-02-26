@@ -201,6 +201,11 @@ export default {
 
         isInBottom () {
             return this.$el.scrollHeight - this.$el.scrollTop <= this.$el.clientHeight + 15;
+        },
+
+        handleKeyDown (evt) {
+            console.log('keyDown');
+            this.$emit('keyDown', evt);
         }
     },
     directives: {

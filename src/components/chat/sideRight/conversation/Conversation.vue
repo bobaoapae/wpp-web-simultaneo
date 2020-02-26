@@ -1,5 +1,5 @@
 <template>
-    <div id="conversation">
+    <div tabindex="0" id="conversation" @keydown="handleKeyDown">
         <ConversationHeader/>
 
         <MessagesList :chat="activeChat"/>
@@ -23,6 +23,11 @@ export default {
     },
     computed: {
         ...mapState(['activeChat'])
+    },
+    methods: {
+        handleKeyDown (evt) {
+            this.$root.$emit('keyDown', evt);
+        }
     }
 };
 </script>
@@ -33,5 +38,6 @@ export default {
     background: #fff;
     display: flex;
     flex-direction: column;
+    outline: none;
 }
 </style>

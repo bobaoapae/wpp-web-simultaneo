@@ -79,7 +79,8 @@
 
             <div class="box-icon-send">
                 <div>
-                    <img @click="handleSendMsg" src="@/assets/images/wpp-icon-send.svg" v-if="mensagem"/>
+                    <img @click="handleSendMsg({ message: mensagem })" src="@/assets/images/wpp-icon-send.svg"
+                         v-if="mensagem"/>
                     <img @click="startRecording" src="@/assets/images/wpp-icon-mic.svg" v-else-if="!gravando"/>
                 </div>
 
@@ -130,6 +131,9 @@ export default {
         };
     },
     mounted () {
+        this.$root.$on('keyDown', () => {
+            this.$refs.input.focus();
+        });
         this.$root.$on('focusInput', () => {
             this.$refs.input.focus();
         });
@@ -265,6 +269,20 @@ export default {
         },
 
         onPaste (evt) {
+            let items = evt.clipboardData.items;
+            let files = [];
+            for (let i = 0; i < items.length; i++) {
+                // Skip content if not image
+                if (items[i].type.indexOf('image') === -1) continue;
+                // Retrieve image on clipboard as blob
+                files.push(items[i].getAsFile());
+            }
+            if (files.length > 0) {
+                files.forEach(async file => {
+                    let base64 = await this.convertToBase64({ file: file });
+                    return this.handleSendMsg({ media: base64, fileName: file.name });
+                });
+            }
             const textMsg = this.$options.filters.emojify(evt.clipboardData.getData('text'));
             document.execCommand('insertHTML', false, textMsg);
         },
@@ -290,15 +308,11 @@ export default {
             if (this.quickReplysVisible && this.filteredQuickReplys.length === 1) {
                 this.handleClickQuickReply(this.filteredQuickReplys[0]);
             } else if (this.mensagem !== '') {
-                this.handleSendMsg();
+                this.handleSendMsg({ message: this.mensagem });
             }
         },
 
-        handleSendMsg () {
-            let msg = {
-                message: this.mensagem
-            };
-
+        handleSendMsg (msg) {
             if (this.activeChat.quotedMsg) {
                 msg.quotedMsg = this.activeChat.quotedMsg.id._serialized;
             }
