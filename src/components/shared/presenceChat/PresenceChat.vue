@@ -28,6 +28,11 @@ export default {
             default: true
         }
     },
+    data () {
+        return {
+            visibleHandled: false
+        };
+    },
     computed: {
         ...mapState(['visible', 'idle']),
 
@@ -41,7 +46,7 @@ export default {
     },
     watch: {
         'active': function (val) {
-            if (val) {
+            if (val && this.visibleHandled) {
                 this.chat.subscribePresence();
             }
         }
@@ -87,6 +92,7 @@ export default {
 
         handleVisible (visible) {
             if (visible) {
+                this.visibleHandled = true;
                 this.chat.subscribePresence();
             }
         }
