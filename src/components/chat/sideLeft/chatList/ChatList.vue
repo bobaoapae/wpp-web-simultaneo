@@ -6,7 +6,7 @@
         </div>
 
         <div class="box-list-group">
-            <transition-group class="list-group" tag="ul" v-if="!inputFilter">
+            <transition-group class="list-group" tag="ul" v-if="inputFilter === ''">
                 <li
                     :class="{ active : active_el === chat.id }"
                     :key="chat.id"

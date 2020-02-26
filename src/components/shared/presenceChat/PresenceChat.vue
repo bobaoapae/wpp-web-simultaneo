@@ -94,7 +94,6 @@ export default {
         handleVisible (visible) {
             if (visible) {
                 this.visibleHandled = true;
-                console.log('handlePresenceVisible');
                 this.chat.subscribePresence();
             }
         }
