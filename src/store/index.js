@@ -672,6 +672,9 @@ const store = new Vuex.Store({
                 el.quotedMsg = undefined;
                 el.openChatInfo = false;
                 el.sendQueue = [];
+                if (!el.customProperties) {
+                    el.customProperties = {};
+                }
                 el.__x_msgsIndex = 1;
                 el.__x_poolAddMsgs = [];
                 el.__x_intervalPool = setInterval(() => {
@@ -928,6 +931,9 @@ const store = new Vuex.Store({
                 }
                 if (msg.isVcard) {
                     msg.vCard = vCardParse.parse(msg.body);
+                }
+                if (!msg.customProperties) {
+                    msg.customProperties = {};
                 }
                 msg.delete = function () {
                     let payload = {
