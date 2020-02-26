@@ -131,8 +131,10 @@ export default {
         };
     },
     mounted () {
-        this.$root.$on('keyDown', () => {
-            this.$refs.input.focus();
+        this.$root.$on('keyDown', (evt) => {
+            if (evt.target.placeholder !== 'Buscar emoji') {
+                this.$refs.input.focus();
+            }
         });
         this.$root.$on('focusInput', () => {
             this.$refs.input.focus();
