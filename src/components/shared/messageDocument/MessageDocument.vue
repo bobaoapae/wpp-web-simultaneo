@@ -19,7 +19,24 @@
                     <span class="file-name">{{msg.filename}}</span>
                 </div>
 
-                <div class="box-download-button">
+                <div class="box-spinner" v-if="generatingLink">
+                    <svg
+                        class="_2bESe"
+                        height="34"
+                        viewBox="0 0 43 43"
+                        width="34">
+                        <circle
+                            class="oWVod _1y_Nu _2BA8e"
+                            cx="21.5"
+                            cy="21.5"
+                            fill="none"
+                            r="20"
+                            stroke-width="3">
+
+                        </circle>
+                    </svg>
+                </div>
+                <div class="box-download-button" v-else>
                     <span role="button">
                         <img alt="" src="@/assets/images/wpp-icon-document-download.svg">
                     </span>
@@ -53,6 +70,11 @@ export default {
             type: Object,
             required: true
         }
+    },
+    data () {
+        return {
+            generatingLink: false
+        };
     },
     computed: {
         formatedTitle () {
@@ -91,18 +113,25 @@ export default {
         ...mapActions(['downloadMedia']),
 
         downloadDocument () {
-            this.downloadMedia({ id: this.msg.id._serialized, base64: false }).then(e => {
-                const element = document.createElement('a');
-                element.setAttribute('href', e);
-                element.toggleAttribute('download');
+            if (!this.generatingLink) {
+                this.generatingLink = true;
+                this.downloadMedia({ id: this.msg.id._serialized, base64: false }).then(e => {
+                    const element = document.createElement('a');
+                    element.setAttribute('href', e);
+                    element.toggleAttribute('download');
 
-                element.style.display = 'none';
-                document.body.appendChild(element);
+                    element.style.display = 'none';
+                    document.body.appendChild(element);
 
-                element.click();
+                    element.click();
 
-                document.body.removeChild(element);
-            });
+                    document.body.removeChild(element);
+                }).catch(reason => {
+                    alert('Falha ao baixar o arquivo, atualize a pagina e tente novamente.');
+                }).finally(() => {
+                    this.generatingLink = false;
+                });
+            }
         }
     }
 };
@@ -163,6 +192,42 @@ export default {
 .dot {
     color: #cbd5da;
     margin: 0 4px;
+}
+
+svg {
+    animation: _3rafi 2s linear infinite;
+}
+
+._2BA8e {
+    stroke: #849982;
+}
+
+.oWVod {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+    stroke-linecap: round;
+    animation: _1NbMv 1.5s ease-in-out infinite;
+}
+
+@keyframes _3rafi {
+    100% {
+        transform: rotate(1turn);
+    }
+}
+
+@keyframes _1NbMv {
+    0% {
+        stroke-dasharray: 1, 150;
+        stroke-dashoffset: 0;
+    }
+    50% {
+        stroke-dasharray: 90, 150;
+        stroke-dashoffset: -35;
+    }
+    100% {
+        stroke-dasharray: 90, 150;
+        stroke-dashoffset: -124;
+    }
 }
 
 </style>
