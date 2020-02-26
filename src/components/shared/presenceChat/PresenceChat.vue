@@ -1,5 +1,6 @@
 <template>
     <div class="presence-chat" v-b-visible.once="handleVisible">
+        <span v-if="!visibleHandled">....</span>
         <span class="last-time" v-if="showLastTime && chat.isOffline && chat.hasLastTimeAvailable">{{this.lastTimeAvailable}}</span>
         <span class="online" v-else-if="showOnline && chat.isOnline">online</span>
         <span class="writing" v-else-if="chat.isComposing">escrevendo...</span>
@@ -11,7 +12,7 @@
 import { mapState } from 'vuex';
 
 export default {
-    name: 'Picture',
+    name: 'PresenceChat',
     props: {
         chat: {
             type: Object,
@@ -93,6 +94,7 @@ export default {
         handleVisible (visible) {
             if (visible) {
                 this.visibleHandled = true;
+                console.log('handlePresenceVisible');
                 this.chat.subscribePresence();
             }
         }
