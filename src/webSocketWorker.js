@@ -11,7 +11,7 @@ self.addEventListener('message', function (event) {
                 self.postMessage({ cmd: 'ws-open' });
             };
             ws.onclose = function (e) {
-                self.postMessage({ cmd: 'ws-close', data: e });
+                self.postMessage({ cmd: 'ws-close', data: e.code });
             };
             ws.onerror = function (e) {
                 self.postMessage({ cmd: 'ws-error', data: e });

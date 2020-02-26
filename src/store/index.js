@@ -260,7 +260,7 @@ const store = new Vuex.Store({
                         break;
                     }
                     case 'ws-close': {
-                        if (data.code !== 4000) {
+                        if (data !== 4000) {
                             window.location.reload();
                         }
                         break;
