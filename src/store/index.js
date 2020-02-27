@@ -524,7 +524,9 @@ const store = new Vuex.Store({
             context.commit('SET_IDLE', false);
             context.commit('TIMEOUT_IDLE', setTimeout(() => {
                 context.commit('SET_IDLE', true);
-                context.dispatch('sendPresenceStatus', { type: 'Unavailable' });
+                setTimeout(() => {
+                    context.dispatch('sendPresenceStatus', { type: 'Unavailable' });
+                }, 20000);
             }, 10000));
         },
 
@@ -540,12 +542,9 @@ const store = new Vuex.Store({
                 if (hidden) {
                     context.commit('TIMEOUT_PRESENCE', setTimeout(() => {
                         context.dispatch('sendPresenceStatus', { type: 'Unavailable' });
-                    }, 5000));
+                    }, 10000));
                 } else {
                     context.dispatch('sendPresenceStatus', { type: 'Available' });
-                    context.commit('TIMEOUT_PRESENCE', setTimeout(() => {
-                        context.dispatch('sendPresenceStatus', { type: 'Available' });
-                    }, 5000));
                 }
             });
         },
