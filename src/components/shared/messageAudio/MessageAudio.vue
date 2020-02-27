@@ -29,8 +29,8 @@
                     <img src="@/assets/images/wpp-icon-audio-play.svg" @click="handleClickPlayAudio"
                          v-else-if="!audioPlaying"/>
                     <img src="@/assets/images/wpp-icon-audio-pause.svg" @click="handleClickPauseAudio" v-else/>
-                    <div class="audio-progress-container">
-                        <span class="audio-progress-mark" :class="{'ptt' : msg.isPtt}"
+                    <div class="audio-progress-container" :class="{'ptt' : msg.isPtt}">
+                        <span class="audio-progress-mark"
                               :style="{width: `${audioProgress}%`}"></span>
                         <input dir="ltr" type="range" class="audio-progress" min="0" max="100" v-model="audioProgress"
                                ref="audioProgress" @input="handleProgressInput">
@@ -217,11 +217,11 @@ export default {
     background-color: #00a5f4;
 }
 
-.message-in .audio-progress-mark.ptt {
+.message-in .ptt .audio-progress-mark {
     background-color: #31c76a;
 }
 
-.message-in .message-audio.played .audio-progress-mark.ptt {
+.message-in .message-audio.played .ptt .audio-progress-mark {
     background-color: #00a5f4;
 }
 
@@ -237,7 +237,7 @@ export default {
     background-color: #00a5f4
 }
 
-.message-in .audio-progress::-webkit-slider-thumb.ptt {
+.message-in .ptt .audio-progress::-webkit-slider-thumb {
     background-color: #31c76a
 }
 
