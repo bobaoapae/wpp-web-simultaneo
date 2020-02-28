@@ -79,8 +79,8 @@
 
             <div class="box-icon-send">
                 <div>
-                    <img @click="handleSendMsg({ message: mensagem })" src="@/assets/images/wpp-icon-send.svg"
-                         v-if="mensagem"/>
+                    <img @click="handleSendMsg()" src="@/assets/images/wpp-icon-send.svg"
+                         v-if="message"/>
                     <img @click="startRecording" src="@/assets/images/wpp-icon-mic.svg" v-else-if="!gravando"/>
                 </div>
 
@@ -116,9 +116,9 @@ export default {
     },
     data () {
         return {
-            mensagem: '',
+            preventOverrideRestore: false,
+            message: '',
             emojiIndex: msg.emojiIndex(),
-            restore: null,
             answerVisible: false,
             quickReplysVisible: false,
             recorder: {},
@@ -151,7 +151,11 @@ export default {
             }
         },
         'activeChat': function (val) {
+            this.preventOverrideRestore = true;
+            this.$refs.input.innerHTML = this.activeChat.htmlInput;
             this.$refs.input.focus();
+            this.preventOverrideRestore = false;
+            this.savePosition();
         }
 
     },
@@ -177,12 +181,12 @@ export default {
         },
 
         showQuickReplys () {
-            return this.mensagem && this.mensagem.charAt(0) === '/' && this.quickReplys && this.quickReplys.length > 0;
+            return this.message && this.message.charAt(0) === '/' && this.quickReplys && this.quickReplys.length > 0;
         },
 
         filteredQuickReplys () {
             return this.quickReplys.filter(quickReply => {
-                return ('/' + quickReply.shortcut).includes(this.mensagem);
+                return ('/' + quickReply.shortcut).toLowerCase().includes(this.message.toLowerCase());
             });
         }
     },
@@ -257,12 +261,9 @@ export default {
 
         onInput (evt) {
             this.savePosition();
-            this.mensagem = this.formatar(this.$refs.input);
-            if (this.mensagem && this.showQuickReplys) {
-                this.quickReplysVisible = true;
-            } else {
-                this.quickReplysVisible = false;
-            }
+            this.activeChat.htmlInput = this.$refs.input.innerHTML;
+            this.message = this.formatar(this.$refs.input);
+            this.quickReplysVisible = !!(this.message && this.showQuickReplys);
         },
 
         handleClickCloseAnswer () {
@@ -290,14 +291,22 @@ export default {
         },
 
         restorePosition () {
-            if (this.restore) {
-                rageSave.restoreSelection(this.restore);
-                this.restore = null;
+            if (this.activeChat.restoreInput) {
+                rageSave.restoreSelection(this.activeChat.restoreInput);
+                this.activeChat.restoreInput = null;
             }
         },
 
         savePosition () {
-            this.restore = rageSave.saveSelection();
+            if (!this.preventOverrideRestore) {
+                if (this.activeChat.restoreInput) {
+                    rageSave.removeMarkers(this.activeChat.restoreInput);
+                }
+                if (this.$refs.input.textContent.length > 0) {
+                    this.activeChat.restoreInput = rageSave.saveSelection();
+                }
+                this.activeChat.htmlInput = this.$refs.input.innerHTML;
+            }
         },
 
         addEmoji (emoji) {
@@ -309,12 +318,16 @@ export default {
         handleEnterPress () {
             if (this.quickReplysVisible && this.filteredQuickReplys.length === 1) {
                 this.handleClickQuickReply(this.filteredQuickReplys[0]);
-            } else if (this.mensagem !== '') {
-                this.handleSendMsg({ message: this.mensagem });
+            } else if (this.message !== '') {
+                this.handleSendMsg();
             }
         },
 
-        handleSendMsg (msg) {
+        handleSendMsg (payload) {
+            let msg = {
+                message: this.message
+            };
+            Object.assign(msg, payload);
             if (this.activeChat.quotedMsg) {
                 msg.quotedMsg = this.activeChat.quotedMsg.id._serialized;
             }
@@ -326,7 +339,7 @@ export default {
         handleClickQuickReply (quickReply) {
             this.$refs.input.focus();
             this.$refs.input.innerHTML = '';
-            this.mensagem = '';
+            this.message = '';
             document.execCommand('insertHTML', false, quickReply.message);
         },
 
@@ -364,9 +377,10 @@ export default {
 
         clearInput () {
             this.$refs.input.innerHTML = '';
-            this.mensagem = '';
-            this.restore = null;
+            this.message = '';
+            this.activeChat.restoreInput = null;
             this.activeChat.quotedMsg = undefined;
+            this.activeChat.htmlInput = '';
             this.emojiVisible = false;
         }
     }

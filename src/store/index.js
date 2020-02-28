@@ -673,6 +673,8 @@ const store = new Vuex.Store({
                 el.quotedMsg = undefined;
                 el.openChatInfo = false;
                 el.sendQueue = [];
+                el.htmlInput = '';
+                el.restoreInput = null;
                 if (!el.customProperties) {
                     el.customProperties = {};
                 }
