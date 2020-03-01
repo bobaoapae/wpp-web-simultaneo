@@ -221,7 +221,7 @@ export default {
     background-color: #31c76a;
 }
 
-.message-in .message-audio.played .ptt .audio-progress-mark {
+.message-audio.played .ptt .audio-progress-mark {
     background-color: #00a5f4;
 }
 
@@ -241,7 +241,7 @@ export default {
     background-color: #31c76a
 }
 
-.message-in .message-audio.played .audio-progress::-webkit-slider-thumb {
+.message-audio.played .audio-progress::-webkit-slider-thumb {
     background-color: #2ab5eb
 }
 
