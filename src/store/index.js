@@ -58,6 +58,23 @@ const store = new Vuex.Store({
         reset: (state) => {
         },
 
+        RESET_WPP (state) {
+            state.self = {};
+            state.contacts = [];
+            state.chats = [];
+            state.quickReplys = [];
+            state.pictures = {};
+            state.medias = {};
+            state.activeChat = null;
+            state.modal.show = false;
+            state.poolContext = [];
+            for (let key in state.wsEvents) {
+                let event = state.wsEvents[key];
+                event.reject(new Error('WhatsApp Re-logged'));
+            }
+            state.wsEvents = {};
+        },
+
         SET_CURRENT_USER (state, payload) {
             state.user = payload;
         },
@@ -289,10 +306,14 @@ const store = new Vuex.Store({
                                 if (payload === 'QR_CODE_SCANNED') {
                                     context.commit('SET_QR_CODE_LOGGED', true);
                                 } else if (payload === 'LOADING_STORE') {
+                                    context.commit('SET_IS_LOADING_CHAT', true);
                                     context.commit('SET_QR_CODE_LOGGED', true);
                                 } else if (payload === 'LOGGED') {
                                     context.commit('SET_QR_CODE_LOGGED', true);
                                 } else if (payload === 'WAITING_QR_CODE_SCAN') {
+                                    context.commit('SET_QR_CODE_LOGGED', false);
+                                    context.commit('SET_IS_LOADING_CHAT', true);
+                                } else if (payload === 'LOADING' || payload === 'WAITING_LOAD') {
                                     context.commit('SET_QR_CODE_LOGGED', false);
                                     context.commit('SET_IS_LOADING_CHAT', true);
                                 }
@@ -302,6 +323,7 @@ const store = new Vuex.Store({
 
                             case 'init': {
                                 const r = JSON.parse(payload);
+                                context.commit('RESET_WPP');
                                 context.commit('SET_SELF', r.self);
 
                                 let init = performance.now();
