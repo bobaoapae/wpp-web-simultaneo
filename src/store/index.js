@@ -8,6 +8,7 @@ import vCardParse from 'vcard-parser';
 import api from '@/api';
 import randomColor from 'random-color';
 import WebSocketWorker from 'worker-loader!@/webSocketWorker';
+import Bottleneck from 'bottleneck';
 
 const vuexLocal = new VuexPersistence({
     storage: window.sessionStorage,
@@ -52,7 +53,8 @@ const store = new Vuex.Store({
         audio: null,
         visible: true,
         idle: false,
-        wsWorker: null
+        wsWorker: null,
+        throttle: null
     },
     mutations: {
         reset: (state) => {
@@ -73,6 +75,9 @@ const store = new Vuex.Store({
                 event.reject(new Error('WhatsApp Re-logged'));
             }
             state.wsEvents = {};
+            state.throttle = new Bottleneck({
+                minTime: 20
+            });
         },
 
         SET_CURRENT_USER (state, payload) {
@@ -259,6 +264,7 @@ const store = new Vuex.Store({
 
     actions: {
         setNewEvent (context) {
+            context.commit('RESET_WPP');
             context.commit('SET_TOKEN', sessionStorage.TOKEN);
             context.commit('SET_WS_WORKER', new WebSocketWorker());
             const wsWorker = context.state.wsWorker;
@@ -469,10 +475,12 @@ const store = new Vuex.Store({
                     payLoadSend.webSocketRequestPayLoad.payload = JSON.stringify(payLoadSend.webSocketRequestPayLoad.payload);
                 }
                 context.commit('ADD_NEW_LISTENNER', { tag: payLoadSend.tag, resolve: resolve, reject: reject });
-                setTimeout(() => reject(new Error('Timeout::' + payload.event)), 60000);
-                context.state.wsWorker.postMessage({
-                    cmd: 'ws-send',
-                    data: payLoadSend
+                context.state.throttle.schedule(() => {
+                    setTimeout(() => reject(new Error('Timeout::' + payload.event)), 60000);
+                    context.state.wsWorker.postMessage({
+                        cmd: 'ws-send',
+                        data: payLoadSend
+                    });
                 });
             });
         },
