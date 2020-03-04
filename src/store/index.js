@@ -32,6 +32,7 @@ const store = new Vuex.Store({
         QrCodeStatus: '',
         self: {},
         contacts: [],
+        findChats: {},
         chats: [],
         quickReplys: [],
         pictures: {},
@@ -75,8 +76,13 @@ const store = new Vuex.Store({
                 event.reject(new Error('WhatsApp Re-logged'));
             }
             state.wsEvents = {};
+            for (let key in state.findChats) {
+                let event = state.findChats[key];
+                event.reject(new Error('WhatsApp Re-logged'));
+            }
+            state.findChats = {};
             state.throttle = new Bottleneck({
-                minTime: 20
+                minTime: 50
             });
         },
 
@@ -259,6 +265,13 @@ const store = new Vuex.Store({
 
         SET_IDLE (state, payload) {
             state.idle = payload;
+        },
+
+        ADD_FIND_CHAT (state, payload) {
+            state.findChats[payload.id] = payload;
+            payload.promise.finally(() => {
+                delete state.findChats[payload.id];
+            });
         }
     },
 
@@ -511,12 +524,21 @@ const store = new Vuex.Store({
         findChatFromId (context, payload) {
             return new Promise((resolve, reject) => {
                 const chat = context.state.chats.find(chat => chat.id === payload.id);
-
+                let findChat = context.state.findChats[payload.id];
                 if (!chat) {
-                    context.dispatch('sendWsMessage', { event: 'findChat', payload: payload.id }).then(chat => {
-                        context.dispatch('newChat', chat);
-                        resolve(chat);
-                    }).catch(reason => reject(reason));
+                    if (!findChat) {
+                        // eslint-disable-next-line promise/param-names
+                        findChat = new Promise((resolve1, reject1) => {
+                            context.dispatch('sendWsMessage', { event: 'findChat', payload: payload.id }).then(chat => {
+                                context.dispatch('newChat', chat);
+                                resolve1(chat);
+                            }).catch(reason => reject1(reason));
+                        });
+                        context.commit('ADD_FIND_CHAT', { id: payload.id, promise: findChat });
+                    } else {
+                        findChat = findChat.promise;
+                    }
+                    findChat.then(value => resolve(value)).catch(reason => reject(reason));
                 } else {
                     resolve(chat);
                 }

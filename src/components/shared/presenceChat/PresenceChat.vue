@@ -1,6 +1,6 @@
 <template>
-    <div class="presence-chat" v-b-visible.once="handleVisible">
-        <span v-if="!visibleHandled">....</span>
+    <div class="presence-chat" v-b-visible="handleVisible">
+        <span v-if="!presenceVisible">....</span>
         <span class="last-time" v-if="showLastTime && chat.isOffline && chat.hasLastTimeAvailable">{{this.lastTimeAvailable}}</span>
         <span class="online" v-else-if="showOnline && chat.isOnline">online</span>
         <span class="writing" v-else-if="chat.isComposing">escrevendo...</span>
@@ -31,7 +31,7 @@ export default {
     },
     data () {
         return {
-            visibleHandled: false
+            presenceVisible: false
         };
     },
     computed: {
@@ -47,7 +47,7 @@ export default {
     },
     watch: {
         'active': function (val) {
-            if (val && this.visibleHandled) {
+            if (val && this.presenceVisible) {
                 this.chat.subscribePresence();
             }
         }
@@ -92,8 +92,8 @@ export default {
         },
 
         handleVisible (visible) {
-            if (visible) {
-                this.visibleHandled = true;
+            this.presenceVisible = visible;
+            if (this.presenceVisible) {
                 this.chat.subscribePresence();
             }
         }
