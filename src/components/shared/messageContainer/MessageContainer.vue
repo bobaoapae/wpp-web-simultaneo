@@ -20,7 +20,7 @@
                     </template>
 
                     <b-dropdown-item @click="handleClickAnswer">Responder</b-dropdown-item>
-                    <b-dropdown-item @click="handleClickDelete">Apagar mensagem</b-dropdown-item>
+                    <b-dropdown-item @click="handleClickDelete" v-if="user.canCreateOperator || user.superConfiguracao.operadorPodeExcluirMsg">Apagar mensagem</b-dropdown-item>
                 </b-dropdown>
             </div>
 
@@ -115,7 +115,7 @@ export default {
         }
     },
     computed: {
-        ...mapState(['activeChat']),
+        ...mapState(['activeChat', 'user']),
 
         showTail () {
             return !this.previousMsg || !this.msg.senderObj || !this.previousMsg.senderObj || (this.previousMsg.isSticker && !this.msg.isSticker) || this.msg.senderObj.id !== this.previousMsg.senderObj.id || this.msg.hasQuotedMsg || this.msg.isSticker || this.msg.fomattedDate !== this.previousMsg.fomattedDate;
@@ -142,6 +142,7 @@ export default {
         },
 
         handleClickDelete () {
+            console.log(this.user);
             this.$root.$emit('showModalDeleteMsg', this.msg);
         },
 

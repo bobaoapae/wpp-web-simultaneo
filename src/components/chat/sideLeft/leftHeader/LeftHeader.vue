@@ -26,10 +26,15 @@
                 </template>
                 <b-dropdown-item to="/changenumber">Alterar Número</b-dropdown-item>
                 <b-dropdown-item to="/changepassword">Alterar Senha</b-dropdown-item>
-                <b-dropdown-item to="/newoperator" v-if="canCreateOperator">Novo Operador</b-dropdown-item>
-                <b-dropdown-form class="text-nowrap" v-if="canCreateOperator">
+                <b-dropdown-item to="/newoperator" v-if="user.canCreateOperator">Novo Operador</b-dropdown-item>
+                <b-dropdown-form class="text-nowrap" v-if="user.canCreateOperator">
                     <b-form-checkbox name="check-button" switch v-model="user.configuracao.enviarNomeOperadores">
                         Enviar Nome Operadores
+                    </b-form-checkbox>
+                </b-dropdown-form>
+                <b-dropdown-form class="text-nowrap" v-if="user.canCreateOperator">
+                    <b-form-checkbox name="check-button" switch v-model="user.configuracao.operadorPodeExcluirMsg">
+                        Operadores podem excluir mensagens?
                     </b-form-checkbox>
                 </b-dropdown-form>
                 <b-dropdown-item class="d-none" to="/changenumber">Alterar Numero</b-dropdown-item>
@@ -49,14 +54,15 @@ export default {
             api.post('/api/users/config/toggleEnvioNomeOperador').then(e => {
                 this.SET_CURRENT_USER(e.data);
             });
+        },
+        'user.configuracao.operadorPodeExcluirMsg': function () {
+            api.post('/api/users/config/toggleOperadorPodeExcluirMsg').then(e => {
+                this.SET_CURRENT_USER(e.data);
+            });
         }
     },
     computed: {
-        ...mapState(['self', 'user']),
-
-        canCreateOperator () {
-            return this.user.permissao && this.user.permissao.permissao !== 'ROLE_OPERATOR';
-        }
+        ...mapState(['self', 'user'])
     },
     methods: {
         ...mapMutations(['SET_CURRENT_USER']),

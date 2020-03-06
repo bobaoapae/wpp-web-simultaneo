@@ -87,6 +87,39 @@ const store = new Vuex.Store({
         },
 
         SET_CURRENT_USER (state, payload) {
+            Object.defineProperty(payload, 'superConfiguracao', {
+                get () {
+                    if (this.permissao.permissao === 'ROLE_OPERATOR') {
+                        return this.usuarioPai.configuracao;
+                    }
+                    return this.configuracao;
+                }
+            });
+            Object.defineProperty(payload, 'isOperator', {
+                get () {
+                    return this.permissao && this.permissao.permissao === 'ROLE_OPERATOR';
+                }
+            });
+            Object.defineProperty(payload, 'isUser', {
+                get () {
+                    return this.permissao && this.permissao.permissao === 'ROLE_USER';
+                }
+            });
+            Object.defineProperty(payload, 'isAdmin', {
+                get () {
+                    return this.permissao && this.permissao.permissao === 'ROLE_ADMIN';
+                }
+            });
+            Object.defineProperty(payload, 'isSuperAdmin', {
+                get () {
+                    return this.permissao && this.permissao.permissao === 'ROLE_SUPER_ADMIN';
+                }
+            });
+            Object.defineProperty(payload, 'canCreateOperator', {
+                get () {
+                    return !this.isOperator;
+                }
+            });
             state.user = payload;
         },
 
