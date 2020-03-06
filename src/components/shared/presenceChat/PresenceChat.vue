@@ -1,6 +1,5 @@
 <template>
     <div class="presence-chat" v-b-visible="handleVisible">
-        <span v-if="!presenceVisible">....</span>
         <span class="last-time" v-if="showLastTime && chat.isOffline && chat.hasLastTimeAvailable">{{this.lastTimeAvailable}}</span>
         <span class="online" v-else-if="showOnline && chat.isOnline">online</span>
         <span class="writing" v-else-if="chat.isComposing">escrevendo...</span>
