@@ -62,6 +62,12 @@
                 />
             </div>
 
+            <div class="box-bind-operator" v-if="user.isOperator && canBindToOperator">
+                <b-form-checkbox size="small" name="check-button" v-model="bindToOperator">
+                    Vincular Chat?
+                </b-form-checkbox>
+            </div>
+
             <div class="box-input">
                 <div
                     @focusin="restorePosition"
@@ -127,7 +133,8 @@ export default {
             ignoreRecording: false,
             time: 0,
             interval: null,
-            emojiVisible: false
+            emojiVisible: false,
+            bindToOperator: true
         };
     },
     mounted () {
@@ -151,6 +158,7 @@ export default {
             }
         },
         'activeChat': function (val) {
+            this.bindToOperator = true;
             this.preventOverrideRestore = true;
             this.$refs.input.innerHTML = this.activeChat.htmlInput;
             this.$refs.input.focus();
@@ -160,7 +168,7 @@ export default {
 
     },
     computed: {
-        ...mapState(['activeChat', 'quickReplys']),
+        ...mapState(['activeChat', 'quickReplys', 'user']),
 
         timeConverter () {
             let a = new Date(this.time * 1000);
@@ -188,6 +196,10 @@ export default {
             return this.quickReplys.filter(quickReply => {
                 return ('/' + quickReply.shortcut).toLowerCase().includes(this.message.toLowerCase());
             });
+        },
+
+        canBindToOperator () {
+            return false;
         }
     },
     methods: {
@@ -333,6 +345,11 @@ export default {
             }
 
             this.activeChat.sendMessage(msg);
+            if (this.canBindToOperator && this.bindToOperator) {
+                this.activeChat.addCustomProperty({
+                    usuario: this.user.uuid
+                });
+            }
             this.clearInput();
         },
 
@@ -478,6 +495,11 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.box-bind-operator {
+    user-select: none;
+    margin: auto;
 }
 
 .quick-replys {

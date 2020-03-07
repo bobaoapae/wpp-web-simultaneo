@@ -20,7 +20,11 @@ const routes = [
         beforeEnter: (to, from, next) => {
             if (sessionStorage.TOKEN) {
                 store.dispatch('closeWs');
-                next();
+                store.dispatch('fetchUser').then(value => {
+                    next();
+                }).catch(reason => {
+                    router.push('/login');
+                });
             } else {
                 router.push('/login');
             }

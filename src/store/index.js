@@ -3,25 +3,16 @@ import Vuex from 'vuex';
 import uniqueid from 'uniqid';
 import visibility from 'vue-visibility-change';
 import VuexReset from '@ianwalter/vuex-reset';
-import VuexPersistence from 'vuex-persist';
 import vCardParse from 'vcard-parser';
 import api from '@/api';
 import randomColor from 'random-color';
 import WebSocketWorker from 'worker-loader!@/webSocketWorker';
 import Bottleneck from 'bottleneck';
 
-const vuexLocal = new VuexPersistence({
-    storage: window.sessionStorage,
-    reducer: state => ({
-        user: state.user
-    }),
-    supportCircular: true
-});
-
 Vue.use(Vuex);
 
 const store = new Vuex.Store({
-    plugins: [VuexReset(), vuexLocal.plugin],
+    plugins: [VuexReset()],
     state: {
         user: {},
         token: '',
@@ -590,10 +581,22 @@ const store = new Vuex.Store({
             return context.dispatch('sendWsMessage', { event: 'getAllQuickReplys' });
         },
 
+        addCustomProperty (context, payload) {
+            return context.dispatch('sendWsMessage', {
+                event: 'addCustomProperty', payload: payload
+            });
+        },
+
         closeWs (context) {
             if (context.state.wsWorker) {
                 context.state.wsWorker.postMessage({ cmd: 'close' });
             }
+        },
+
+        fetchUser (context) {
+            return api.get('/api/users/self').then(user => {
+                context.commit('SET_CURRENT_USER', user.data);
+            });
         },
 
         initPong (context) {
@@ -808,6 +811,13 @@ const store = new Vuex.Store({
                         return Promise.resolve(this.msgsParted);
                     }
                     return context.dispatch('loadEarly', { chatId: this.id });
+                };
+                el.addCustomProperty = function (value) {
+                    return context.dispatch('addCustomProperty', {
+                        id: this.id,
+                        type: 'CHAT',
+                        value: value
+                    });
                 };
                 Object.defineProperty(el, 'lastMsg', {
                     get () {
