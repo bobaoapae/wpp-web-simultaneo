@@ -46,7 +46,8 @@ const store = new Vuex.Store({
         visible: true,
         idle: false,
         wsWorker: null,
-        throttle: null
+        throttle: null,
+        driverState: ''
     },
     mutations: {
         reset: (state) => {
@@ -128,6 +129,10 @@ const store = new Vuex.Store({
 
         SET_IS_LOADING_CHAT (state, payload) {
             state.isLoadingChat = payload;
+        },
+
+        SET_DRIVER_STATE (state, payload) {
+            state.driverState = payload;
         },
 
         SET_IMG_QRCODE (state, payload) {
@@ -346,6 +351,7 @@ const store = new Vuex.Store({
                             }
 
                             case 'update-estado': {
+                                context.commit('SET_DRIVER_STATE', payload);
                                 if (payload === 'QR_CODE_SCANNED') {
                                     context.commit('SET_QR_CODE_LOGGED', true);
                                 } else if (payload === 'LOADING_STORE') {
@@ -353,10 +359,7 @@ const store = new Vuex.Store({
                                     context.commit('SET_QR_CODE_LOGGED', true);
                                 } else if (payload === 'LOGGED') {
                                     context.commit('SET_QR_CODE_LOGGED', true);
-                                } else if (payload === 'WAITING_QR_CODE_SCAN') {
-                                    context.commit('SET_QR_CODE_LOGGED', false);
-                                    context.commit('SET_IS_LOADING_CHAT', true);
-                                } else if (payload === 'LOADING' || payload === 'WAITING_LOAD') {
+                                } else if (payload === 'WAITING_QR_CODE_SCAN' || payload === 'LOADING' || payload === 'WAITING_LOAD') {
                                     context.commit('SET_QR_CODE_LOGGED', false);
                                     context.commit('SET_IS_LOADING_CHAT', true);
                                 }

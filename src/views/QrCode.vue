@@ -88,12 +88,12 @@
             </div>
 
             <div class="box-qrcode">
-               <div class="_1pw2F" v-show="imgQrCode">
+               <div class="_1pw2F" v-if="imgQrCode">
                   <img id="logo-white" src="@/assets/images/wpp-logo-white.svg"/>
                   <img :src="imgQrCode" id="qrcode-img"/>
                </div>
 
-               <div class="loading" v-show="!imgQrCode">
+               <div class="loading" v-else>
                   <LoadginSpinner/>
                </div>
             </div>
@@ -114,7 +114,7 @@ export default {
         this.setNewEvent();
     },
     computed: {
-        ...mapState(['imgQrCode', 'isQrCodeLogged'])
+        ...mapState(['imgQrCode'])
     },
     methods: {
         ...mapActions(['setNewEvent'])
