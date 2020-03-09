@@ -16,6 +16,10 @@
             >
         </div>
 
+        <div class="box-nome">
+            <span class="nome-usuario-principal"><strong>{{nomeUsuario}}</strong></span>
+        </div>
+
         <div class="box-icons">
             <img src="@/assets/images/wpp-icon-status.svg"/>
             <img @click="handleClick" src="@/assets/images/wpp-icon-message.svg"/>
@@ -62,7 +66,14 @@ export default {
         }
     },
     computed: {
-        ...mapState(['self', 'user'])
+        ...mapState(['self', 'user']),
+
+        nomeUsuario () {
+            if (this.user.permissao.permissao !== 'ROLE_OPERATOR') {
+                return this.user.nome;
+            }
+            return this.user.usuarioPai.nome;
+        }
     },
     methods: {
         ...mapMutations(['SET_CURRENT_USER']),
@@ -100,5 +111,14 @@ export default {
     width: 40px;
     border-radius: 50%;
     object-fit: cover;
+}
+
+.box-nome {
+    margin: auto;
+}
+
+.nome-usuario-principal {
+    margin-left: 10px;
+    font-size: 13px;
 }
 </style>
