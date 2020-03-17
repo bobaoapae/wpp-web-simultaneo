@@ -102,7 +102,7 @@
 
 <script>
 import { Picker } from 'emoji-mart-vue-fast';
-import { mapState, mapActions } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 import { msg } from '@/helper.js';
 import { rageSave } from '@/rangeSelectionSaveRestore.js';
 import QuotedMsg from '../../../../shared/quotedMsg/QuotedMsg';
@@ -297,9 +297,10 @@ export default {
                     let base64 = await this.convertToBase64({ file: file });
                     return this.handleSendMsg({ media: base64, fileName: file.name });
                 });
+            } else {
+                const textMsg = this.$options.filters.emojify(evt.clipboardData.getData('text'));
+                document.execCommand('insertHTML', false, textMsg);
             }
-            const textMsg = this.$options.filters.emojify(evt.clipboardData.getData('text'));
-            document.execCommand('insertHTML', false, textMsg);
         },
 
         restorePosition () {

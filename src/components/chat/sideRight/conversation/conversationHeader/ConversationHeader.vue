@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 import Picture from '@/components/shared/picture/Picture.vue';
 import PresenceChat from '@/components/shared/presenceChat/PresenceChat';
 
@@ -99,9 +99,15 @@ export default {
         },
 
         onChange (event) {
-            event.target.files.forEach(async file => {
-                let base64 = await this.convertToBase64({ file: file });
-                return this.handleSendMsg({ media: base64, fileName: file.name });
+            let promises = [];
+            event.target.files.forEach(file => {
+                let promise = this.convertToBase64({ file: file }).then(base64 => {
+                    this.handleSendMsg({ media: base64, fileName: file.name });
+                });
+                promises.push(promise);
+            });
+            Promise.all(promises).finally(() => {
+                this.$refs.file.value = '';
             });
         },
 
