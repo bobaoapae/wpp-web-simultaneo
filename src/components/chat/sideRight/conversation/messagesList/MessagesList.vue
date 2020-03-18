@@ -127,7 +127,7 @@ export default {
             }
         },
         'chat.lastMsg.id': function (val) {
-            if (!this.loadingEarly && this.visible && (val.fromMe || this.isInBottom())) {
+            if (val && !this.loadingEarly && this.visible && (val.fromMe || this.isInBottom())) {
                 this.scrollToBottom();
             }
         },

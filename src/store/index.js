@@ -373,11 +373,11 @@ const store = new Vuex.Store({
                                 context.commit('SET_SELF', r.self);
 
                                 let init = performance.now();
-                                context.dispatch('getAllChats').then(chats => {
+                                context.dispatch('getAllChats').then(async chats => {
                                     console.log('chats::', chats);
                                     console.log('time get all chats::', performance.now() - init);
-                                    context.dispatch('handleSetChats', chats);
-                                    context.dispatch('sortChatsByTime');
+                                    await context.dispatch('handleSetChats', chats);
+                                    await context.dispatch('sortChatsByTime');
                                     context.state.poolContext.forEach(func => func());
                                     context.state.poolContext = [];
                                     context.dispatch('initPong');
@@ -515,12 +515,10 @@ const store = new Vuex.Store({
                     payLoadSend.webSocketRequestPayLoad.payload = JSON.stringify(payLoadSend.webSocketRequestPayLoad.payload);
                 }
                 context.commit('ADD_NEW_LISTENNER', { tag: payLoadSend.tag, resolve: resolve, reject: reject });
-                context.state.throttle.schedule(() => {
-                    setTimeout(() => reject(new Error('Timeout::' + payload.event)), 60000);
-                    context.state.wsWorker.postMessage({
-                        cmd: 'ws-send',
-                        data: payLoadSend
-                    });
+                setTimeout(() => reject(new Error('Timeout::' + payload.event)), 60000);
+                context.state.wsWorker.postMessage({
+                    cmd: 'ws-send',
+                    data: payLoadSend
                 });
             });
         },
@@ -557,8 +555,9 @@ const store = new Vuex.Store({
                         // eslint-disable-next-line promise/param-names
                         findChat = new Promise((resolve1, reject1) => {
                             context.dispatch('sendWsMessage', { event: 'findChat', payload: payload.id }).then(chat => {
-                                context.dispatch('newChat', chat);
-                                resolve1(chat);
+                                context.dispatch('newChat', chat).then(() => {
+                                    resolve1(chat);
+                                });
                             }).catch(reason => reject1(reason));
                         });
                         context.commit('ADD_FIND_CHAT', { id: payload.id, promise: findChat });
@@ -739,28 +738,28 @@ const store = new Vuex.Store({
               CHATS
           */
 
-        newChat (context, payload) {
+        async newChat (context, payload) {
             const chat = context.state.chats.find((element) => {
                 return element.id === payload.id;
             });
             if (!chat) {
-                context.dispatch('setChatProperties', payload);
-                context.commit('ADD_NEW_CHAT', payload);
+                await context.dispatch('setChatProperties', payload);
+                await context.commit('ADD_NEW_CHAT', payload);
                 context.dispatch('sortChatsByTime');
             }
         },
 
-        setChatProperties (context, el) {
+        async setChatProperties (context, el) {
             if (!Array.isArray(el)) {
-                setProperties(el);
+                await setProperties(el);
             } else {
-                el.forEach(el => {
-                    setProperties(el);
-                });
+                await Promise.all(el.map(el => {
+                    return setProperties(el);
+                }));
             }
 
-            function setProperties (el) {
-                context.dispatch('setMsgsProperties', el.msgs);
+            async function setProperties (el) {
+                await context.dispatch('setMsgsProperties', el.msgs);
                 el.quotedMsg = undefined;
                 el.openChatInfo = false;
                 el.sendQueue = [];
@@ -1062,10 +1061,10 @@ const store = new Vuex.Store({
             }
         },
 
-        handleSetChats (context, payload) {
-            context.dispatch('setChatProperties', payload);
-            context.commit('SET_CHATS', payload);
-            context.dispatch('updateTitle');
+        async handleSetChats (context, payload) {
+            await context.dispatch('setChatProperties', payload);
+            await context.commit('SET_CHATS', payload);
+            await context.dispatch('updateTitle');
         },
 
         updateChat (context, payload) {
