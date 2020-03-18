@@ -126,8 +126,8 @@ export default {
                 });
             }
         },
-        'chat.lastMsg.id': function (val) {
-            if (val && !this.loadingEarly && this.visible && (val.fromMe || this.isInBottom())) {
+        'chat.lastMsg.id._serialized': function (val) {
+            if (val && !this.loadingEarly && this.visible && (this.chat.lastMsg.id.fromMe || this.isInBottom())) {
                 this.scrollToBottom();
             }
         },
