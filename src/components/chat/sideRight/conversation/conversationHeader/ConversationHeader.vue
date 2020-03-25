@@ -40,7 +40,7 @@ export default {
     },
     data () {
         return {
-            file: ''
+            files: []
         };
     },
     computed: {
@@ -58,7 +58,7 @@ export default {
         }
     },
     methods: {
-        ...mapActions(['convertToBase64']),
+        ...mapActions(['uploadFile']),
 
         timeConverter (unixTimeStamp) {
             let a = new Date(unixTimeStamp * 1000);
@@ -99,26 +99,35 @@ export default {
         },
 
         onChange (event) {
-            let promises = [];
-            event.target.files.forEach(file => {
-                let promise = this.convertToBase64({ file: file }).then(base64 => {
-                    this.handleSendMsg({ media: base64, fileName: file.name });
-                });
-                promises.push(promise);
-            });
-            Promise.all(promises).finally(() => {
+            if (event.target.files && event.target.files.length > 0) {
+                this.files.push(...event.target.files);
                 this.$refs.file.value = '';
-            });
+                this.handleSendMsg('');
+            }
         },
 
-        handleSendMsg (msg) {
-            if (this.activeChat.quotedMsg) {
-                msg.quotedMsg = this.activeChat.quotedMsg.id._serialized;
-            }
+        handleSendMsg (text) {
+            let promises = [];
+            this.files.forEach(file => {
+                promises.push(this.uploadFile(file).then(tag => {
+                    let msg = {};
 
-            this.activeChat.quotedMsg = undefined;
+                    msg.message = text;
+                    msg.fileUUID = tag;
 
-            return this.activeChat.sendMessage(msg);
+                    if (this.activeChat.quotedMsg) {
+                        msg.quotedMsg = this.activeChat.quotedMsg.id._serialized;
+                    }
+
+                    this.activeChat.quotedMsg = undefined;
+
+                    return this.activeChat.sendMessage(msg);
+                }));
+            });
+            this.files = [];
+            Promise.all(promises).catch(reason => {
+                console.log('Error Upload::', reason);
+            });
         },
 
         openChatInfo () {

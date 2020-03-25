@@ -203,7 +203,7 @@ export default {
         }
     },
     methods: {
-        ...mapActions(['convertToBase64']),
+        ...mapActions(['uploadFile']),
 
         toggleRecording () {
             this.gravando = !this.gravando;
@@ -257,10 +257,9 @@ export default {
         },
 
         handleSendPtt (data) {
-            this.convertToBase64({ file: data }).then(value => {
+            this.uploadFile(new File([data], new Date().getTime() + '.ptt', { type: data.type })).then(tag => {
                 let msg = {
-                    media: value,
-                    fileName: new Date().getTime() + '.ptt'
+                    fileUUID: tag
                 };
 
                 if (this.activeChat.quotedMsg) {
@@ -294,8 +293,8 @@ export default {
             }
             if (files.length > 0) {
                 files.forEach(async file => {
-                    let base64 = await this.convertToBase64({ file: file });
-                    return this.handleSendMsg({ media: base64, fileName: file.name });
+                    let tag = await this.uploadFile(file);
+                    return this.handleSendMsg({ fileUUID: tag });
                 });
             } else {
                 const textMsg = this.$options.filters.emojify(evt.clipboardData.getData('text'));

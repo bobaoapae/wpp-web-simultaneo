@@ -715,6 +715,30 @@ const store = new Vuex.Store({
             });
         },
 
+        uploadFile (context, payload) {
+            return new Promise((resolve, reject) => {
+                let size = payload.size / 1024 / 1024;
+                if (size >= 70) {
+                    reject(new Error('Tamanho máximo do envio não pode ser maior que 70Mb'));
+                } else {
+                    let formData = new FormData();
+                    formData.append('file', payload);
+                    return api.post('/api/uploadFile',
+                        formData,
+                        {
+                            headers: {
+                                'Content-Type': 'multipart/form-data'
+                            }
+                        }
+                    ).then(result => {
+                        resolve(result.data);
+                    }).catch(reason => {
+                        reject(reason);
+                    });
+                }
+            });
+        },
+
         sendPresenceStatus (context, payload) {
             return new Promise((resolve, reject) => {
                 context.dispatch('sendWsMessage', { event: `sendPresence${payload.type}` }).then(data => {
