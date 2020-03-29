@@ -142,7 +142,6 @@ export default {
         },
 
         handleClickDelete () {
-            console.log(this.user);
             this.$root.$emit('showModalDeleteMsg', this.msg);
         },
 

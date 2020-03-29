@@ -828,6 +828,24 @@ const store = new Vuex.Store({
                 el.seeChat = function () {
                     return context.dispatch('seeChat', { chatId: this.id });
                 };
+                el.pinChat = function () {
+                    return context.dispatch('pinChat', { chatId: this.id });
+                };
+                el.unPinChat = function () {
+                    return context.dispatch('unPinChat', { chatId: this.id });
+                };
+                el.deleteChat = function () {
+                    return context.dispatch('deleteChat', { chatId: this.id });
+                };
+                el.markRecording = function () {
+                    return context.dispatch('markRecording', { chatId: this.id });
+                };
+                el.markComposing = function () {
+                    return context.dispatch('markComposing', { chatId: this.id });
+                };
+                el.markPaused = function () {
+                    return context.dispatch('markPaused', { chatId: this.id });
+                };
                 el.subscribePresence = function () {
                     return context.dispatch('subscribePresence', { chatId: this.id });
                 };
@@ -1099,6 +1117,9 @@ const store = new Vuex.Store({
             if (chat) {
                 delete payload.msgs;
                 let sortChats = chat.pin !== payload.pin;
+                if (!payload.pin) {
+                    payload.pin = 0;
+                }
                 Object.assign(chat, payload);
                 context.dispatch('updateTitle');
                 if (sortChats) {
@@ -1161,6 +1182,30 @@ const store = new Vuex.Store({
 
         seeChat (context, payload) {
             return context.dispatch('sendWsMessage', { event: 'seeChat', payload: payload.chatId });
+        },
+
+        pinChat (context, payload) {
+            return context.dispatch('sendWsMessage', { event: 'pinChat', payload: payload.chatId });
+        },
+
+        unPinChat (context, payload) {
+            return context.dispatch('sendWsMessage', { event: 'unPinChat', payload: payload.chatId });
+        },
+
+        deleteChat (context, payload) {
+            return context.dispatch('sendWsMessage', { event: 'deleteChat', payload: payload.chatId });
+        },
+
+        markRecording (context, payload) {
+            return context.dispatch('sendWsMessage', { event: 'markRecording', payload: payload.chatId });
+        },
+
+        markComposing (context, payload) {
+            return context.dispatch('sendWsMessage', { event: 'markComposing', payload: payload.chatId });
+        },
+
+        markPaused (context, payload) {
+            return context.dispatch('sendWsMessage', { event: 'markPaused', payload: payload.chatId });
         },
 
         subscribePresence (context, payload) {

@@ -204,7 +204,6 @@ export default {
         },
 
         handleKeyDown (evt) {
-            console.log('keyDown');
             this.$emit('keyDown', evt);
         }
     },

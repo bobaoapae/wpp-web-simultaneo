@@ -8,60 +8,22 @@
         <div class="box-list-group">
             <transition-group class="list-group" tag="ul" name="flip-list" v-if="!inputFilter">
                 <li
-                    :class="{ active : active_el === chat.id }"
+                    :class="{ active : chat === activeChat }"
                     :key="chat.id"
-                    @click="handleClick(chat)"
                     class="list-group-item d-flex"
                     v-for="chat in chatsFiltered"
                 >
-                    <Picture :group="chat.isGroup" :id="chat.id"/>
-
-                    <div class="box-info-chat">
-                        <div class="d-flex">
-                            <NameChat :chat="chat"/>
-                            <TimeMsg :chat="chat"/>
-                        </div>
-
-                        <div class="d-flex presence-chat-container">
-                            <PresenceChat :chat="chat"
-                                          :class="{'d-flex align-items-center flex-grow-1': chat.isChat && (chat.isComposing || chat.isRecording)}"
-                                          :showLastTime="false"
-                                          :showOnline="false"
-                                          v-if="chat.isChat"
-                                          :key="chat.id"/>
-                            <LastMsg :chat="chat" v-if="!chat.isChat || (!chat.isComposing && !chat.isRecording)"/>
-                            <Icons :chat="chat"/>
-                        </div>
-                    </div>
+                    <ChatRow :chat="chat"/>
                 </li>
             </transition-group>
             <ul class="list-group" v-else>
                 <li
-                    :class="{ active : active_el === chat.id }"
+                    :class="{ active : chat === activeChat }"
                     :key="chat.id"
-                    @click="handleClick(chat)"
                     class="list-group-item d-flex"
                     v-for="chat in chatsFiltered"
                 >
-                    <Picture :group="chat.isGroup" :id="chat.id"/>
-
-                    <div class="box-info-chat">
-                        <div class="d-flex">
-                            <NameChat :chat="chat"/>
-                            <TimeMsg :chat="chat"/>
-                        </div>
-
-                        <div class="d-flex presence-chat-container">
-                            <PresenceChat :chat="chat"
-                                          :class="{'d-flex align-items-center flex-grow-1': chat.isChat && (chat.isComposing || chat.isRecording)}"
-                                          :showLastTime="false"
-                                          :showOnline="false"
-                                          v-if="chat.isChat"
-                                          :key="chat.id"/>
-                            <LastMsg :chat="chat" v-if="!chat.isChat || (!chat.isComposing && !chat.isRecording)"/>
-                            <Icons :chat="chat"/>
-                        </div>
-                    </div>
+                    <ChatRow :chat="chat"/>
                 </li>
             </ul>
         </div>
@@ -69,24 +31,13 @@
 </template>
 
 <script>
-import TimeMsg from './timeMsg/TimeMsg.vue';
-import LastMsg from './lastMsg/LastMsg.vue';
-import Icons from './icons/Icons.vue';
-import NameChat from './nameChat/NameChat.vue';
-import Picture from '@/components/shared/picture/Picture.vue';
-import PresenceChat from '@/components/shared/presenceChat/PresenceChat.vue';
-
-import { mapState, mapMutations } from 'vuex';
+import { mapState } from 'vuex';
+import ChatRow from './chatRow/ChatRow';
 
 export default {
     name: 'ChatList',
     components: {
-        Picture,
-        TimeMsg,
-        LastMsg,
-        Icons,
-        NameChat,
-        PresenceChat
+        ChatRow
     },
     data () {
         return {
@@ -96,7 +47,7 @@ export default {
         };
     },
     computed: {
-        ...mapState(['chats']),
+        ...mapState(['chats', 'activeChat']),
 
         chatsFiltered () {
             const chatVisible = this.chats.filter(chat => {
@@ -114,19 +65,6 @@ export default {
         }
     },
     methods: {
-        ...mapMutations(['SET_ACTIVE_CHAT']),
-
-        handleClick (chat) {
-            // seta o chat que sera visto
-            this.SET_ACTIVE_CHAT(chat);
-            // seta a cor do li do chat clicado
-            this.active_el = chat.id;
-
-            if (chat.unreadCount > 0) {
-                chat.seeChat();
-            }
-        },
-
         handleInput () {
             this.inputFilter = this.inputData;
         },
@@ -187,29 +125,6 @@ export default {
 
 .list-group-item:hover {
     background: #f4f5f5;
-}
-
-.box-info-chat {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-    justify-content: center;
-    overflow: hidden;
-    padding-right: 15px;
-    border-top: 1px solid #f2f2f2 !important;
-}
-
-.list-group-item >>> .picture {
-    padding: 0 13px 0 15px;
-    height: 73px;
-    display: flex;
-    align-items: center;
-}
-
-.list-group-item >>> .picture img {
-    height: 50px;
-    width: 50px;
-    border-radius: 50%;
 }
 
 @media screen and (min-width: 1441px) {
