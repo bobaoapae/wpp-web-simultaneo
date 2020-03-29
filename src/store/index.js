@@ -190,6 +190,9 @@ const store = new Vuex.Store({
 
         REMOVE_CHAT (state, payload) {
             state.chats = state.chats.filter(e => e.id !== payload.id);
+            if (state.activeChat && state.activeChat.id === payload.id) {
+                state.activeChat = null;
+            }
         },
 
         ADD_NEW_LISTENNER (state, payload) {
