@@ -38,6 +38,10 @@
                                 Conversa
                             </b-dropdown-item>
                             <b-dropdown-item @click.stop="handleUnPinChat" v-else>Desafixar a Conversa</b-dropdown-item>
+                            <b-dropdown-item @click.stop="handleClearChat"
+                                             v-if="user.canCreateOperator || user.superConfiguracao.operadorPodeExcluirMsg">
+                                Limpar Conversa
+                            </b-dropdown-item>
                             <b-dropdown-item @click.stop="handleDeleteChat"
                                              v-if="chat.isChat && user.canCreateOperator || user.superConfiguracao.operadorPodeExcluirMsg">
                                 Deletar Conversa
@@ -132,6 +136,13 @@ export default {
         handleDeleteChat () {
             this.processing = true;
             this.chat.deleteChat().finally(() => {
+                this.processing = false;
+            });
+        },
+
+        handleClearChat () {
+            this.processing = true;
+            this.chat.clearChat().finally(() => {
                 this.processing = false;
             });
         }

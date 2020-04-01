@@ -849,6 +849,9 @@ const store = new Vuex.Store({
                 el.markPaused = function () {
                     return context.dispatch('markPaused', { chatId: this.id });
                 };
+                el.clearChat = function (keepFavorites) {
+                    return context.dispatch('clearChat', { chatId: this.id, keepFavorites: keepFavorites === true });
+                };
                 el.subscribePresence = function () {
                     return context.dispatch('subscribePresence', { chatId: this.id });
                 };
@@ -1209,6 +1212,10 @@ const store = new Vuex.Store({
 
         markPaused (context, payload) {
             return context.dispatch('sendWsMessage', { event: 'markPaused', payload: payload.chatId });
+        },
+
+        clearChat (context, payload) {
+            return context.dispatch('sendWsMessage', { event: 'clearChat', payload: payload });
         },
 
         subscribePresence (context, payload) {

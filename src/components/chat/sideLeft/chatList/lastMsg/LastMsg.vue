@@ -1,11 +1,13 @@
 <template>
-    <div :class="{unread : chat.isUnread}" class="last-msg flex-grow-1 d-flex align-items-center" v-if="chat.lastMsg">
-        <MessageIconStatus :ack="chat.lastMsg.ack" class="icon-status" v-if="chat.lastMsg.id.fromMe"/>
+    <div :class="{unread : chat.isUnread}" class="last-msg flex-grow-1 d-flex align-items-center">
+        <template v-if="chat.lastMsg">
+            <MessageIconStatus :ack="chat.lastMsg.ack" class="icon-status" v-if="chat.lastMsg.id.fromMe"/>
 
-        <span :inner-html.prop="`${chat.lastMsg.senderObj.formattedName}: ` | emojify"
-              v-if="chat.isGroup && chat.lastMsg && chat.lastMsg.senderObj && !chat.lastMsg.id.fromMe"></span>
+            <span :inner-html.prop="`${chat.lastMsg.senderObj.formattedName}: ` | emojify"
+                  v-if="chat.isGroup && chat.lastMsg && chat.lastMsg.senderObj && !chat.lastMsg.id.fromMe"></span>
 
-        <MessageBody :lastMsg="chat.lastMsg"/>
+            <MessageBody :lastMsg="chat.lastMsg"/>
+        </template>
     </div>
 </template>
 

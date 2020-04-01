@@ -1,5 +1,6 @@
 <template>
-    <div class="messages-list" @scroll="handleScroll" @mousewheel="handleScroll" @touchmove="handleScroll"
+    <div class="messages-list" @scroll="handleMessageListChange" @mousewheel="handleMessageListChange"
+         @touchmove="handleMessageListChange"
          ref="messageList">
         <LoadingEarlyMsg v-show="loadingEarly"/>
         <div :id="encodedMsgId(item)" :key="encodedMsgId(item)" @dblclick.left.prevent="handleDoubleClick(item)"
@@ -135,6 +136,9 @@ export default {
             if (val && this.isInBottom()) {
                 this.chat.seeChat();
             }
+        },
+        'msgs': function () {
+            this.handleMessageListChange();
         }
     },
     methods: {
@@ -163,7 +167,7 @@ export default {
             });
         },
 
-        handleScroll (e) {
+        handleMessageListChange (e) {
             let props = {
                 scrollHeight: this.$el.scrollHeight,
                 scrollTop: this.$el.scrollTop,
@@ -173,7 +177,7 @@ export default {
             this.scrollHeight = props.scrollHeight;
             this.scrollTop = props.scrollTop;
             this.clientHeight = props.clientHeight;
-            if (this.loadingEarly) {
+            if (e && this.loadingEarly) {
                 e.preventDefault();
             } else if (!this.loadingEarly && !this.chat.noEarlierMsgs && ((props.scrollHeight > 1050 && props.calc <= 1050) || props.scrollTop === 0)) {
                 this.handleLoadEarly();
