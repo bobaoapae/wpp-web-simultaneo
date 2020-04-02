@@ -286,15 +286,14 @@ export default {
             let items = evt.clipboardData.items;
             let files = [];
             for (let i = 0; i < items.length; i++) {
-                // Skip content if not image
                 if (items[i].type.indexOf('image') === -1) continue;
-                // Retrieve image on clipboard as blob
                 files.push(items[i].getAsFile());
             }
             if (files.length > 0) {
+                let currentMsg = this.message;
                 files.forEach(async file => {
                     let tag = await this.uploadFile(file);
-                    return this.handleSendMsg({ fileUUID: tag });
+                    return this.handleSendMsg({ message: currentMsg, fileUUID: tag });
                 });
             } else {
                 const textMsg = this.$options.filters.emojify(evt.clipboardData.getData('text'));
@@ -335,11 +334,10 @@ export default {
             }
         },
 
-        handleSendMsg (payload) {
-            let msg = {
-                message: this.message
-            };
-            Object.assign(msg, payload);
+        handleSendMsg (msg) {
+            if (!msg) {
+                msg = { message: this.message };
+            }
             if (this.activeChat.quotedMsg) {
                 msg.quotedMsg = this.activeChat.quotedMsg.id._serialized;
             }
