@@ -49,7 +49,7 @@
                         </b-dropdown>
                     </div>
                 </div>
-                <LoadginSpinner class="processing" v-else/>
+                <LoadingSpinner class="processing" v-else/>
             </div>
         </div>
     </div>
@@ -63,12 +63,12 @@ import NameChat from '../nameChat/NameChat.vue';
 import Picture from '@/components/shared/picture/Picture.vue';
 import PresenceChat from '@/components/shared/presenceChat/PresenceChat.vue';
 import { mapMutations, mapState } from 'vuex';
-import LoadginSpinner from '../../../../shared/loadingSpinner/LoadingSpinner';
+import LoadingSpinner from '../../../../shared/loadingSpinner/LoadingSpinner';
 
 export default {
     name: 'ChatRow',
     components: {
-        LoadginSpinner,
+        LoadingSpinner,
         Picture,
         TimeMsg,
         LastMsg,
