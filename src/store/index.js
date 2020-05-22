@@ -30,6 +30,7 @@ const store = new Vuex.Store({
         medias: {},
         timeOutChats: -1,
         activeChat: null,
+        selectMsgs: { show: false, msg: null, msgs: [] },
         poolContext: [],
         modal: {
             type: '',
@@ -142,6 +143,20 @@ const store = new Vuex.Store({
         SET_ACTIVE_CHAT (state, payload) {
             console.log('activeChat: ', payload);
             state.activeChat = payload;
+            state.selectMsgs.show = false;
+        },
+
+        SET_SELECT_MSGS (state, payload) {
+            state.selectMsgs.show = payload.show;
+            state.selectMsgs.msgs = [];
+        },
+
+        TOGGLE_SELECT_MSG (state, payload) {
+            if (state.selectMsgs.msgs.includes(payload.msg)) {
+                state.selectMsgs.msgs = state.selectMsgs.msgs.filter(e => e !== payload.msg);
+            } else {
+                state.selectMsgs.msgs.push(payload.msg);
+            }
         },
 
         SET_SELF (state, payload) {

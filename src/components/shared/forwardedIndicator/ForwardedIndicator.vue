@@ -17,6 +17,8 @@ export default {
 <style scoped>
 .icon {
     margin-left: 3px;
+    width: 16px;
+    height: 16px;
 }
 
 .message {

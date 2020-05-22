@@ -67,8 +67,6 @@ export const rageSave = (function () {
         if (markerEl) {
             range[atStart ? 'setStartBefore' : 'setEndBefore'](markerEl);
             removeNode(markerEl);
-        } else {
-            module.warn('Marker element has been removed. Cannot restore selection.');
         }
     }
 

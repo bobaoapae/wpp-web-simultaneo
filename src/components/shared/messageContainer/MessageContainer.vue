@@ -1,58 +1,69 @@
 <template>
     <div :class="{'message-in' : !msg.id.fromMe, 'message-out': msg.id.fromMe, 'blink' : msg.blink}"
-         class="message-container">
-        <div :class="showTail ? 'tail' : ''" class="message-body" v-b-hover="handleHover">
-            <div class="tail-container" v-if="showTail"></div>
-            <div
-                :class="{'same-color' : msg.isSameColor}"
-                class="msg-menu"
-                v-show="showMenuIcon || menuAberto">
-                <b-dropdown
-                    @hide="handleHideMenu"
-                    @show="handleShowMenu"
-                    lazy
-                    no-caret
-                    toggle-class="text-decoration-none p-0"
-                    variant="link"
-                >
-                    <template v-slot:button-content>
-                        <img src="@/assets/images/wpp-message-arrow-down.svg">
-                    </template>
-
-                    <b-dropdown-item @click="handleClickAnswer">Responder</b-dropdown-item>
-                    <b-dropdown-item @click="handleClickDelete" v-if="user.canCreateOperator || user.superConfiguracao.operadorPodeExcluirMsg">Apagar mensagem</b-dropdown-item>
-                </b-dropdown>
+         class="message-container" @click="handleClickMessageContainer">
+        <div class="message-row">
+            <div class="select-msg-container" v-if="showSelectMsgs">
+                <div class="select-msg" :class="{'selected' : isMsgSelected}">
+                    <div class="select-msg-check"></div>
+                </div>
             </div>
+            <div :class="showTail ? 'tail' : ''" class="message-body" v-b-hover="handleHover">
+                <div class="tail-container" v-if="showTail"></div>
+                <div
+                    class="msg-menu"
+                    v-show="showMenuIcon || menuAberto">
+                    <b-dropdown
+                        @hide="handleHideMenu"
+                        @show="handleShowMenu"
+                        lazy
+                        no-caret
+                        toggle-class="text-decoration-none p-0"
+                        variant="link"
+                    >
+                        <template v-slot:button-content>
+                            <img src="@/assets/images/wpp-message-arrow-down.svg">
+                        </template>
 
-            <!-- Identificador de mensagens no grupo -->
-            <div class="identify-msg-group pb-0 pt-2 pl-2 pr-2" v-if="activeChat.isGroup && !msg.id.fromMe && showTail">
-                <div :style="{color: activeChat.getColor(msg.senderObj.id)}" @click="handleClick" class="btn-link"
-                     v-if="msg.senderObj.name">
-                    {{msg.senderObj.name | emojify}}
+                        <b-dropdown-item @click="handleClickAnswer">Responder</b-dropdown-item>
+                        <b-dropdown-item @click="handleClickForward">Encaminhar</b-dropdown-item>
+                        <b-dropdown-item @click="handleClickDelete"
+                                         v-if="user.canCreateOperator || user.superConfiguracao.operadorPodeExcluirMsg">
+                            Apagar mensagem
+                        </b-dropdown-item>
+                    </b-dropdown>
                 </div>
 
-                <div class="d-flex justify-content-between" v-else>
+                <!-- Identificador de mensagens no grupo -->
+                <div class="identify-msg-group pb-0 pt-2 pl-2 pr-2"
+                     v-if="activeChat.isGroup && !msg.id.fromMe && showTail">
+                    <div :style="{color: activeChat.getColor(msg.senderObj.id)}" @click="handleClick" class="btn-link"
+                         v-if="msg.senderObj.name">
+                        {{msg.senderObj.name | emojify}}
+                    </div>
+
+                    <div class="d-flex justify-content-between" v-else>
                     <span :style="{color: activeChat.getColor(msg.senderObj.id)}" @click="handleClick"
                           class="btn-link number">{{msg.senderObj.formattedName | emojify}}</span>
-                    <span class="name">~{{msg.senderObj.pushname}}</span>
+                        <span class="name">~{{msg.senderObj.pushname}}</span>
+                    </div>
                 </div>
+
+                <!-- Mensagem Encaminhada -->
+                <ForwardedIndicator v-if="msg.isForwarded"/>
+
+                <QuotedMsg :quotedMsg="msg.quotedMsgObject" v-if="msg.hasQuotedMsg"/>
+
+                <MessageText :msg="msg" v-if="msg.isChat"/>
+                <MessagePhoto :msg="msg" v-else-if="msg.isImage"/>
+                <MessageSticker :msg="msg" v-else-if="msg.isSticker"/>
+                <MessageGif :msg="msg" v-else-if="msg.isGif"/>
+                <MessageVideo :msg="msg" v-else-if="msg.isVideo"/>
+                <MessageDocument :msg="msg" v-else-if="msg.isDocument"/>
+                <MessageAudio :msg="msg" v-else-if="msg.isAudio || msg.isPtt"/>
+                <MessageRevoked :msg="msg" v-else-if="msg.isRevoked"/>
+                <MessageLocation :msg="msg" v-else-if="msg.isLocation"/>
+                <MessageContact :msg="msg" v-else-if="msg.isVcard"/>
             </div>
-
-            <!-- Mensagem Encaminhada -->
-            <ForwardedIndicator v-if="msg.isForwarded"/>
-
-            <QuotedMsg :quotedMsg="msg.quotedMsgObject" v-if="msg.hasQuotedMsg"/>
-
-            <MessageText :msg="msg" v-if="msg.isChat"/>
-            <MessagePhoto :msg="msg" v-else-if="msg.isImage"/>
-            <MessageSticker :msg="msg" v-else-if="msg.isSticker"/>
-            <MessageGif :msg="msg" v-else-if="msg.isGif"/>
-            <MessageVideo :msg="msg" v-else-if="msg.isVideo"/>
-            <MessageDocument :msg="msg" v-else-if="msg.isDocument"/>
-            <MessageAudio :msg="msg" v-else-if="msg.isAudio || msg.isPtt"/>
-            <MessageRevoked :msg="msg" v-else-if="msg.isRevoked"/>
-            <MessageLocation :msg="msg" v-else-if="msg.isLocation"/>
-            <MessageContact :msg="msg" v-else-if="msg.isVcard"/>
         </div>
     </div>
 </template>
@@ -94,6 +105,15 @@ export default {
             menuAberto: false
         };
     },
+    mounted () {
+        this.$root.$on('keyDown', (evt) => {
+            if (this.showSelectMsgs) {
+                if (evt.key === 'Escape') {
+                    this.SET_SELECT_MSGS({ show: false });
+                }
+            }
+        });
+    },
     watch: {
         'activeChat.quotedMsg': function (val) {
             if (val === this.msg) {
@@ -101,6 +121,17 @@ export default {
                 setTimeout(() => {
                     this.msg.blink = false;
                 }, 1500);
+            }
+        },
+
+        'activeChat': function () {
+            this.SET_SELECT_MSGS({ show: false });
+        },
+
+        'selectMsgs.msg': function (msg) {
+            let selectThisMsg = msg === this.msg;
+            if (selectThisMsg) {
+                console.log('select this msg::', msg);
             }
         }
     },
@@ -115,14 +146,22 @@ export default {
         }
     },
     computed: {
-        ...mapState(['activeChat', 'user']),
+        ...mapState(['activeChat', 'user', 'selectMsgs']),
 
         showTail () {
             return !this.previousMsg || !this.msg.senderObj || !this.previousMsg.senderObj || (this.previousMsg.isSticker && !this.msg.isSticker) || this.msg.senderObj.id !== this.previousMsg.senderObj.id || this.msg.hasQuotedMsg || this.msg.isSticker || this.msg.fomattedDate !== this.previousMsg.fomattedDate;
+        },
+
+        showSelectMsgs () {
+            return this.selectMsgs && this.selectMsgs.show;
+        },
+
+        isMsgSelected () {
+            return this.selectMsgs.msgs.includes(this.msg);
         }
     },
     methods: {
-        ...mapMutations(['SET_ACTIVE_CHAT']),
+        ...mapMutations(['SET_ACTIVE_CHAT', 'SET_SELECT_MSGS', 'TOGGLE_SELECT_MSG']),
         ...mapActions(['findChatFromId']),
 
         handleHover (isHover) {
@@ -141,6 +180,10 @@ export default {
             this.activeChat.quotedMsg = this.msg;
         },
 
+        handleClickForward (evt) {
+            this.SET_SELECT_MSGS({ show: true });
+        },
+
         handleClickDelete () {
             this.$root.$emit('showModalDeleteMsg', this.msg);
         },
@@ -151,19 +194,36 @@ export default {
             });
 
             this.$root.$emit('showNewChat', false);
+        },
+
+        handleClickMessageContainer () {
+            if (this.selectMsgs.show) {
+                this.TOGGLE_SELECT_MSG({ msg: this.msg });
+            }
         }
     }
 };
 </script>
 
 <style scoped>
+.message-row {
+    display: flex;
+    align-items: center;
+}
+
+.message-out .message-row {
+    flex-direction: row-reverse;
+}
+
 .msg-menu {
     position: absolute;
     right: 3px;
     border-top-right-radius: 5px;
     display: block;
     text-align: right;
-    height: 25px;
+    height: 18px;
+    top: 2px;
+    width: 18px;
     z-index: 1;
 }
 
@@ -171,10 +231,6 @@ export default {
     vertical-align: top;
     top: -3px;
     position: relative;
-}
-
-.msg-menu.same-color img {
-    filter: brightness(0.55);
 }
 
 .icon {
@@ -284,6 +340,54 @@ export default {
     animation-play-state: running;
 }
 
+.select-msg-container {
+    cursor: pointer;
+    display: inline-block;
+    height: 18px;
+    transform: translateZ(0);
+    vertical-align: middle;
+    width: 18px;
+}
+
+.message-in .select-msg-container {
+    margin-right: 10px;
+}
+
+.message-out .select-msg-container {
+    margin-left: 10px;
+}
+
+.select-msg {
+    background-color: initial;
+    border-radius: 2px;
+    border: 2px solid rgba(74, 74, 74, .75);
+    box-sizing: border-box;
+    height: 100%;
+    pointer-events: none;
+    transition: background-color .14s, border-color .14s;
+}
+
+.select-msg.selected {
+    background-color: #00bfa5;
+    border-color: #00bfa5;
+}
+
+.select-msg-check {
+    opacity: 0;
+    border-bottom: 2px solid var(--white);
+    border-right: 2px solid var(--white);
+    position: relative;
+    height: 11px;
+    width: 6px;
+    left: 5px;
+    transform: rotate(45deg);
+    animation: _28R-H .16s ease-out forwards;
+}
+
+.selected .select-msg-check {
+    opacity: 1;
+}
+
 @keyframes blink-out {
     from {
         background-color: #DCF8C6;
@@ -308,6 +412,20 @@ export default {
     }
     to {
         filter: brightness(0.8);
+    }
+}
+
+@keyframes _28R-H {
+    0% {
+        left: 2px;
+        width: 0;
+        height: 0
+    }
+
+    to {
+        height: 11px;
+        width: 6px;
+        left: 5px;
     }
 }
 </style>

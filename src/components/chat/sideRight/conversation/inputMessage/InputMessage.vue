@@ -1,12 +1,13 @@
 <template>
     <div ref="container">
-        <b-collapse id="collapse-emoji" v-model="emojiVisible" @show="handleEmojiOpening"
-                    @shown="handleEmojiOpened" @hide="handleEmojiClosing" @hidden="handleEmojiClosed">
-            <picker
-                :color="'#009688'"
-                :data="emojiIndex"
-                :emojiSize="32"
-                :i18n="{search: 'Buscar emoji',
+        <div class="input-msg" v-show="!showSelectMsgs">
+            <b-collapse id="collapse-emoji" v-model="emojiVisible" @show="handleEmojiOpening"
+                        @shown="handleEmojiOpened" @hide="handleEmojiClosing" @hidden="handleEmojiClosed">
+                <picker
+                    :color="'#009688'"
+                    :data="emojiIndex"
+                    :emojiSize="32"
+                    :i18n="{search: 'Buscar emoji',
                             notfound: '',
                             categories: {
                               search: '',
@@ -22,87 +23,97 @@
                               flags: 'Bandeiras',
                               custom: 'Custom',
                             }}"
-                :perLine="21"
-                :recent="[]"
-                :showPreview="false"
-                :style="{ height:'320px', backgroundColor:'#f0f0f0 !important', fontSize:'14px'}"
-                @select="addEmoji"
-                set="apple"
-            />
-        </b-collapse>
-
-        <b-collapse id="collapse-answer-msg" v-model="answerVisible">
-            <div class="box-answer">
-                <QuotedMsg :quotedMsg="activeChat.quotedMsg" class="flex-grow-1" v-if="answerVisible"/>
-
-                <div @click="handleClickCloseAnswer" class="close-answer">
-                    <img src="@/assets/images/wpp-icon-close-answer.svg">
-                </div>
-            </div>
-        </b-collapse>
-
-        <b-collapse id="collapse-answer-msg" v-model="quickReplysVisible">
-            <div class="quick-replys" v-if="showQuickReplys">
-                <div :key="quickReply.id" @click="handleClickQuickReply(quickReply)" class="quick-reply"
-                     v-for="quickReply in filteredQuickReplys">
-                    /<span class="quick-reply-name">{{quickReply.shortcut}}</span> <span class="quick-reply-msg">{{quickReply.message}}</span>
-                </div>
-            </div>
-        </b-collapse>
-
-        <div id="input-message">
-            <div class="box-icon-emoji">
-                <b-img
-                    @mousedown.prevent
-                    alt="Button emoji"
-                    class="btn-emoji-open"
-                    role="button"
-                    src="@/assets/images/wpp-icon-emoji.svg"
-                    v-b-toggle.collapse-emoji
+                    :perLine="21"
+                    :recent="[]"
+                    :showPreview="false"
+                    :style="{ height:'320px', backgroundColor:'#f0f0f0 !important', fontSize:'14px'}"
+                    @select="addEmoji"
+                    set="apple"
                 />
-            </div>
+            </b-collapse>
 
-            <div class="box-bind-operator" v-if="user.isOperator && canBindToOperator">
-                <b-form-checkbox size="small" name="check-button" v-model="bindToOperator">
-                    Vincular Chat?
-                </b-form-checkbox>
-            </div>
+            <b-collapse id="collapse-answer-msg" v-model="answerVisible">
+                <div class="box-answer">
+                    <QuotedMsg :quotedMsg="activeChat.quotedMsg" class="flex-grow-1" v-if="answerVisible"/>
 
-            <div class="box-input">
-                <div
-                    @focusin="restorePosition"
-                    @input="onInput"
-                    @keypress.enter.exact.prevent="handleEnterPress"
-                    @keyup="savePosition"
-                    @mouseup="savePosition"
-                    @paste.prevent="onPaste"
-                    class="input"
-                    contenteditable="true"
-                    data-text="Digite uma mensagem"
-                    ref="input"
-                ></div>
-            </div>
+                    <div @click="handleClickCloseAnswer" class="close-answer">
+                        <img src="@/assets/images/wpp-icon-close-answer.svg">
+                    </div>
+                </div>
+            </b-collapse>
 
-            <div class="box-icon-send">
-                <div>
-                    <img @click="handleSendMsg()" src="@/assets/images/wpp-icon-send.svg"
-                         v-if="message"/>
-                    <img @click="startRecording" src="@/assets/images/wpp-icon-mic.svg" v-else-if="!gravando"/>
+            <b-collapse id="collapse-replies" v-model="quickReplysVisible">
+                <div class="quick-replys" v-if="showQuickReplys">
+                    <div :key="quickReply.id" @click="handleClickQuickReply(quickReply)" class="quick-reply"
+                         v-for="quickReply in filteredQuickReplys">
+                        /<span class="quick-reply-name">{{quickReply.shortcut}}</span> <span class="quick-reply-msg">{{quickReply.message}}</span>
+                    </div>
+                </div>
+            </b-collapse>
+
+            <div id="input-message">
+                <div class="box-icon-emoji">
+                    <b-img
+                        @mousedown.prevent
+                        alt="Button emoji"
+                        class="btn-emoji-open"
+                        role="button"
+                        src="@/assets/images/wpp-icon-emoji.svg"
+                        v-b-toggle.collapse-emoji
+                    />
                 </div>
 
-                <div v-if="gravando">
-                    <img @click="stopRecording" src="@/assets/images/wpp-icon-cancel-ptt-outline.svg"/>
-                    <span class="recorder-time">{{timeConverter}}</span>
-                    <img @click="sendPtt" src="@/assets/images/wpp-icon-send-ptt-outline.svg"/>
+                <div class="box-bind-operator" v-if="user.isOperator && canBindToOperator">
+                    <b-form-checkbox size="small" name="check-button" v-model="bindToOperator">
+                        Vincular Chat?
+                    </b-form-checkbox>
+                </div>
+
+                <div class="box-input">
+                    <div
+                        @focusin="restorePosition"
+                        @input="onInput"
+                        @keypress.enter.exact.prevent="handleEnterPress"
+                        @keyup="savePosition"
+                        @mouseup="savePosition"
+                        @paste.prevent="onPaste"
+                        class="input"
+                        contenteditable="true"
+                        data-text="Digite uma mensagem"
+                        ref="input"
+                    ></div>
+                </div>
+
+                <div class="box-icon-send">
+                    <div>
+                        <img @click="handleSendMsg()" src="@/assets/images/wpp-icon-send.svg"
+                             v-if="message"/>
+                        <img @click="startRecording" src="@/assets/images/wpp-icon-mic.svg" v-else-if="!gravando"/>
+                    </div>
+
+                    <div v-if="gravando">
+                        <img @click="stopRecording" src="@/assets/images/wpp-icon-cancel-ptt-outline.svg"/>
+                        <span class="recorder-time">{{timeConverter}}</span>
+                        <img @click="sendPtt" src="@/assets/images/wpp-icon-send-ptt-outline.svg"/>
+                    </div>
                 </div>
             </div>
+        </div>
+        <div v-show="showSelectMsgs" class="box-select-msgs">
+            <button class="close-select-msgs" @click="handleClickCloseSelectMsgs">
+                <img src="@/assets/images/wpp-icon-close-modal.svg"/>
+            </button>
+            <span class="qtd-msg-selected">{{qtdSelected}}</span>
+            <button class="forward-select-msgs" :disabled="!hasMessageSelected" title="Encaminhar Mensagens">
+                <img src="@/assets/images/wpp-icon-forwarded.svg"/>
+            </button>
         </div>
     </div>
 </template>
 
 <script>
 import { Picker } from 'emoji-mart-vue-fast';
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapMutations, mapState } from 'vuex';
 import { msg } from '@/helper.js';
 import { rageSave } from '@/rangeSelectionSaveRestore.js';
 import QuotedMsg from '../../../../shared/quotedMsg/QuotedMsg';
@@ -139,7 +150,7 @@ export default {
     },
     mounted () {
         this.$root.$on('keyDown', (evt) => {
-            if (evt.target.placeholder !== 'Buscar emoji') {
+            if (!evt.ctrlKey && evt.target.placeholder !== 'Buscar emoji') {
                 this.$refs.input.focus();
             }
         });
@@ -168,7 +179,7 @@ export default {
 
     },
     computed: {
-        ...mapState(['activeChat', 'quickReplys', 'user']),
+        ...mapState(['activeChat', 'quickReplys', 'user', 'selectMsgs']),
 
         timeConverter () {
             let a = new Date(this.time * 1000);
@@ -200,10 +211,28 @@ export default {
 
         canBindToOperator () {
             return false;
+        },
+
+        showSelectMsgs () {
+            return this.selectMsgs && this.selectMsgs.show;
+        },
+
+        hasMessageSelected () {
+            return this.selectMsgs.msgs.length > 0;
+        },
+
+        qtdSelected () {
+            let qtd = this.selectMsgs.msgs.length;
+            let text = `${qtd} selecionada`;
+            if (qtd > 1 || qtd === 0) {
+                text += 's';
+            }
+            return text;
         }
     },
     methods: {
         ...mapActions(['uploadFile']),
+        ...mapMutations(['SET_SELECT_MSGS']),
 
         toggleRecording () {
             this.gravando = !this.gravando;
@@ -374,6 +403,10 @@ export default {
             this.$root.$emit('finishCloseEmoji');
         },
 
+        handleClickCloseSelectMsgs () {
+            this.SET_SELECT_MSGS({ show: false });
+        },
+
         formatar (domElement) {
             let msg = '';
             domElement.childNodes.forEach(function (e) {
@@ -536,5 +569,48 @@ export default {
     flex-grow: 1;
     position: relative;
     margin-left: 3px;
+}
+
+.box-select-msgs {
+    box-sizing: border-box;
+    flex: 1 1 auto;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 20px;
+    min-height: 20px;
+    min-width: 0;
+    outline: none;
+    width: inherit;
+    will-change: width;
+    padding: 9px 12px 11px;
+    background-color: #efefef;
+    align-items: center;
+    justify-content: center;
+    height: 62px;
+    display: flex;
+}
+
+.box-select-msgs button {
+    margin-right: 10px;
+    border: none;
+    width: 40px;
+    height: 40px;
+}
+
+.box-select-msgs button:focus {
+    border: none;
+    outline: none;
+}
+
+.box-select-msgs button:disabled {
+    opacity: 0.4;
+}
+
+.qtd-msg-selected {
+    flex: 1;
+    font-size: 14.5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 </style>
