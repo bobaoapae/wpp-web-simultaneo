@@ -104,7 +104,8 @@
                 <img src="@/assets/images/wpp-icon-close-modal.svg"/>
             </button>
             <span class="qtd-msg-selected">{{qtdSelected}}</span>
-            <button class="forward-select-msgs" :disabled="!hasMessageSelected" title="Encaminhar Mensagens">
+            <button class="forward-select-msgs" :disabled="!hasMessageSelected" title="Encaminhar Mensagens"
+                    @click="handleClickForwardMsgs">
                 <img src="@/assets/images/wpp-icon-forwarded.svg"/>
             </button>
         </div>
@@ -232,7 +233,7 @@ export default {
     },
     methods: {
         ...mapActions(['uploadFile']),
-        ...mapMutations(['SET_SELECT_MSGS']),
+        ...mapMutations(['SET_SELECT_MSGS', 'SET_SELECT_CHATS']),
 
         toggleRecording () {
             this.gravando = !this.gravando;
@@ -405,6 +406,10 @@ export default {
 
         handleClickCloseSelectMsgs () {
             this.SET_SELECT_MSGS({ show: false });
+        },
+
+        handleClickForwardMsgs () {
+            this.SET_SELECT_CHATS({ show: true });
         },
 
         formatar (domElement) {

@@ -54,43 +54,43 @@ export default {
     position: absolute;
     z-index: 99;
     width: 100%;
-    background-color: hsla(0,0%,100%,.85);
+    background-color: hsla(0, 0%, 100%, .85);
     height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-    .box-modal {
-        background-color: #fff;
-        border-radius: 3px;
-        box-shadow: 0 17px 50px 0 rgba(0,0,0,.19), 0 12px 15px 0 rgba(0,0,0,.24);
-        padding: 22px 24px 20px;
-        box-sizing: border-box;
-        display: flex;
-        overflow: hidden;
-        width: 400px;
-        flex-direction: column;
-        flex: none;
-    }
+.box-modal {
+    background-color: #fff;
+    border-radius: 3px;
+    box-shadow: 0 17px 50px 0 rgba(0, 0, 0, .19), 0 12px 15px 0 rgba(0, 0, 0, .24);
+    padding: 22px 24px 20px;
+    box-sizing: border-box;
+    display: flex;
+    overflow: hidden;
+    width: 400px;
+    flex-direction: column;
+    flex: none;
+}
 
-    .title {
-        text-align: left;
-        margin-bottom: 20px;
-        font-size: 20px;
-        font-weight: 400;
-    }
+.title {
+    text-align: left;
+    margin-bottom: 20px;
+    font-size: 20px;
+    font-weight: 400;
+}
 
-    .footer {
+.footer {
 
-        text-align: right;
-        padding: 50px 5px 0;
-        display: flex;
-        flex-wrap: wrap-reverse;
-        justify-content: flex-end;
-        overflow: hidden;
-        white-space: nowrap;
-    }
+    text-align: right;
+    padding: 50px 5px 0;
+    display: flex;
+    flex-wrap: wrap-reverse;
+    justify-content: flex-end;
+    overflow: hidden;
+    white-space: nowrap;
+}
 
 .cancelar {
     padding: 10px 24px;
@@ -101,7 +101,7 @@ export default {
     text-transform: uppercase;
     position: relative;
     font-size: 14px;
-    transition: box-shadow .18s ease-out,background .18s ease-out,color .18s ease-out;
+    transition: box-shadow .18s ease-out, background .18s ease-out, color .18s ease-out;
     display: inline-block;
     line-height: normal;
     white-space: pre-wrap;
@@ -118,7 +118,7 @@ export default {
     text-transform: uppercase;
     position: relative;
     font-size: 14px;
-    transition: box-shadow .18s ease-out,background .18s ease-out,color .18s ease-out;
+    transition: box-shadow .18s ease-out, background .18s ease-out, color .18s ease-out;
     display: inline-block;
     line-height: normal;
     white-space: pre-wrap;

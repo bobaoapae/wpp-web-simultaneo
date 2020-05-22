@@ -3,7 +3,7 @@
         <div class="list-contact-container">
             <ul>
                 <li :key="contact.id" v-for="contact in contactsFiltered">
-                    <Contact :contact="contact"/>
+                    <Contact :contact="contact" @chatClick="handleChatClick"/>
                 </li>
             </ul>
         </div>
@@ -43,6 +43,11 @@ export default {
         this.$root.$on('searchNewChat', data => {
             this.filter = data;
         });
+    },
+    methods: {
+        handleChatClick (chat) {
+            this.$emit('chatClick', chat);
+        }
     }
 };
 </script>

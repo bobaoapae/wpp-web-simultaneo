@@ -12,6 +12,7 @@
 
         <ModalMedia/>
         <ModalDeleteMsg/>
+        <ModalSelectChats/>
     </div>
 </template>
 
@@ -22,12 +23,14 @@ import SideLeft from '@/components/chat/sideLeft/SideLeft.vue';
 import SideRight from '@/components/chat/sideRight/SideRight.vue';
 import ModalMedia from './ModalMedia';
 import ModalDeleteMsg from './ModalDeleteMsg';
+import ModalSelectChats from './ModalSelectChats';
 
 export default {
     name: 'Chat',
     components: {
         ModalDeleteMsg,
         ModalMedia,
+        ModalSelectChats,
         SideLeft,
         SideRight,
         ChatInfo

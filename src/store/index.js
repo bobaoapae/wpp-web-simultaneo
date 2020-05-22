@@ -30,7 +30,8 @@ const store = new Vuex.Store({
         medias: {},
         timeOutChats: -1,
         activeChat: null,
-        selectMsgs: { show: false, msg: null, msgs: [] },
+        selectMsgs: { show: false, msgs: [] },
+        selectChats: { show: false, chats: [] },
         poolContext: [],
         modal: {
             type: '',
@@ -156,6 +157,19 @@ const store = new Vuex.Store({
                 state.selectMsgs.msgs = state.selectMsgs.msgs.filter(e => e !== payload.msg);
             } else {
                 state.selectMsgs.msgs.push(payload.msg);
+            }
+        },
+
+        SET_SELECT_CHATS (state, payload) {
+            state.selectChats.show = payload.show;
+            state.selectChats.chats = [];
+        },
+
+        TOGGLE_SELECT_CHAT (state, payload) {
+            if (state.selectChats.chats.includes(payload.chat)) {
+                state.selectChats.chats = state.selectChats.chats.filter(e => e !== payload.chat);
+            } else {
+                state.selectChats.chats.push(payload.chat);
             }
         },
 
@@ -843,6 +857,16 @@ const store = new Vuex.Store({
                     });
                     return context.dispatch('sendMsg', payload);
                 };
+                el.forwardMessages = function (payload) {
+                    let payloadSend = { idsChats: [], idsMsgs: [] };
+                    payload.chats.forEach(value => {
+                        payloadSend.idsChats.push(value.id);
+                    });
+                    payload.msgs.forEach(value => {
+                        payloadSend.idsMsgs.push(value.id._serialized);
+                    });
+                    return context.dispatch('forwardMsgs', payloadSend);
+                };
                 el.seeChat = function () {
                     return context.dispatch('seeChat', { chatId: this.id });
                 };
@@ -1199,6 +1223,10 @@ const store = new Vuex.Store({
 
         sendMsg (context, payload) {
             return context.dispatch('sendWsMessage', { event: 'sendMessage', payload: payload });
+        },
+
+        forwardMsgs (context, payload) {
+            return context.dispatch('sendWsMessage', { event: 'forwardMessage', payload: payload });
         },
 
         seeChat (context, payload) {

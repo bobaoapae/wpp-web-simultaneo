@@ -108,6 +108,7 @@ export default {
     mounted () {
         this.$root.$on('keyDown', (evt) => {
             if (this.showSelectMsgs) {
+                evt.preventDefault();
                 if (evt.key === 'Escape') {
                     this.SET_SELECT_MSGS({ show: false });
                 }

@@ -1,7 +1,7 @@
 <template>
     <div class="forwarded-indicator">
         <span class="icon">
-            <img src="@/assets/images/wpp-icon-forwarded.svg">
+            <img src="@/assets/images/wpp-icon-forwarded.svg" height="16" width="16">
         </span>
 
         <span class="message">Encaminhada</span>
@@ -17,8 +17,6 @@ export default {
 <style scoped>
 .icon {
     margin-left: 3px;
-    width: 16px;
-    height: 16px;
 }
 
 .message {

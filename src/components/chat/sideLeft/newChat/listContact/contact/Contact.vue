@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import { mapActions, mapMutations, mapState } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 import Picture from '@/components/shared/picture/Picture.vue';
 
 export default {
@@ -35,15 +35,12 @@ export default {
         ...mapState(['chats'])
     },
     methods: {
-        ...mapMutations(['SET_ACTIVE_CHAT']),
         ...mapActions(['findChatFromId']),
 
         handleClick () {
             this.findChatFromId({ id: this.contact.id }).then(chat => {
-                this.SET_ACTIVE_CHAT(chat);
+                this.$emit('chatClick', chat);
             });
-
-            this.$root.$emit('showNewChat', false);
         }
     }
 };

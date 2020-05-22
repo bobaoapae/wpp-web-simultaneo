@@ -3,7 +3,7 @@
         <div id="new-chat" v-if="show">
             <Header/>
             <InputSearch/>
-            <ListContact/>
+            <ListContact @chatClick="handleChatClick"/>
         </div>
     </transition>
 </template>
@@ -12,6 +12,7 @@
 import Header from './header/Header';
 import InputSearch from './inputSearch/InputSearch';
 import ListContact from './listContact/ListContact';
+import { mapMutations } from 'vuex';
 
 export default {
     name: 'NewChat',
@@ -25,6 +26,14 @@ export default {
         this.$root.$on('showNewChat', data => {
             this.show = data;
         });
+    },
+    methods: {
+        ...mapMutations(['SET_ACTIVE_CHAT']),
+
+        handleChatClick (chat) {
+            this.SET_ACTIVE_CHAT(chat);
+            this.$root.$emit('showNewChat', false);
+        }
     }
 };
 </script>
