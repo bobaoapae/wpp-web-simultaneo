@@ -87,7 +87,7 @@
                 <div class="box-icon-send">
                     <div>
                         <img @click="handleSendMsg()" src="@/assets/images/wpp-icon-send.svg"
-                             v-if="message"/>
+                             v-if="activeChat.message"/>
                         <img @click="startRecording" src="@/assets/images/wpp-icon-mic.svg" v-else-if="!gravando"/>
                     </div>
 
@@ -135,7 +135,6 @@ export default {
     data () {
         return {
             preventOverrideRestore: false,
-            message: '',
             emojiIndex: msg.emojiIndex(),
             answerVisible: false,
             quickReplysVisible: false,
@@ -157,6 +156,9 @@ export default {
         });
         this.$root.$on('focusInput', () => {
             this.$refs.input.focus();
+        });
+        this.$root.$on('sendMessage', (data) => {
+            this.handleSendMsg(data);
         });
         this.$refs.input.focus();
     },
@@ -201,12 +203,12 @@ export default {
         },
 
         showQuickReplys () {
-            return this.message && this.message.charAt(0) === '/' && this.quickReplys && this.quickReplys.length > 0;
+            return this.activeChat.message && this.activeChat.message.charAt(0) === '/' && this.quickReplys && this.quickReplys.length > 0;
         },
 
         filteredQuickReplys () {
             return this.quickReplys.filter(quickReply => {
-                return ('/' + quickReply.shortcut).toLowerCase().includes(this.message.toLowerCase());
+                return ('/' + quickReply.shortcut).toLowerCase().includes(this.activeChat.message.toLowerCase());
             });
         },
 
@@ -303,8 +305,8 @@ export default {
         onInput (evt) {
             this.savePosition();
             this.activeChat.htmlInput = this.$refs.input.innerHTML;
-            this.message = this.formatar(this.$refs.input);
-            this.quickReplysVisible = !!(this.message && this.showQuickReplys);
+            this.activeChat.message = this.formatar(this.$refs.input);
+            this.quickReplysVisible = !!(this.activeChat.message && this.showQuickReplys);
         },
 
         handleClickCloseAnswer () {
@@ -320,7 +322,7 @@ export default {
                 files.push(items[i].getAsFile());
             }
             if (files.length > 0) {
-                let currentMsg = this.message;
+                let currentMsg = this.activeChat.message;
                 files.forEach(async file => {
                     let tag = await this.uploadFile(file);
                     return this.handleSendMsg({ message: currentMsg, fileUUID: tag });
@@ -359,14 +361,17 @@ export default {
         handleEnterPress () {
             if (this.quickReplysVisible && this.filteredQuickReplys.length === 1) {
                 this.handleClickQuickReply(this.filteredQuickReplys[0]);
-            } else if (this.message !== '') {
+            } else if (this.activeChat.message !== '') {
                 this.handleSendMsg();
             }
         },
 
         handleSendMsg (msg) {
             if (!msg) {
-                msg = { message: this.message };
+                msg = {};
+            }
+            if (!msg.message) {
+                msg.message = this.activeChat.message;
             }
             if (this.activeChat.quotedMsg) {
                 msg.quotedMsg = this.activeChat.quotedMsg.id._serialized;
@@ -384,7 +389,7 @@ export default {
         handleClickQuickReply (quickReply) {
             this.$refs.input.focus();
             this.$refs.input.innerHTML = '';
-            this.message = '';
+            this.activeChat.message = '';
             document.execCommand('insertHTML', false, quickReply.message);
         },
 
@@ -430,7 +435,7 @@ export default {
 
         clearInput () {
             this.$refs.input.innerHTML = '';
-            this.message = '';
+            this.activeChat.message = '';
             this.activeChat.restoreInput = null;
             this.activeChat.quotedMsg = undefined;
             this.activeChat.htmlInput = '';

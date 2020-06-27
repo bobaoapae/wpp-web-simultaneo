@@ -827,8 +827,10 @@ const store = new Vuex.Store({
                 el.__x_msgsIndex = 1;
                 el.__x_poolAddMsgs = [];
                 el.__x_intervalPool = setInterval(() => {
-                    let msgs = el.__x_poolAddMsgs;
-                    el.__x_poolAddMsgs = [];
+                    let msgs = [];
+                    while (el.__x_poolAddMsgs.length) {
+                        msgs.push(el.__x_poolAddMsgs.pop());
+                    }
                     if (msgs && msgs.length > 0) {
                         context.dispatch('setMsgsProperties', msgs);
                         el.msgs.push(...msgs);

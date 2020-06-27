@@ -102,32 +102,19 @@ export default {
             if (event.target.files && event.target.files.length > 0) {
                 this.files.push(...event.target.files);
                 this.$refs.file.value = '';
-                this.handleSendMsg('');
+                this.handleSendMsg();
             }
         },
 
-        handleSendMsg (text) {
-            let promises = [];
+        handleSendMsg () {
             this.files.forEach(file => {
-                promises.push(this.uploadFile(file).then(tag => {
-                    let msg = {};
-
-                    msg.message = text;
-                    msg.fileUUID = tag;
-
-                    if (this.activeChat.quotedMsg) {
-                        msg.quotedMsg = this.activeChat.quotedMsg.id._serialized;
-                    }
-
-                    this.activeChat.quotedMsg = undefined;
-
-                    return this.activeChat.sendMessage(msg);
-                }));
+                this.uploadFile(file).then(tag => {
+                    this.$root.$emit('sendMessage', { fileUUID: tag });
+                }).catch(error => {
+                    console.log('Upload Error::', error);
+                });
             });
             this.files = [];
-            Promise.all(promises).catch(reason => {
-                console.log('Error Upload::', reason);
-            });
         },
 
         openChatInfo () {
