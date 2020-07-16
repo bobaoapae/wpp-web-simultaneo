@@ -42,10 +42,10 @@
                 </div>
             </b-collapse>
 
-            <b-collapse id="collapse-replies" v-model="quickReplysVisible">
-                <div class="quick-replys" v-if="showQuickReplys">
+            <b-collapse id="collapse-replies" v-model="quickRepliesVisible">
+                <div class="quick-replys" v-if="quickRepliesVisible">
                     <div :key="quickReply.id" @click="handleClickQuickReply(quickReply)" class="quick-reply"
-                         v-for="quickReply in filteredQuickReplys">
+                         v-for="quickReply in filteredQuickReplies">
                         /<span class="quick-reply-name">{{quickReply.shortcut}}</span> <span class="quick-reply-msg">{{quickReply.message}}</span>
                     </div>
                 </div>
@@ -137,7 +137,7 @@ export default {
             preventOverrideRestore: false,
             emojiIndex: msg.emojiIndex(),
             answerVisible: false,
-            quickReplysVisible: false,
+            quickRepliesVisible: false,
             recorder: {},
             gumStream: {},
             gravando: false,
@@ -145,7 +145,8 @@ export default {
             time: 0,
             interval: null,
             emojiVisible: false,
-            bindToOperator: true
+            bindToOperator: true,
+            filteredQuickReplies: []
         };
     },
     mounted () {
@@ -200,16 +201,6 @@ export default {
 
             time = min + ':' + sec;
             return time;
-        },
-
-        showQuickReplys () {
-            return this.activeChat.message && this.activeChat.message.charAt(0) === '/' && this.quickReplys && this.quickReplys.length > 0;
-        },
-
-        filteredQuickReplys () {
-            return this.quickReplys.filter(quickReply => {
-                return ('/' + quickReply.shortcut).toLowerCase().includes(this.activeChat.message.toLowerCase());
-            });
         },
 
         canBindToOperator () {
@@ -306,7 +297,16 @@ export default {
             this.savePosition();
             this.activeChat.htmlInput = this.$refs.input.innerHTML;
             this.activeChat.message = this.formatar(this.$refs.input);
-            this.quickReplysVisible = !!(this.activeChat.message && this.showQuickReplys);
+            this.quickRepliesVisible = this.activeChat.message.charAt(0) === '/' && this.quickReplys && this.quickReplys.length > 0;
+            if (this.quickRepliesVisible) {
+                this.filteredQuickReplies = this.getQuickRepliesToShow();
+            }
+        },
+
+        getQuickRepliesToShow () {
+            return this.quickReplys.filter(quickReply => {
+                return ('/' + quickReply.shortcut).toLowerCase().includes(this.activeChat.message.toLowerCase());
+            });
         },
 
         handleClickCloseAnswer () {
@@ -359,8 +359,8 @@ export default {
         },
 
         handleEnterPress () {
-            if (this.quickReplysVisible && this.filteredQuickReplys.length === 1) {
-                this.handleClickQuickReply(this.filteredQuickReplys[0]);
+            if (this.quickRepliesVisible && this.filteredQuickReplies.length === 1) {
+                this.handleClickQuickReply(this.filteredQuickReplies[0]);
             } else if (this.activeChat.message !== '') {
                 this.handleSendMsg();
             }
