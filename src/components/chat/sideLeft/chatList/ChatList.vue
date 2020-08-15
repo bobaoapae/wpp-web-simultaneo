@@ -6,16 +6,22 @@
         </div>
 
         <div class="box-list-group">
-            <transition-group class="list-group" tag="ul" name="flip-list" v-if="!inputFilter">
+            <RecycleScroller
+                class="scroller"
+                :items="chatsFiltered"
+                :item-size="73"
+                key-field="id"
+                v-slot="{ item }"
+                v-if="!inputFilter"
+            >
                 <li
-                    :class="{ active : chat === activeChat }"
-                    :key="chat.id"
+                    :class="{ active : item === activeChat }"
+                    :key="item.id"
                     class="list-group-item d-flex"
-                    v-for="chat in chatsFiltered"
                 >
-                    <ChatRow :chat="chat"/>
+                    <ChatRow :chat="item"/>
                 </li>
-            </transition-group>
+            </RecycleScroller>
             <ul class="list-group" v-else>
                 <li
                     :class="{ active : chat === activeChat }"
@@ -78,6 +84,10 @@ export default {
 </script>
 
 <style scoped>
+.scroller {
+    max-height: calc(100vh - 109px);
+}
+
 .active {
     background: #e9ebeb !important;
 }
@@ -115,6 +125,8 @@ export default {
     overflow-x: hidden;
     transition: transform 0.2s;
 }
+
+.box-list-group >>>
 
 .list-group-item {
     padding: 0;

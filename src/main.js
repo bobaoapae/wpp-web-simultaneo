@@ -8,11 +8,13 @@ import { BootstrapVue, IconsPlugin } from 'bootstrap-vue';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-vue/dist/bootstrap-vue.min.css';
 import 'emoji-mart-vue-fast/css/emoji-mart.css';
+import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
 import AsyncComputed from 'vue-async-computed';
 import VueScrollTo from 'vue-scrollto';
 import VueTelInput from 'vue-tel-input';
 import { msg } from '@/helper.js';
 import vueDebounce from 'vue-debounce';
+import VueVirtualScroller from 'vue-virtual-scroller';
 
 Vue.config.productionTip = false;
 
@@ -22,6 +24,7 @@ Vue.use(AsyncComputed);
 Vue.use(VueScrollTo);
 Vue.use(VueTelInput);
 Vue.use(vueDebounce);
+Vue.use(VueVirtualScroller);
 
 Vue.filter('uppercase', function (value) {
     if (!value) return '';

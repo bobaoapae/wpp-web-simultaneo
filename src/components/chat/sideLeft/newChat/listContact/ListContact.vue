@@ -2,9 +2,17 @@
     <div class="list-contact">
         <div class="list-contact-container">
             <ul>
-                <li :key="contact.id" v-for="contact in contactsFiltered">
-                    <Contact :contact="contact" @chatClick="handleChatClick"/>
-                </li>
+                <RecycleScroller
+                    class="scroller"
+                    :items="contactsFiltered"
+                    :item-size="73"
+                    key-field="id"
+                    v-slot="{ item }"
+                >
+                    <li :key="item.id">
+                        <Contact :contact="item" @chatClick="handleChatClick"/>
+                    </li>
+                </RecycleScroller>
             </ul>
         </div>
     </div>
@@ -57,6 +65,10 @@ export default {
     overflow: hidden;
 }
 
+.scroller {
+    max-height: calc(100vh - 157px);
+}
+
 ul {
     background-color: #f7f7f7;
     max-height: calc(100vh - 157px);
@@ -75,6 +87,10 @@ li {
 
 @media (min-width: 1441px) {
     ul {
+        max-height: calc(100vh - 195px);
+    }
+
+    .scroller {
         max-height: calc(100vh - 195px);
     }
 }
