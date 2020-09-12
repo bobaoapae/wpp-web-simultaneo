@@ -394,6 +394,9 @@ const store = new Vuex.Store({
                                 } else if (payload === 'WAITING_QR_CODE_SCAN' || payload === 'LOADING' || payload === 'WAITING_LOAD') {
                                     context.commit('SET_QR_CODE_LOGGED', false);
                                     context.commit('SET_IS_LOADING_CHAT', true);
+                                    if (payload === 'WAITING_LOAD' || payload === 'LOADING') {
+                                        context.commit('SET_IMG_QRCODE', '');
+                                    }
                                 }
 
                                 break;
@@ -618,6 +621,16 @@ const store = new Vuex.Store({
         addCustomProperty (context, payload) {
             return context.dispatch('sendWsMessage', {
                 event: 'addCustomProperty', payload: payload
+            });
+        },
+
+        logout (context, payload) {
+            return context.dispatch('sendWsMessage', {
+                event: 'logout'
+            }).then(value => {
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.refresh();
             });
         },
 
