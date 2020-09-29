@@ -6,8 +6,8 @@
                 <img src="@/assets/images/wpp-icon-audio.svg" v-else/>
             </div>
             <div class="audio-wrapper">
-                <span class="audio-time" v-if="!audioPlaying">{{msg.duration | timeFormatted}}</span>
-                <span class="audio-time" v-else>{{audioTime | timeFormatted}}</span>
+                <span class="audio-time" v-if="!audioPlaying">{{ msg.duration | timeFormatted }}</span>
+                <span class="audio-time" v-else>{{ audioTime | timeFormatted }}</span>
                 <div class="audio-controls">
                     <div class="box-spinner" v-if="srcLoading && !srcAudio">
                         <svg
@@ -104,7 +104,8 @@ export default {
 
         handleProgressInput (evt) {
             let progressValue = evt.target.valueAsNumber;
-            this.audioProgress = progressValue;
+            let timeTarget = this.$refs.audio.duration * progressValue / 100;
+            this.$refs.audio.currentTime = timeTarget;
         },
 
         handlePlayAudio (evt) {
