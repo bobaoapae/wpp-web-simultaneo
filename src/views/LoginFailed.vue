@@ -3,21 +3,29 @@
         <div class="login-failed">
             <span class="h5 title">Tentando conectar ao celular</span>
             <span class="content">
-                <span class="reconnect">Tentando novamente em {{time}} segundos</span>
+                <span class="reconnect">Tentando novamente em {{ time }} segundos</span>
                 <hr class="divider"/>
                 <span class="desc">Certifique-se de que seu telefone tem uma conexão ativa com a internet.</span>
+                <hr class="divider"/>
+                <div class="logout" v-if="showLogout">
+                    <span>Demorando muito? <button class="btn btn-link" @click="logout">Clique aqui</button> para deslogar e reiniciar</span>
+                </div>
             </span>
         </div>
     </div>
 </template>
 
 <script>
+import { mapActions } from 'vuex';
+
 export default {
     name: 'LoginFailed',
     data () {
         return {
             time: 30,
-            intervalId: 0
+            intervalId: 0,
+            timeout: 0,
+            showLogout: false
         };
     },
     created () {
@@ -27,9 +35,16 @@ export default {
                 this.time = 30;
             }
         }, 1000);
+        this.timeout = setTimeout(() => {
+            this.showLogout = true;
+        }, 30000);
     },
     destroyed () {
         clearInterval(this.intervalId);
+        clearTimeout(this.timeout);
+    },
+    methods: {
+        ...mapActions(['logout'])
     }
 };
 </script>
