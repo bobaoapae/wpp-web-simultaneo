@@ -21,7 +21,30 @@
                 <input @change="onChange" id="file" multiple ref="file" type="file"/>
             </label>
 
-            <img src="@/assets/images/wpp-icon-kebab-menu.svg">
+            <b-dropdown
+                lazy
+                no-caret
+                toggle-class="text-decoration-none p-0"
+                variant="link"
+                ref="dropdown"
+            >
+                <template v-slot:button-content>
+                    <img src="@/assets/images/wpp-icon-kebab-menu.svg">
+                </template>
+
+                <b-dropdown-item @click.stop="handlePinChat" v-if="!activeChat.pin || activeChat.pin === 0">Fixar a
+                    Conversa
+                </b-dropdown-item>
+                <b-dropdown-item @click.stop="handleUnPinChat" v-else>Desafixar a Conversa</b-dropdown-item>
+                <b-dropdown-item @click.stop="handleClearChat"
+                                 v-if="user.canCreateOperator || user.superConfiguracao.operadorPodeExcluirMsg">
+                    Limpar Conversa
+                </b-dropdown-item>
+                <b-dropdown-item @click.stop="handleDeleteChat"
+                                 v-if="activeChat.isChat && user.canCreateOperator || user.superConfiguracao.operadorPodeExcluirMsg">
+                    Deletar Conversa
+                </b-dropdown-item>
+            </b-dropdown>
         </div>
 
     </div>
@@ -44,7 +67,7 @@ export default {
         };
     },
     computed: {
-        ...mapState(['activeChat']),
+        ...mapState(['activeChat', 'user']),
 
         nameEmojify () {
             if (this.activeChat.formattedTitle) {
@@ -115,6 +138,22 @@ export default {
                 });
             });
             this.files = [];
+        },
+
+        handlePinChat () {
+            this.activeChat.pinChat();
+        },
+
+        handleUnPinChat () {
+            this.activeChat.unPinChat();
+        },
+
+        handleDeleteChat () {
+            this.activeChat.deleteChat();
+        },
+
+        handleClearChat () {
+            this.activeChat.clearChat();
         },
 
         openChatInfo () {

@@ -345,7 +345,7 @@ const store = new Vuex.Store({
 
             wsWorker.postMessage({ cmd: 'ws-init', data: `${localStorage.baseURL.replace('http', 'ws')}/api/ws` });
 
-            wsWorker.addEventListener('message', (event) => {
+            wsWorker.addEventListener('message', async (event) => {
                 let cmd = event.data.cmd;
                 let data = event.data.data;
                 switch (cmd) {
@@ -413,11 +413,13 @@ const store = new Vuex.Store({
                                     console.log('time get all chats::', performance.now() - init);
                                     await context.dispatch('handleSetChats', chats);
                                     await context.dispatch('sortChatsByTime');
-                                    context.state.poolContext.forEach(func => func());
+                                    for await (let func of context.state.poolContext) {
+                                        func();
+                                    }
                                     context.state.poolContext = [];
-                                    context.dispatch('initPong');
-                                    context.dispatch('initPresenceTimeout');
-                                    context.dispatch('appActive');
+                                    await context.dispatch('initPong');
+                                    await context.dispatch('initPresenceTimeout');
+                                    await context.dispatch('appActive');
                                     context.commit('SET_IS_LOADING_CHAT', false);
                                 });
 
@@ -437,14 +439,14 @@ const store = new Vuex.Store({
                             case 'new-chat': {
                                 const r = JSON.parse(payload);
 
-                                let funcao = () => {
-                                    context.dispatch('newChat', r);
+                                let funcao = async () => {
+                                    await context.dispatch('newChat', r);
                                 };
 
                                 if (context.state.isLoadingChat) {
                                     context.state.poolContext.push(funcao);
                                 } else {
-                                    funcao();
+                                    await funcao();
                                 }
 
                                 break;
@@ -453,14 +455,14 @@ const store = new Vuex.Store({
                             case 'update-chat': {
                                 const r = JSON.parse(payload);
 
-                                let funcao = () => {
-                                    context.dispatch('updateChat', r);
+                                let funcao = async () => {
+                                    await context.dispatch('updateChat', r);
                                 };
 
                                 if (context.state.isLoadingChat) {
                                     context.state.poolContext.push(funcao);
                                 } else {
-                                    funcao();
+                                    await funcao();
                                 }
 
                                 break;
@@ -469,14 +471,14 @@ const store = new Vuex.Store({
                             case 'remove-chat': {
                                 const r = JSON.parse(payload);
 
-                                let funcao = () => {
+                                let funcao = async () => {
                                     context.commit('REMOVE_CHAT', r);
                                 };
 
                                 if (context.state.isLoadingChat) {
                                     context.state.poolContext.push(funcao);
                                 } else {
-                                    funcao();
+                                    await funcao();
                                 }
 
                                 break;
@@ -485,14 +487,14 @@ const store = new Vuex.Store({
                             case 'remove-msg': {
                                 const r = JSON.parse(payload);
 
-                                let funcao = () => {
-                                    context.dispatch('removeMsgFromChat', r);
+                                let funcao = async () => {
+                                    await context.dispatch('removeMsgFromChat', r);
                                 };
 
                                 if (context.state.isLoadingChat) {
                                     context.state.poolContext.push(funcao);
                                 } else {
-                                    funcao();
+                                    await funcao();
                                 }
 
                                 break;
@@ -501,14 +503,14 @@ const store = new Vuex.Store({
                             case 'new-msg': {
                                 const r = JSON.parse(payload);
 
-                                let funcao = () => {
-                                    context.dispatch('addNewMsgInChat', r);
+                                let funcao = async () => {
+                                    await context.dispatch('addNewMsgInChat', r);
                                 };
 
                                 if (context.state.isLoadingChat) {
                                     context.state.poolContext.push(funcao);
                                 } else {
-                                    funcao();
+                                    await funcao();
                                 }
 
                                 break;
@@ -517,14 +519,14 @@ const store = new Vuex.Store({
                             case 'update-msg': {
                                 const r = JSON.parse(payload);
 
-                                let funcao = () => {
-                                    context.dispatch('updateMsg', r);
+                                let funcao = async () => {
+                                    await context.dispatch('updateMsg', r);
                                 };
 
                                 if (context.state.isLoadingChat) {
                                     context.state.poolContext.push(funcao);
                                 } else {
-                                    funcao();
+                                    await funcao();
                                 }
 
                                 break;
@@ -858,7 +860,7 @@ const store = new Vuex.Store({
                         });
                         context.dispatch('sortChatsByTime');
                         let newMsgIn = msgs.find(value => !value.id.fromMe && value.isNewMsg);
-                        if (newMsgIn && el.muteExpiration <= 0 && (el !== context.state.activeChat || !context.state.visible)) {
+                        if (newMsgIn && el.muteExpiration === 0 && (el !== context.state.activeChat || !context.state.visible)) {
                             context.dispatch('playNewMsgNotification');
                         }
                     }
@@ -1169,7 +1171,7 @@ const store = new Vuex.Store({
             await context.dispatch('updateTitle');
         },
 
-        updateChat (context, payload) {
+        async updateChat (context, payload) {
             const chat = context.state.chats.find((element) => {
                 return element.id === payload.id;
             });
@@ -1181,15 +1183,15 @@ const store = new Vuex.Store({
                     payload.pin = 0;
                 }
                 Object.assign(chat, payload);
-                context.dispatch('updateTitle');
+                await context.dispatch('updateTitle');
                 if (sortChats) {
-                    context.dispatch('sortChatsByTime');
+                    await context.dispatch('sortChatsByTime');
                 }
             }
         },
 
         sortChatsByTime (context) {
-            context.commit('SET_TIMEOUT_CHATS', setTimeout(() => {
+            context.commit('SET_TIMEOUT_CHATS', setTimeout(async () => {
                 const chats = context.state.chats;
 
                 chats.sort(function (a, b) {
@@ -1218,7 +1220,7 @@ const store = new Vuex.Store({
                 });
 
                 context.commit('SET_CHATS', chats);
-                context.dispatch('updateTitle');
+                await context.dispatch('updateTitle');
             }, 50));
         },
 

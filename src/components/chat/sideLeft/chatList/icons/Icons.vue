@@ -1,6 +1,6 @@
 <template>
     <div class="icons">
-        <div class="mute" v-show="chat.muteExpiration > 0">
+        <div class="mute" v-show="chat.muteExpiration > 0 || chat.muteExpiration === -1">
             <img src="@/assets/images/wpp-icon-mute.svg">
         </div>
 
