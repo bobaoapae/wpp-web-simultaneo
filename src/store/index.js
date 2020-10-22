@@ -7,7 +7,7 @@ import vCardParse from 'vcard-parser';
 import api from '@/api';
 import randomColor from 'random-color';
 import WebSocketWorker from 'worker-loader!@/webSocketWorker';
-import Bottleneck from 'bottleneck';
+import throttledQueue from 'throttled-queue';
 
 Vue.use(Vuex);
 
@@ -48,7 +48,6 @@ const store = new Vuex.Store({
         visible: true,
         idle: false,
         wsWorker: null,
-        throttle: null,
         driverState: ''
     },
     mutations: {
@@ -75,9 +74,6 @@ const store = new Vuex.Store({
                 event.reject(new Error('WhatsApp Re-logged'));
             }
             state.findChats = {};
-            state.throttle = new Bottleneck({
-                minTime: 50
-            });
         },
 
         SET_CURRENT_USER (state, payload) {
@@ -916,7 +912,15 @@ const store = new Vuex.Store({
                         this.__x_msgsIndex++;
                         return Promise.resolve(this.msgsParted);
                     }
-                    return context.dispatch('loadEarly', { chatId: this.id });
+                    if (!this.throttle) {
+                        this.throttle = throttledQueue(1, 3000);
+                    }
+                    return new Promise((resolve, reject) => {
+                        this.throttle(async () => {
+                            await context.dispatch('loadEarly', { chatId: this.id });
+                            setTimeout(resolve, 3000);
+                        });
+                    });
                 };
                 el.addCustomProperty = function (value) {
                     return context.dispatch('addCustomProperty', {
