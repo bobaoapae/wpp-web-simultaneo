@@ -24,6 +24,7 @@ const store = new Vuex.Store({
         self: {},
         contacts: [],
         findChats: {},
+        findChatsByNumber: {},
         chats: [],
         quickReplys: [],
         pictures: {},
@@ -329,6 +330,13 @@ const store = new Vuex.Store({
             payload.promise.finally(() => {
                 delete state.findChats[payload.id];
             });
+        },
+
+        ADD_FIND_CHAT_BY_NUMBER (state, payload) {
+            state.findChatsByNumber[payload.id] = payload;
+            payload.promise.finally(() => {
+                delete state.findChatsByNumber[payload.id];
+            });
         }
     },
 
@@ -588,12 +596,37 @@ const store = new Vuex.Store({
                         // eslint-disable-next-line promise/param-names
                         findChat = new Promise((resolve1, reject1) => {
                             context.dispatch('sendWsMessage', { event: 'findChat', payload: payload.id }).then(chat => {
-                                context.dispatch('newChat', chat).then(() => {
+                                context.dispatch('newChat', chat).then((chat) => {
                                     resolve1(chat);
                                 });
                             }).catch(reason => reject1(reason));
                         });
                         context.commit('ADD_FIND_CHAT', { id: payload.id, promise: findChat });
+                    } else {
+                        findChat = findChat.promise;
+                    }
+                    findChat.then(value => resolve(value)).catch(reason => reject(reason));
+                } else {
+                    resolve(chat);
+                }
+            });
+        },
+
+        findChatFromNumber (context, payload) {
+            return new Promise((resolve, reject) => {
+                const chat = context.state.chats.find(chat => chat.contact && chat.contact.id && chat.contact.id.user === payload.number);
+                let findChat = context.state.findChatsByNumber[payload.number];
+                if (!chat) {
+                    if (!findChat) {
+                        // eslint-disable-next-line promise/param-names
+                        findChat = new Promise((resolve1, reject1) => {
+                            context.dispatch('sendWsMessage', { event: 'findChatByNumber', payload: payload.number }).then(chat => {
+                                context.dispatch('newChat', chat).then((chat) => {
+                                    resolve1(chat);
+                                });
+                            }).catch(reason => reject1(reason));
+                        });
+                        context.commit('ADD_FIND_CHAT_BY_NUMBER', { number: payload.number, promise: findChat });
                     } else {
                         findChat = findChat.promise;
                     }
@@ -806,14 +839,17 @@ const store = new Vuex.Store({
           */
 
         async newChat (context, payload) {
-            const chat = context.state.chats.find((element) => {
+            let chat = context.state.chats.find((element) => {
                 return element.id === payload.id;
             });
             if (!chat) {
+                chat = payload;
                 await context.dispatch('setChatProperties', payload);
                 await context.commit('ADD_NEW_CHAT', payload);
-                context.dispatch('sortChatsByTime');
+                await context.dispatch('sortChatsByTime');
             }
+
+            return chat;
         },
 
         async setChatProperties (context, el) {

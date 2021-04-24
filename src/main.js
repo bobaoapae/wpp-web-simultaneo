@@ -9,6 +9,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-vue/dist/bootstrap-vue.min.css';
 import 'emoji-mart-vue-fast/css/emoji-mart.css';
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
+import 'vue-tel-input/dist/vue-tel-input.css';
 import AsyncComputed from 'vue-async-computed';
 import VueScrollTo from 'vue-scrollto';
 import VueTelInput from 'vue-tel-input';

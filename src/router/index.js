@@ -6,6 +6,7 @@ import ForgotPassword from '@/views/ForgotPassword';
 import NewOperator from '@/views/NewOperator';
 import ChangePassword from '@/views/ChangePassword';
 import ChangeNumber from '@/views/ChangeNumber';
+import SendMessageToNumber from '@/views/SendMessageToNumber';
 import ConfirmChangeNumber from '@/views/ConfirmChangeNumber';
 import NotFound from '@/views/NotFound';
 import store from '@/store';
@@ -59,6 +60,11 @@ const routes = [
         path: '/confirmchangenumber',
         name: 'confirm-change-number',
         component: ConfirmChangeNumber
+    },
+    {
+        path: '/sendmessagetonumber',
+        name: 'send-message-to-number',
+        component: SendMessageToNumber
     },
     {
         path: '*',

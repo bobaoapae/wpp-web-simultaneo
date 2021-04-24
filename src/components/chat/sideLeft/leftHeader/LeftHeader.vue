@@ -28,6 +28,7 @@
                 <template v-slot:button-content>
                     <img src="@/assets/images/wpp-icon-kebab-menu.svg"/>
                 </template>
+                <b-dropdown-item to="/sendmessagetonumber">Enviar Mensagem Para Número</b-dropdown-item>
                 <b-dropdown-item to="/changenumber">Alterar Número</b-dropdown-item>
                 <b-dropdown-item to="/changepassword">Alterar Senha</b-dropdown-item>
                 <b-dropdown-item to="/newoperator" v-if="user.canCreateOperator">Novo Operador</b-dropdown-item>
@@ -41,7 +42,6 @@
                         Operadores podem excluir mensagens?
                     </b-form-checkbox>
                 </b-dropdown-form>
-                <b-dropdown-item class="d-none" to="/changenumber">Alterar Numero</b-dropdown-item>
             </b-dropdown>
         </div>
     </header>
