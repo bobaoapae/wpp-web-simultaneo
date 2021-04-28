@@ -623,4 +623,7 @@ export default {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+.input-msg >>> .emoji-mart-category-label h3{
+    background-color: transparent;
+}
 </style>

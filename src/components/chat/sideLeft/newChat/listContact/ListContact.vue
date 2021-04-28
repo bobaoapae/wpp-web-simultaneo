@@ -21,7 +21,7 @@
 <script>
 import { mapState } from 'vuex';
 import Contact from './contact/Contact';
-import sort from 'fast-sort';
+import { sort } from 'fast-sort';
 
 export default {
     name: 'ListContact',
