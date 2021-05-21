@@ -1,15 +1,15 @@
 <template>
     <div id="conversation-header">
         <div class="box-img">
-            <Picture :group="activeChat.isGroup" :id="activeChat.id" :key="activeChat.id"/>
+            <Picture :group="chat.isGroup" :id="chat.id" :key="chat.id"/>
         </div>
 
         <div @click.prevent="openChatInfo" class="box-info">
             <div :inner-html.prop="nameEmojify | emojify" class="nome"></div>
 
             <div class="info">
-                <PresenceChat :chat="activeChat"
-                              :key="activeChat.id" v-if="activeChat.isChat"/>
+                <PresenceChat :chat="chat"
+                              :key="chat.id" v-if="chat.isChat"/>
             </div>
         </div>
 
@@ -32,7 +32,7 @@
                     <img src="@/assets/images/wpp-icon-kebab-menu.svg">
                 </template>
 
-                <b-dropdown-item @click.stop="handlePinChat" v-if="!activeChat.pin || activeChat.pin === 0">Fixar a
+                <b-dropdown-item @click.stop="handlePinChat" v-if="!chat.pin || chat.pin === 0">Fixar a
                     Conversa
                 </b-dropdown-item>
                 <b-dropdown-item @click.stop="handleUnPinChat" v-else>Desafixar a Conversa</b-dropdown-item>
@@ -41,7 +41,7 @@
                     Limpar Conversa
                 </b-dropdown-item>
                 <b-dropdown-item @click.stop="handleDeleteChat"
-                                 v-if="activeChat.isChat && user.canCreateOperator || user.superConfiguracao.operadorPodeExcluirMsg">
+                                 v-if="chat.isChat && user.canCreateOperator || user.superConfiguracao.operadorPodeExcluirMsg">
                     Deletar Conversa
                 </b-dropdown-item>
             </b-dropdown>
@@ -61,23 +61,29 @@ export default {
         Picture,
         PresenceChat
     },
+    props: {
+        chat: {
+            type: Object,
+            required: true
+        }
+    },
     data () {
         return {
             files: []
         };
     },
     computed: {
-        ...mapState(['activeChat', 'user']),
+        ...mapState(['user']),
 
         nameEmojify () {
-            if (this.activeChat.formattedTitle) {
-                return this.activeChat.formattedTitle;
+            if (this.chat.formattedTitle) {
+                return this.chat.formattedTitle;
             }
-            return '+' + this.activeChat.id.replace('@c.us', '');
+            return '+' + this.chat.id.replace('@c.us', '');
         },
 
         lastTimeAvailable () {
-            return this.timeConverter(this.activeChat.lastPresenceAvailableTime);
+            return this.timeConverter(this.chat.lastPresenceAvailableTime);
         }
     },
     methods: {
@@ -130,10 +136,13 @@ export default {
         },
 
         handleSendMsg () {
-            this.files.forEach(file => {
+            let files = [...this.files];
+            let currentChat = this.chat;
+            files.forEach(file => {
                 this.uploadFile(file).then(tag => {
-                    this.$root.$emit('sendMessage', { fileUUID: tag });
+                    currentChat.buildAndSendMessage({ fileUUID: tag });
                 }).catch(error => {
+                    alert(`Upload File Error: ${error}`);
                     console.log('Upload Error::', error);
                 });
             });
@@ -141,23 +150,23 @@ export default {
         },
 
         handlePinChat () {
-            this.activeChat.pinChat();
+            this.chat.pinChat();
         },
 
         handleUnPinChat () {
-            this.activeChat.unPinChat();
+            this.chat.unPinChat();
         },
 
         handleDeleteChat () {
-            this.activeChat.deleteChat();
+            this.chat.deleteChat();
         },
 
         handleClearChat () {
-            this.activeChat.clearChat();
+            this.chat.clearChat();
         },
 
         openChatInfo () {
-            this.activeChat.openChatInfo = !this.activeChat.openChatInfo;
+            this.chat.openChatInfo = !this.chat.openChatInfo;
         }
     }
 };

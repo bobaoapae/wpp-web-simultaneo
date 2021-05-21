@@ -1,10 +1,10 @@
 <template>
     <div tabindex="0" id="conversation" @keydown="handleKeyDown">
-        <ConversationHeader/>
+        <ConversationHeader :chat="chat"/>
 
-        <MessagesList :chat="activeChat"/>
+        <MessagesList :chat="chat"/>
 
-        <InputMessage/>
+        <InputMessage :chat="chat"/>
     </div>
 </template>
 
@@ -21,8 +21,14 @@ export default {
         InputMessage,
         ConversationHeader
     },
+    props: {
+        chat: {
+            type: Object,
+            required: true
+        }
+    },
     computed: {
-        ...mapState(['activeChat'])
+        ...mapState(['user'])
     },
     methods: {
         handleKeyDown (evt) {

@@ -1,7 +1,7 @@
 <template>
     <div ref="container">
         <div class="input-msg" v-show="!showSelectMsgs">
-            <b-collapse id="collapse-emoji" v-model="emojiVisible" @show="handleEmojiOpening"
+            <b-collapse id="collapse-emoji" v-model="chat.emojiVisible" @show="handleEmojiOpening"
                         @shown="handleEmojiOpened" @hide="handleEmojiClosing" @hidden="handleEmojiClosed">
                 <picker
                     :color="'#009688'"
@@ -34,7 +34,7 @@
 
             <b-collapse id="collapse-answer-msg" v-model="answerVisible">
                 <div class="box-answer">
-                    <QuotedMsg :quotedMsg="activeChat.quotedMsg" class="flex-grow-1" v-if="answerVisible"/>
+                    <QuotedMsg :quotedMsg="chat.quotedMsg" class="flex-grow-1" v-if="answerVisible"/>
 
                     <div @click="handleClickCloseAnswer" class="close-answer">
                         <img src="@/assets/images/wpp-icon-close-answer.svg">
@@ -86,12 +86,12 @@
 
                 <div class="box-icon-send">
                     <div>
-                        <img @click="handleSendMsg()" src="@/assets/images/wpp-icon-send.svg"
-                             v-if="activeChat.message"/>
-                        <img @click="startRecording" src="@/assets/images/wpp-icon-mic.svg" v-else-if="!gravando"/>
+                        <img @click="handleSendMessage" src="@/assets/images/wpp-icon-send.svg"
+                             v-if="chat.message"/>
+                        <img @click="startRecording" src="@/assets/images/wpp-icon-mic.svg" v-else-if="!recording"/>
                     </div>
 
-                    <div v-if="gravando">
+                    <div v-if="recording">
                         <img @click="stopRecording" src="@/assets/images/wpp-icon-cancel-ptt-outline.svg"/>
                         <span class="recorder-time">{{timeConverter}}</span>
                         <img @click="sendPtt" src="@/assets/images/wpp-icon-send-ptt-outline.svg"/>
@@ -132,6 +132,12 @@ export default {
         QuotedMsg,
         Picker
     },
+    props: {
+        chat: {
+            type: Object,
+            required: true
+        }
+    },
     data () {
         return {
             preventOverrideRestore: false,
@@ -140,11 +146,10 @@ export default {
             quickRepliesVisible: false,
             recorder: {},
             gumStream: {},
-            gravando: false,
+            recording: false,
             ignoreRecording: false,
             time: 0,
             interval: null,
-            emojiVisible: false,
             bindToOperator: true,
             filteredQuickReplies: []
         };
@@ -158,13 +163,10 @@ export default {
         this.$root.$on('focusInput', () => {
             this.$refs.input.focus();
         });
-        this.$root.$on('sendMessage', (data) => {
-            this.handleSendMsg(data);
-        });
         this.$refs.input.focus();
     },
     watch: {
-        'activeChat.quotedMsg': function (val) {
+        'chat.quotedMsg': function (val) {
             if (val) {
                 this.$refs.input.focus();
                 this.answerVisible = true;
@@ -172,10 +174,10 @@ export default {
                 this.answerVisible = false;
             }
         },
-        'activeChat': function (val) {
+        'chat': function (val) {
             this.bindToOperator = true;
             this.preventOverrideRestore = true;
-            this.$refs.input.innerHTML = this.activeChat.htmlInput;
+            this.$refs.input.innerHTML = this.chat.htmlInput;
             this.$refs.input.focus();
             this.preventOverrideRestore = false;
             this.savePosition();
@@ -183,7 +185,7 @@ export default {
 
     },
     computed: {
-        ...mapState(['activeChat', 'quickReplys', 'user', 'selectMsgs']),
+        ...mapState(['quickReplys', 'user', 'selectMsgs']),
 
         timeConverter () {
             let a = new Date(this.time * 1000);
@@ -229,7 +231,7 @@ export default {
         ...mapMutations(['SET_SELECT_MSGS', 'SET_SELECT_CHATS']),
 
         toggleRecording () {
-            this.gravando = !this.gravando;
+            this.recording = !this.recording;
 
             if (this.recorder && this.recorder.state === 'recording') {
                 this.recorder.stop();
@@ -280,24 +282,26 @@ export default {
         },
 
         handleSendPtt (data) {
+            let currentChat = this.chat;
             this.uploadFile(new File([data], new Date().getTime() + '.ptt', { type: data.type })).then(tag => {
                 let msg = {
                     fileUUID: tag
                 };
 
-                if (this.activeChat.quotedMsg) {
-                    msg.quotedMsg = this.activeChat.quotedMsg.id._serialized;
-                }
-                this.activeChat.sendMessage(msg);
-                this.clearInput();
+                currentChat.buildAndSendMessage(msg);
             });
+        },
+
+        handleSendMessage () {
+            this.chat.buildAndSendMessage();
+            this.$refs.input.innerHTML = '';
         },
 
         onInput (evt) {
             this.savePosition();
-            this.activeChat.htmlInput = this.$refs.input.innerHTML;
-            this.activeChat.message = this.formatar(this.$refs.input);
-            this.quickRepliesVisible = this.activeChat.message.charAt(0) === '/' && this.quickReplys && this.quickReplys.length > 0;
+            this.chat.htmlInput = this.$refs.input.innerHTML;
+            this.chat.message = this.formatar(this.$refs.input);
+            this.quickRepliesVisible = this.chat.message.charAt(0) === '/' && this.quickReplys && this.quickReplys.length > 0;
             if (this.quickRepliesVisible) {
                 this.filteredQuickReplies = this.getQuickRepliesToShow();
             }
@@ -305,13 +309,13 @@ export default {
 
         getQuickRepliesToShow () {
             return this.quickReplys.filter(quickReply => {
-                return ('/' + quickReply.shortcut).toLowerCase().includes(this.activeChat.message.toLowerCase());
+                return ('/' + quickReply.shortcut).toLowerCase().includes(this.chat.message.toLowerCase());
             });
         },
 
         handleClickCloseAnswer () {
             this.answerVisible = false;
-            this.activeChat.quotedMsg = undefined;
+            this.chat.quotedMsg = undefined;
         },
 
         onPaste (evt) {
@@ -322,10 +326,10 @@ export default {
                 files.push(items[i].getAsFile());
             }
             if (files.length > 0) {
-                let currentMsg = this.activeChat.message;
+                let currentChat = this.chat;
                 files.forEach(async file => {
                     let tag = await this.uploadFile(file);
-                    return this.handleSendMsg({ message: currentMsg, fileUUID: tag });
+                    await currentChat.buildAndSendMessage({ fileUUID: tag });
                 });
             } else {
                 const textMsg = this.$options.filters.emojify(evt.clipboardData.getData('text'));
@@ -334,21 +338,21 @@ export default {
         },
 
         restorePosition () {
-            if (this.activeChat.restoreInput) {
-                rageSave.restoreSelection(this.activeChat.restoreInput);
-                this.activeChat.restoreInput = null;
+            if (this.chat.restoreInput) {
+                rageSave.restoreSelection(this.chat.restoreInput);
+                this.chat.restoreInput = null;
             }
         },
 
         savePosition () {
             if (!this.preventOverrideRestore) {
-                if (this.activeChat.restoreInput) {
-                    rageSave.removeMarkers(this.activeChat.restoreInput);
+                if (this.chat.restoreInput) {
+                    rageSave.removeMarkers(this.chat.restoreInput);
                 }
                 if (this.$refs.input.textContent.length > 0) {
-                    this.activeChat.restoreInput = rageSave.saveSelection();
+                    this.chat.restoreInput = rageSave.saveSelection();
                 }
-                this.activeChat.htmlInput = this.$refs.input.innerHTML;
+                this.chat.htmlInput = this.$refs.input.innerHTML;
             }
         },
 
@@ -361,35 +365,15 @@ export default {
         handleEnterPress () {
             if (this.quickRepliesVisible && this.filteredQuickReplies.length === 1) {
                 this.handleClickQuickReply(this.filteredQuickReplies[0]);
-            } else if (this.activeChat.message !== '') {
-                this.handleSendMsg();
+            } else if (this.chat.message !== '') {
+                this.handleSendMessage();
             }
-        },
-
-        handleSendMsg (msg) {
-            if (!msg) {
-                msg = {};
-            }
-            if (!msg.message) {
-                msg.message = this.activeChat.message;
-            }
-            if (this.activeChat.quotedMsg) {
-                msg.quotedMsg = this.activeChat.quotedMsg.id._serialized;
-            }
-
-            this.activeChat.sendMessage(msg);
-            if (this.canBindToOperator && this.bindToOperator) {
-                this.activeChat.addCustomProperty({
-                    usuario: this.user.uuid
-                });
-            }
-            this.clearInput();
         },
 
         handleClickQuickReply (quickReply) {
             this.$refs.input.focus();
             this.$refs.input.innerHTML = '';
-            this.activeChat.message = '';
+            this.chat.message = '';
             document.execCommand('insertHTML', false, quickReply.message);
         },
 
@@ -431,15 +415,6 @@ export default {
             });
 
             return this.$options.filters.capitalize(msg);
-        },
-
-        clearInput () {
-            this.$refs.input.innerHTML = '';
-            this.activeChat.message = '';
-            this.activeChat.restoreInput = null;
-            this.activeChat.quotedMsg = undefined;
-            this.activeChat.htmlInput = '';
-            this.emojiVisible = false;
         }
     }
 };
