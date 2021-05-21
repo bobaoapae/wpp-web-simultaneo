@@ -26,7 +26,7 @@ const store = new Vuex.Store({
         findChats: {},
         findChatsByNumber: {},
         chats: [],
-        quickReplys: [],
+        quickReplies: [],
         pictures: {},
         medias: {},
         timeOutChats: -1,
@@ -59,7 +59,7 @@ const store = new Vuex.Store({
             state.self = {};
             state.contacts = [];
             state.chats = [];
-            state.quickReplys = [];
+            state.quickReplies = [];
             state.pictures = {};
             state.medias = {};
             state.activeChat = null;
@@ -178,8 +178,8 @@ const store = new Vuex.Store({
             Vue.set(state, 'contacts', [...payload]);
         },
 
-        SET_QUICK_REPLYS (state, payload) {
-            Vue.set(state, 'quickReplys', [...payload]);
+        SET_QUICK_REPLIES (state, payload) {
+            Vue.set(state, 'quickReplies', [...payload]);
         },
 
         SET_CHATS (state, payload) {
@@ -386,7 +386,7 @@ const store = new Vuex.Store({
                                 break;
                             }
 
-                            case 'update-estado': {
+                            case 'update-state': {
                                 context.commit('SET_DRIVER_STATE', payload);
                                 if (payload === 'QR_CODE_SCANNED') {
                                     context.commit('SET_QR_CODE_LOGGED', true);
@@ -395,46 +395,42 @@ const store = new Vuex.Store({
                                     context.commit('SET_QR_CODE_LOGGED', true);
                                 } else if (payload === 'LOGGED') {
                                     context.commit('SET_QR_CODE_LOGGED', true);
+
+                                    let selfInfo = await context.dispatch('getSelfInfo');
+                                    context.commit('RESET_WPP');
+                                    context.commit('SET_SELF', selfInfo.self);
+
+                                    let init = performance.now();
+                                    context.dispatch('getAllChats').then(async chats => {
+                                        console.log('chats::', chats);
+                                        console.log('time get all chats::', performance.now() - init);
+                                        await context.dispatch('handleSetChats', chats);
+                                        await context.dispatch('sortChatsByTime');
+                                        for await (let func of context.state.poolContext) {
+                                            func();
+                                        }
+                                        context.state.poolContext = [];
+                                        await context.dispatch('initPong');
+                                        await context.dispatch('initPresenceTimeout');
+                                        await context.dispatch('appActive');
+                                        context.commit('SET_IS_LOADING_CHAT', false);
+                                    });
+
+                                    context.dispatch('getAllContacts').then(contacts => {
+                                        context.commit('SET_CONTACTS', contacts);
+                                    });
+
+                                    if (selfInfo.isBusiness) {
+                                        context.dispatch('getAllQuickReplies').then(quickReplies => {
+                                            context.commit('SET_QUICK_REPLIES', quickReplies);
+                                        });
+                                    }
                                 } else if (payload === 'WAITING_QR_CODE_SCAN' || payload === 'LOADING' || payload === 'WAITING_LOAD') {
                                     context.commit('SET_QR_CODE_LOGGED', false);
                                     context.commit('SET_IS_LOADING_CHAT', true);
                                     if (payload === 'WAITING_LOAD' || payload === 'LOADING') {
                                         context.commit('SET_IMG_QRCODE', '');
                                     }
-                                }
-
-                                break;
-                            }
-
-                            case 'init': {
-                                const r = JSON.parse(payload);
-                                context.commit('RESET_WPP');
-                                context.commit('SET_SELF', r.self);
-
-                                let init = performance.now();
-                                context.dispatch('getAllChats').then(async chats => {
-                                    console.log('chats::', chats);
-                                    console.log('time get all chats::', performance.now() - init);
-                                    await context.dispatch('handleSetChats', chats);
-                                    await context.dispatch('sortChatsByTime');
-                                    for await (let func of context.state.poolContext) {
-                                        func();
-                                    }
-                                    context.state.poolContext = [];
-                                    await context.dispatch('initPong');
-                                    await context.dispatch('initPresenceTimeout');
-                                    await context.dispatch('appActive');
-                                    context.commit('SET_IS_LOADING_CHAT', false);
-                                });
-
-                                context.dispatch('getAllContacts').then(contacts => {
-                                    context.commit('SET_CONTACTS', contacts);
-                                });
-
-                                if (r.isBussiness) {
-                                    context.dispatch('getAllQuickReplys').then(quickReplys => {
-                                        context.commit('SET_QUICK_REPLYS', quickReplys);
-                                    });
                                 }
 
                                 break;
@@ -637,6 +633,10 @@ const store = new Vuex.Store({
             });
         },
 
+        getSelfInfo (context, payload) {
+            return context.dispatch('sendWsMessage', { event: 'getSelfInfo' });
+        },
+
         getAllChats (context, payload) {
             return context.dispatch('sendWsMessage', { event: 'getAllChats' });
         },
@@ -645,8 +645,8 @@ const store = new Vuex.Store({
             return context.dispatch('sendWsMessage', { event: 'getAllContacts' });
         },
 
-        getAllQuickReplys (context, payload) {
-            return context.dispatch('sendWsMessage', { event: 'getAllQuickReplys' });
+        getAllQuickReplies (context, payload) {
+            return context.dispatch('sendWsMessage', { event: 'getAllQuickReplies' });
         },
 
         addCustomProperty (context, payload) {
@@ -877,7 +877,8 @@ const store = new Vuex.Store({
                 }
                 el.__x_msgsIndex = 1;
                 el.__x_poolAddMsgs = [];
-                el.__x_intervalPool = setInterval(() => {
+                el.__x_intervalPool = 0;
+                el.__x_intervalPoolCreate = () => setInterval(() => {
                     let msgs = [];
                     while (el.__x_poolAddMsgs.length) {
                         msgs.push(el.__x_poolAddMsgs.pop());
@@ -902,6 +903,9 @@ const store = new Vuex.Store({
                     }
                 }, 150);
                 el.addMsg = function (msg) {
+                    if (el.__x_intervalPool === 0) {
+                        el.__x_intervalPoolCreate();
+                    }
                     el.__x_poolAddMsgs.push(msg);
                 };
                 el.sendMessage = function (payload) {
@@ -945,7 +949,11 @@ const store = new Vuex.Store({
                     return context.dispatch('clearChat', { chatId: this.id, keepFavorites: keepFavorites === true });
                 };
                 el.subscribePresence = function () {
-                    return context.dispatch('subscribePresence', { chatId: this.id });
+                    if (!this.presenceSubscribed) {
+                        return context.dispatch('subscribePresence', { chatId: this.id }).then(value => {
+                            this.isSubscribeToPresence = true;
+                        });
+                    }
                 };
                 el.loadEarly = function () {
                     if (this.__x_msgsIndex * 50 < this.msgs.length) {
