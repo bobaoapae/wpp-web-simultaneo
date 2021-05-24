@@ -965,8 +965,12 @@ const store = new Vuex.Store({
                     }
                     return new Promise((resolve, reject) => {
                         this.throttle(async () => {
-                            await context.dispatch('loadEarly', { chatId: this.id });
-                            setTimeout(resolve, 3000);
+                            try {
+                                await context.dispatch('loadEarly', { chatId: this.id });
+                                setTimeout(resolve, 3000);
+                            } catch (e) {
+                                reject(e);
+                            }
                         });
                     });
                 };

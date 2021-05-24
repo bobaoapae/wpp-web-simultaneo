@@ -189,7 +189,11 @@ export default {
         async handleLoadEarly () {
             if (!this.loadingEarly) {
                 this.loadingEarly = true;
-                await this.chat.loadEarly();
+                try {
+                    await this.chat.loadEarly();
+                } catch (e) {
+                    console.error('LoadEarly Error::', e);
+                }
                 this.loadingEarly = false;
                 return true;
             }
