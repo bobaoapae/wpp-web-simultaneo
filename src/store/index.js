@@ -875,6 +875,7 @@ const store = new Vuex.Store({
                 if (!el.customProperties) {
                     el.customProperties = {};
                 }
+                el.loadingEarly = false;
                 el.__x_msgsIndex = 1;
                 el.__x_poolAddMsgs = [];
                 el.__x_intervalPool = 0;
@@ -907,6 +908,26 @@ const store = new Vuex.Store({
                         el.__x_intervalPoolCreate();
                     }
                     el.__x_poolAddMsgs.push(msg);
+                };
+                el.clearInputMessage = function () {
+                    el.message = '';
+                    el.restoreInput = null;
+                    el.quotedMsg = undefined;
+                    el.htmlInput = '';
+                    el.emojiVisible = false;
+                };
+                el.buildAndSendMessage = function (payload) {
+                    if (!payload) {
+                        payload = {};
+                    }
+                    if (!payload.message) {
+                        payload.message = el.message;
+                    }
+                    if (el.quotedMsg) {
+                        payload.quotedMsg = el.quotedMsg.id._serialized;
+                    }
+                    el.clearInputMessage();
+                    return el.sendMessage(payload);
                 };
                 el.sendMessage = function (payload) {
                     Object.assign(payload, {

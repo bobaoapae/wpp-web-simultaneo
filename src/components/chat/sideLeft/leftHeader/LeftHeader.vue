@@ -29,7 +29,7 @@
                     <img src="@/assets/images/wpp-icon-kebab-menu.svg"/>
                 </template>
                 <b-dropdown-item to="/sendmessagetonumber">Enviar Mensagem Para Número</b-dropdown-item>
-                <b-dropdown-item to="/changenumber">Alterar Número</b-dropdown-item>
+                <b-dropdown-item to="/changenumber" v-if="user.canCreateOperator">Alterar Número</b-dropdown-item>
                 <b-dropdown-item to="/changepassword">Alterar Senha</b-dropdown-item>
                 <b-dropdown-item to="/newoperator" v-if="user.canCreateOperator">Novo Operador</b-dropdown-item>
                 <b-dropdown-form class="text-nowrap" v-if="user.canCreateOperator">

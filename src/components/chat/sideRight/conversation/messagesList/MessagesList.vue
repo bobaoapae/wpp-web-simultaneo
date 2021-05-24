@@ -2,7 +2,7 @@
     <div class="messages-list" @scroll="handleMessageListChange" @mousewheel="handleMessageListChange"
          @touchmove="handleMessageListChange"
          ref="messageList">
-        <LoadingEarlyMsg v-show="loadingEarly"/>
+        <LoadingEarlyMsg v-show="chat.loadingEarly"/>
         <div :id="encodedMsgId(item)" :key="encodedMsgId(item)" @dblclick.left.prevent="handleDoubleClick(item)"
              v-for="(item, index) in msgs" v-for-callback="{key: index, array: msgs, callback: handleLoadMsgFinish}">
             <MessageDateFormatted :formattedDate="item.fomattedDate"
@@ -92,7 +92,6 @@ export default {
     },
     data () {
         return {
-            loadingEarly: false,
             msgsLoaded: false,
             resizeObeserver: null,
             clientHeight: -1,
@@ -128,7 +127,7 @@ export default {
             }
         },
         'chat.lastMsg.id._serialized': function (val) {
-            if (val && !this.loadingEarly && this.visible && (this.chat.lastMsg.id.fromMe || this.isInBottom())) {
+            if (val && !this.chat.loadingEarly && this.visible && (this.chat.lastMsg.id.fromMe || this.isInBottom())) {
                 this.scrollToBottom();
             }
         },
@@ -177,9 +176,9 @@ export default {
             this.scrollHeight = props.scrollHeight;
             this.scrollTop = props.scrollTop;
             this.clientHeight = props.clientHeight;
-            if (e && this.loadingEarly) {
+            if (e && this.chat.loadingEarly) {
                 e.preventDefault();
-            } else if (!this.loadingEarly && !this.chat.noEarlierMsgs && ((props.scrollHeight > 1050 && props.calc <= 1050) || props.scrollTop === 0)) {
+            } else if (!this.chat.loadingEarly && !this.chat.noEarlierMsgs && ((props.scrollHeight > 1050 && props.calc <= 1050) || props.scrollTop === 0)) {
                 this.handleLoadEarly();
             } else if (this.active && this.isInBottom() && this.chat.isUnread) {
                 this.chat.seeChat();
@@ -187,14 +186,14 @@ export default {
         },
 
         async handleLoadEarly () {
-            if (!this.loadingEarly) {
-                this.loadingEarly = true;
+            if (!this.chat.loadingEarly) {
+                this.chat.loadingEarly = true;
                 try {
                     await this.chat.loadEarly();
                 } catch (e) {
                     console.error('LoadEarly Error::', e);
                 }
-                this.loadingEarly = false;
+                this.chat.loadingEarly = false;
                 return true;
             }
             return Promise.resolve(false);
