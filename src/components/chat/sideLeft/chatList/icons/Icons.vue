@@ -1,15 +1,15 @@
 <template>
     <div class="icons">
-        <div class="mute" v-show="chat.muteExpiration > 0 || chat.muteExpiration === -1">
+        <div class="mute" v-if="chat.muteExpiration > 0 || chat.muteExpiration === -1">
             <img src="@/assets/images/wpp-icon-mute.svg">
         </div>
 
-        <div class="pin" v-show="chat.pin > 0">
+        <div class="pin" v-if="chat.pin > 0">
             <img src="@/assets/images/wpp-icon-pin.svg">
         </div>
 
-        <div class="unreadCount" v-show="chat.unreadCount">
-            <span>{{chat.unreadCount}}</span>
+        <div class="unreadCount" v-if="chat.unreadCount">
+            <span v-if="chat.unreadCount>0">{{chat.unreadCount}}</span>
         </div>
     </div>
 </template>
