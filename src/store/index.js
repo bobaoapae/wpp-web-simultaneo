@@ -954,6 +954,12 @@ const store = new Vuex.Store({
                 el.unPinChat = function () {
                     return context.dispatch('unPinChat', { chatId: this.id });
                 };
+                el.markRead = function () {
+                    return context.dispatch('markRead', { chatId: this.id });
+                };
+                el.markUnRead = function () {
+                    return context.dispatch('markUnRead', { chatId: this.id });
+                };
                 el.deleteChat = function () {
                     return context.dispatch('deleteChat', { chatId: this.id });
                 };
@@ -1333,6 +1339,14 @@ const store = new Vuex.Store({
 
         unPinChat (context, payload) {
             return context.dispatch('sendWsMessage', { event: 'unPinChat', payload: payload.chatId });
+        },
+
+        markRead (context, payload) {
+            return context.dispatch('sendWsMessage', { event: 'markRead', payload: payload.chatId });
+        },
+
+        markUnRead (context, payload) {
+            return context.dispatch('sendWsMessage', { event: 'markUnRead', payload: payload.chatId });
         },
 
         deleteChat (context, payload) {

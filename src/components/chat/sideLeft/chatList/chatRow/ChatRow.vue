@@ -38,6 +38,10 @@
                                 Conversa
                             </b-dropdown-item>
                             <b-dropdown-item @click.stop="handleUnPinChat" v-else>Desafixar a Conversa</b-dropdown-item>
+                            <b-dropdown-item @click.stop="handleUnReadChat" v-if="chat.unreadCount === 0">Marcar como não lido
+                            </b-dropdown-item>
+                            <b-dropdown-item @click.stop="handleReadChat" v-if="chat.unreadCount !== 0">Marcar como lido
+                            </b-dropdown-item>
                             <b-dropdown-item @click.stop="handleClearChat"
                                              v-if="user.canCreateOperator || user.superConfiguracao.operadorPodeExcluirMsg">
                                 Limpar Conversa
@@ -129,6 +133,20 @@ export default {
         handleUnPinChat () {
             this.processing = true;
             this.chat.unPinChat().finally(() => {
+                this.processing = false;
+            });
+        },
+
+        handleUnReadChat () {
+            this.processing = true;
+            this.chat.markUnRead().finally(() => {
+                this.processing = false;
+            });
+        },
+
+        handleReadChat () {
+            this.processing = true;
+            this.chat.markRead().finally(() => {
                 this.processing = false;
             });
         },
