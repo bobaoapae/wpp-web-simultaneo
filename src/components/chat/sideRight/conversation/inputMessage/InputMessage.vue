@@ -185,7 +185,7 @@ export default {
 
     },
     computed: {
-        ...mapState(['quickReplys', 'user', 'selectMsgs']),
+        ...mapState(['quickReplies', 'user', 'selectMsgs']),
 
         timeConverter () {
             let a = new Date(this.time * 1000);
@@ -301,14 +301,14 @@ export default {
             this.savePosition();
             this.chat.htmlInput = this.$refs.input.innerHTML;
             this.chat.message = this.formatar(this.$refs.input);
-            this.quickRepliesVisible = this.chat.message.charAt(0) === '/' && this.quickReplys && this.quickReplys.length > 0;
+            this.quickRepliesVisible = this.chat.message.charAt(0) === '/' && this.quickReplies && this.quickReplies.length > 0;
             if (this.quickRepliesVisible) {
                 this.filteredQuickReplies = this.getQuickRepliesToShow();
             }
         },
 
         getQuickRepliesToShow () {
-            return this.quickReplys.filter(quickReply => {
+            return this.quickReplies.filter(quickReply => {
                 return ('/' + quickReply.shortcut).toLowerCase().includes(this.chat.message.toLowerCase());
             });
         },
