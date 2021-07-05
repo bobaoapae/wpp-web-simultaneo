@@ -7,7 +7,7 @@
                 <div class="text-center" v-if="loading">
                     <p class="title">Buscando informações...</p>
                     <div class="loading-info m-auto">
-                        <LoadginSpinner/>
+                        <LoadingSpinner/>
                     </div>
                 </div>
                 <form @submit.prevent="handleSubmit" id="form-login" v-else-if="!error.active && !success">
@@ -43,12 +43,12 @@
 
 <script>
 import api from '@/api';
-import LoadginSpinner from '@/components/shared/loadingSpinner/LoadingSpinner';
+import LoadingSpinner from '@/components/shared/loadingSpinner/LoadingSpinner';
 import PhoneAwesome from 'awesome-phonenumber';
 
 export default {
     name: 'ChangeNumber',
-    components: { LoadginSpinner },
+    components: { LoadingSpinner },
     created () {
         api.get(`/api/auth/changeNumber/${this.$route.query.token}`).then(value => {
             Object.assign(this.changeNumberData, value.data);
