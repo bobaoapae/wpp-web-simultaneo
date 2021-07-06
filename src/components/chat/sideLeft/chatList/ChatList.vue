@@ -1,28 +1,29 @@
 <template>
     <div id="chat-list">
         <div class="box-input-search">
-            <input placeholder="Procurar" style="outline: none;" type="text" v-model.trim="inputData"
+            <input placeholder="Procurar" style="outline: none;" type="text"
                    @keydown.exact.esc="handleEscPress" v-debounce:200ms.lock="handleInput"/>
         </div>
 
         <div class="box-list-group">
-            <RecycleScroller
-                class="scroller"
-                :items="chatsFiltered"
-                :item-size="73"
-                key-field="id"
-                v-slot="{ item }"
-                v-if="!inputFilter"
-            >
-                <li
-                    :class="{ active : item === activeChat }"
-                    :key="item.id"
-                    class="list-group-item d-flex"
-                >
-                    <ChatRow :chat="item"/>
-                </li>
-            </RecycleScroller>
-            <ul class="list-group" v-else>
+            <div class="chat-filter-container">
+                <div class="chat-filter">
+                    <ul>
+                        <li :class="{'selected': showOnlyMyChats}" @click="handleClickFilterMyChats">Minhas
+                            ({{ myChatsUnread }})
+                        </li>
+                        <li :class="{'selected': !showOnlyMyChats}" @click="handleClickFilterAllChats">Todas
+                            ({{ allChatsUnread }})
+                        </li>
+                    </ul>
+                </div>
+                <div class="chat-filter-icon">
+                    <img width="12" src="@/assets/images/filter-icon.svg"/>
+                    <span>Filtros</span>
+                </div>
+            </div>
+            <!-- TODO: implementar vue virtual scroll -->
+            <ul class="list-group">
                 <li
                     :class="{ active : chat === activeChat }"
                     :key="chat.id"
@@ -37,7 +38,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 import ChatRow from './chatRow/ChatRow';
 
 export default {
@@ -49,35 +50,56 @@ export default {
         return {
             active_el: null,
             inputFilter: '',
-            inputData: ''
+            showOnlyMyChats: true
         };
     },
+    async mounted () {
+        await this.updateMyChats();
+    },
     computed: {
-        ...mapState(['chats', 'activeChat']),
+        ...mapState(['chats', 'activeChat', 'user', 'myChats']),
 
         chatsFiltered () {
-            const chatVisible = this.chats.filter(chat => {
+            let chats = this.showOnlyMyChats ? this.myChats : this.chats;
+            let chatVisible = chats.filter(chat => {
                 return chat.shouldAppearInList && !chat.archive;
             });
 
-            if (this.inputFilter === '') {
-                return chatVisible;
+            if (this.inputFilter) {
+                chatVisible = chatVisible.filter(chat => {
+                    return chat.formattedTitle.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(this.inputFilter.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')) ||
+                        chat.id.replace('@c.us', '').includes(this.inputFilter.toLowerCase());
+                });
             }
 
-            return chatVisible.filter(chat => {
-                return chat.formattedTitle.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(this.inputFilter.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')) ||
-                    chat.id.replace('@c.us', '').includes(this.inputFilter.toLowerCase());
-            });
+            return chatVisible;
+        },
+
+        myChatsUnread () {
+            return this.myChats.filter(value => value.unreadCount !== 0).length;
+        },
+
+        allChatsUnread () {
+            return this.chats.filter(value => value.unreadCount !== 0).length;
         }
     },
     methods: {
-        handleInput () {
-            this.inputFilter = this.inputData;
+        ...mapActions(['getChatsWithProperty', 'updateMyChats']),
+
+        handleInput (val) {
+            this.inputFilter = val;
         },
 
         handleEscPress () {
-            this.inputData = '';
             this.inputFilter = '';
+        },
+
+        handleClickFilterMyChats () {
+            this.showOnlyMyChats = true;
+        },
+
+        handleClickFilterAllChats () {
+            this.showOnlyMyChats = false;
         }
     }
 };
@@ -126,8 +148,6 @@ export default {
     transition: transform 0.2s;
 }
 
-.box-list-group >>>
-
 .list-group-item {
     padding: 0;
     cursor: pointer;
@@ -145,5 +165,61 @@ export default {
         overflow-y: scroll;
         overflow-x: hidden;
     }
+}
+
+.chat-filter-container {
+    margin-top: 0.2rem;
+    margin-bottom: 0.2rem;
+    border-top: 1px solid #f2f2f2 !important;
+    border-bottom: 1px solid #f2f2f2 !important;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-items: flex-start;
+}
+
+.chat-filter {
+    display: flex;
+    margin-left: 0.4rem;
+    margin-top: 0.4rem;
+    padding-top: 1rem;
+    margin-bottom: 0.4rem;
+    border-radius: 4px;
+    justify-content: left;
+}
+
+.chat-filter ul {
+    list-style-type: none;
+    align-content: center;
+    user-select: none;
+    padding: 0.3rem 0;
+}
+
+.chat-filter ul li {
+    display: inline;
+    color: #fff;
+    background-color: #7BC4BA;
+    padding: 0.8rem 2rem;
+    border-radius: 7px;
+    margin: 0.4rem 1rem;
+}
+
+.chat-filter ul li:hover {
+    cursor: pointer;
+}
+
+.chat-filter ul li.selected {
+    background-color: #5A9E95;
+}
+
+.chat-filter-icon {
+    display: flex;
+    padding-top: 1rem;
+    align-items: center;
+    color: #757575;
+}
+
+.chat-filter-icon span {
+    margin-left: 0.3rem;
 }
 </style>

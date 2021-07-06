@@ -26,7 +26,7 @@
                 <span class="title">Anotações</span>
                 <ul v-if="activeChat.customProperties">
                     <li :key="value.key" v-for="(value, name) in activeChat.customProperties">
-                        <div class="col-12 chat-custom-properties" v-if="name !== 'initialized'">
+                        <div class="col-12 chat-custom-properties" v-if="name !== 'currentOperator'">
                             <span class="col-5 p-0 mr-2" type="text">{{name}}:</span>
                             <span class="col-5 p-0" type="text">{{value}}</span>
                             <button @click="deleteProperty(name)" class="col-2 p-0"></button>

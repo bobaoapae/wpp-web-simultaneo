@@ -151,7 +151,8 @@ export default {
             time: 0,
             interval: null,
             bindToOperator: true,
-            filteredQuickReplies: []
+            filteredQuickReplies: [],
+            canBindToOperator: false
         };
     },
     mounted () {
@@ -175,12 +176,17 @@ export default {
             }
         },
         'chat': function (val) {
+            this.checkCurrentOperator();
             this.bindToOperator = true;
             this.preventOverrideRestore = true;
             this.$refs.input.innerHTML = this.chat.htmlInput;
             this.$refs.input.focus();
             this.preventOverrideRestore = false;
             this.savePosition();
+        },
+        'chat.customProperties': function (val) {
+            console.log(this.user.uuid, val.currentOperator);
+            this.canBindToOperator = !val.currentOperator || val.currentOperator !== this.user.uuid;
         }
 
     },
@@ -205,10 +211,6 @@ export default {
             return time;
         },
 
-        canBindToOperator () {
-            return false;
-        },
-
         showSelectMsgs () {
             return this.selectMsgs && this.selectMsgs.show;
         },
@@ -227,7 +229,7 @@ export default {
         }
     },
     methods: {
-        ...mapActions(['uploadFile']),
+        ...mapActions(['uploadFile', 'getCurrentOperator', 'changeCustomPropertyChat', 'setCurrentOperator']),
         ...mapMutations(['SET_SELECT_MSGS', 'SET_SELECT_CHATS']),
 
         toggleRecording () {
@@ -293,6 +295,9 @@ export default {
         },
 
         handleSendMessage () {
+            if (this.canBindToOperator && this.bindToOperator) {
+                this.setCurrentOperator({ chat: this.chat });
+            }
             this.chat.buildAndSendMessage();
             this.$refs.input.innerHTML = '';
         },
@@ -415,6 +420,13 @@ export default {
             });
 
             return this.$options.filters.capitalize(msg);
+        },
+
+        async checkCurrentOperator () {
+            let currentOperatorProperty = await this.getCurrentOperator({ chatId: this.chat.id });
+            if (currentOperatorProperty) {
+                await this.changeCustomPropertyChat(currentOperatorProperty);
+            }
         }
     }
 };
