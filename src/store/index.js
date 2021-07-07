@@ -8,6 +8,7 @@ import api from '@/api';
 import randomColor from 'random-color';
 import WebSocketWorker from 'worker-loader!@/webSocketWorker';
 import throttledQueue from 'throttled-queue';
+import pako from 'pako';
 
 Vue.use(Vuex);
 
@@ -252,7 +253,17 @@ const store = new Vuex.Store({
                             let frames = wsEvent.frames.sort((a, b) => a.frameId - b.frameId);
                             let response = '';
                             for (let x = 0; x < frames.length; x++) {
-                                response += frames[x].response;
+                                let data = frames[x].response;
+                                if (frames[x].compressionAlgorithm) {
+                                    console.log('Compressed::', data.length);
+                                    let compressData = atob(data);
+                                    compressData = compressData.split('').map(function (e) {
+                                        return e.charCodeAt(0);
+                                    });
+                                    data = new TextDecoder('utf-8').decode(pako.inflate(new Uint8Array(compressData)));
+                                    console.log('Decompressed::', data.length);
+                                }
+                                response += data;
                             }
                             try {
                                 response = JSON.parse(response);
