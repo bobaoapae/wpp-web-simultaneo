@@ -5,34 +5,40 @@
                    @keydown.exact.esc="handleEscPress" v-debounce:200ms.lock="handleInput"/>
         </div>
 
-        <div class="box-list-group">
-            <div class="chat-filter-container">
-                <div class="chat-filter">
-                    <ul>
-                        <li :class="{'selected': showOnlyMyChats}" @click="handleClickFilterMyChats">Minhas
-                            ({{ myChatsUnread }})
-                        </li>
-                        <li :class="{'selected': !showOnlyMyChats}" @click="handleClickFilterAllChats">Todas
-                            ({{ allChatsUnread }})
-                        </li>
-                    </ul>
-                </div>
-                <div class="chat-filter-icon">
-                    <img width="12" src="@/assets/images/filter-icon.svg"/>
-                    <span>Filtros</span>
-                </div>
+        <div class="chat-filter-container">
+            <div class="chat-filter">
+                <ul>
+                    <li :class="{'selected': showOnlyMyChats}" @click="handleClickFilterMyChats">Minhas
+                        ({{ myChatsUnread }})
+                    </li>
+                    <li :class="{'selected': !showOnlyMyChats}" @click="handleClickFilterAllChats">Todas
+                        ({{ allChatsUnread }})
+                    </li>
+                </ul>
             </div>
-            <!-- TODO: implementar vue virtual scroll -->
-            <ul class="list-group">
+            <div class="chat-filter-icon">
+                <img width="12" src="@/assets/images/filter-icon.svg"/>
+                <span>Filtros</span>
+            </div>
+        </div>
+
+        <div class="box-list-group">
+            <RecycleScroller
+                :key="recycleScrollerKey"
+                class="scroller"
+                :items="chatsFiltered"
+                :item-size="73"
+                key-field="id"
+                v-slot="{ item }"
+            >
                 <li
-                    :class="{ active : chat === activeChat }"
-                    :key="chat.id"
+                    :class="{ active : item === activeChat }"
+                    :key="item.id"
                     class="list-group-item d-flex"
-                    v-for="chat in chatsFiltered"
                 >
-                    <ChatRow :chat="chat"/>
+                    <ChatRow :chat="item"/>
                 </li>
-            </ul>
+            </RecycleScroller>
         </div>
     </div>
 </template>
@@ -40,11 +46,13 @@
 <script>
 import { mapActions, mapState } from 'vuex';
 import ChatRow from './chatRow/ChatRow';
+import { RecycleScroller } from 'vue-virtual-scroller';
 
 export default {
     name: 'ChatList',
     components: {
-        ChatRow
+        ChatRow,
+        RecycleScroller
     },
     data () {
         return {
@@ -81,6 +89,10 @@ export default {
 
         allChatsUnread () {
             return this.chats.filter(value => value.unreadCount !== 0).length;
+        },
+
+        recycleScrollerKey () {
+            return this.showOnlyMyChats + this.inputFilter;
         }
     },
     methods: {
@@ -107,7 +119,7 @@ export default {
 
 <style scoped>
 .scroller {
-    max-height: calc(100vh - 147px);
+    max-height: calc(100vh - 234px);
 }
 
 .active {
@@ -161,7 +173,7 @@ export default {
 
 @media screen and (min-width: 1441px) {
     .box-list-group {
-        max-height: calc(100vh - 147px);
+        max-height: calc(100vh - 234px);
         overflow-y: scroll;
         overflow-x: hidden;
     }
