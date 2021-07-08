@@ -255,13 +255,11 @@ const store = new Vuex.Store({
                             for (let x = 0; x < frames.length; x++) {
                                 let data = frames[x].response;
                                 if (frames[x].compressionAlgorithm) {
-                                    console.log('Compressed::', data.length);
                                     let compressData = atob(data);
                                     compressData = compressData.split('').map(function (e) {
                                         return e.charCodeAt(0);
                                     });
                                     data = new TextDecoder('utf-8').decode(pako.inflate(new Uint8Array(compressData)));
-                                    console.log('Decompressed::', data.length);
                                 }
                                 response += data;
                             }
