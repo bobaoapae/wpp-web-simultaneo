@@ -185,7 +185,6 @@ export default {
             this.savePosition();
         },
         'chat.customProperties': function (val) {
-            console.log(this.user.uuid, val.currentOperator);
             this.canBindToOperator = !val.currentOperator || val.currentOperator !== this.user.uuid;
         }
 
@@ -295,7 +294,7 @@ export default {
         },
 
         handleSendMessage () {
-            if (this.canBindToOperator && this.bindToOperator) {
+            if (this.user.isOperator && this.canBindToOperator && this.bindToOperator) {
                 this.setCurrentOperator({ chat: this.chat });
             }
             this.chat.buildAndSendMessage();
