@@ -897,7 +897,7 @@ const store = new Vuex.Store({
         },
 
         getGroupInviteInfo (context, payload) {
-            return context.dispatch('sendWsMessage', { event: 'getGroupInviteInfoHandler', payload: payload.link });
+            return context.dispatch('sendWsMessage', { event: 'getGroupInviteInfo', payload: payload.link });
         },
 
         /*
