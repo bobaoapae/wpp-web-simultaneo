@@ -247,32 +247,7 @@ const store = new Vuex.Store({
             if (wsEvent) {
                 let webSocketResponse = JSON.parse(payload.data);
                 if (webSocketResponse.status === 200 || webSocketResponse.status === 201) {
-                    if (webSocketResponse.frameId) {
-                        wsEvent.frames.push(webSocketResponse);
-                        if (wsEvent.frames.length === webSocketResponse.qtdFrames) {
-                            let frames = wsEvent.frames.sort((a, b) => a.frameId - b.frameId);
-                            let response = '';
-                            for (let x = 0; x < frames.length; x++) {
-                                let data = frames[x].response;
-                                if (frames[x].compressionAlgorithm) {
-                                    let compressData = atob(data);
-                                    compressData = compressData.split('').map(function (e) {
-                                        return e.charCodeAt(0);
-                                    });
-                                    data = new TextDecoder('utf-8').decode(pako.inflate(new Uint8Array(compressData)));
-                                }
-                                response += data;
-                            }
-                            try {
-                                response = JSON.parse(response);
-                            } catch (e) {
-                                console.log(e);
-                            }
-                            wsEvent.resolve(response);
-                        }
-                    } else {
-                        wsEvent.resolve(webSocketResponse.response);
-                    }
+                    wsEvent.resolve(webSocketResponse.response);
                 } else {
                     wsEvent.reject(webSocketResponse);
                 }
@@ -392,7 +367,11 @@ const store = new Vuex.Store({
                         break;
                     }
                     case 'ws-message': {
-                        let payload = data.data;
+                        let compressData = atob(data.data);
+                        compressData = compressData.split('').map(function (e) {
+                            return e.charCodeAt(0);
+                        });
+                        let payload = new TextDecoder('utf-8').decode(pako.inflate(new Uint8Array(compressData)));
                         let eventOrTag = data.cmd;
                         switch (eventOrTag) {
                             case 'need-qrcode': {
@@ -503,7 +482,13 @@ const store = new Vuex.Store({
                                 const r = JSON.parse(payload);
 
                                 let funcao = async () => {
-                                    await context.dispatch('removeMsgFromChat', r);
+                                    if (Array.isArray(r)) {
+                                        for (const msg of r) {
+                                            await context.dispatch('removeMsgFromChat', msg);
+                                        }
+                                    } else {
+                                        await context.dispatch('removeMsgFromChat', r);
+                                    }
                                 };
 
                                 if (context.state.isLoadingChat) {
@@ -519,7 +504,13 @@ const store = new Vuex.Store({
                                 const r = JSON.parse(payload);
 
                                 let funcao = async () => {
-                                    await context.dispatch('addNewMsgInChat', r);
+                                    if (Array.isArray(r)) {
+                                        for (const msg of r) {
+                                            await context.dispatch('addNewMsgInChat', msg);
+                                        }
+                                    } else {
+                                        await context.dispatch('addNewMsgInChat', r);
+                                    }
                                 };
 
                                 if (context.state.isLoadingChat) {
@@ -535,7 +526,13 @@ const store = new Vuex.Store({
                                 const r = JSON.parse(payload);
 
                                 let funcao = async () => {
-                                    await context.dispatch('updateMsg', r);
+                                    if (Array.isArray(r)) {
+                                        for (const msg of r) {
+                                            await context.dispatch('updateMsg', msg);
+                                        }
+                                    } else {
+                                        await context.dispatch('updateMsg', r);
+                                    }
                                 };
 
                                 if (context.state.isLoadingChat) {

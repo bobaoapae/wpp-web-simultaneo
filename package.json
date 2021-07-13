@@ -22,7 +22,7 @@
     "html-escaper": "^3.0.3",
     "mapbox-gl": "^2.2.0",
     "opus-media-recorder": "^0.8.0",
-    "pako": "^1.0.10",
+    "pako": "^1.0.11",
     "random-color": "^1.0.1",
     "throttled-queue": "^1.0.7",
     "uniqid": "^5.3.0",
