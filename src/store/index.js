@@ -247,7 +247,25 @@ const store = new Vuex.Store({
             if (wsEvent) {
                 let webSocketResponse = JSON.parse(payload.data);
                 if (webSocketResponse.status === 200 || webSocketResponse.status === 201) {
-                    wsEvent.resolve(webSocketResponse.response);
+                    if (webSocketResponse.frameId) {
+                        wsEvent.frames.push(webSocketResponse);
+                        if (wsEvent.frames.length === webSocketResponse.qtdFrames) {
+                            let frames = wsEvent.frames.sort((a, b) => a.frameId - b.frameId);
+                            let response = '';
+                            for (let x = 0; x < frames.length; x++) {
+                                let data = frames[x].response;
+                                response += data;
+                            }
+                            try {
+                                response = JSON.parse(response);
+                            } catch (e) {
+                                console.log(e);
+                            }
+                            wsEvent.resolve(response);
+                        }
+                    } else {
+                        wsEvent.resolve(webSocketResponse.response);
+                    }
                 } else {
                     wsEvent.reject(webSocketResponse);
                 }
