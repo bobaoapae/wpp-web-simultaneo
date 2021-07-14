@@ -39,7 +39,8 @@ export default {
                     await Promise.all(promises);
                     for (let x = 0; x < this.msg.mentionedJidList.length; x++) {
                         let chat = results[this.msg.mentionedJidList[x]];
-                        let name = chat.contact.formattedName || chat.contact.verifiedName || chat.contact.pushname;
+                        let contact = await chat.contact();
+                        let name = contact.formattedName || contact.verifiedName || contact.pushname;
                         caption = caption.replace('@' + this.msg.mentionedJidList[x].split('@')[0], `<span class='mention-symbol'>@</span><span class='btn-link' dir="ltr">${name}</span>`);
                     }
                 }
@@ -63,7 +64,8 @@ export default {
                     await Promise.all(promises);
                     for (let x = 0; x < this.msg.mentionedJidList.length; x++) {
                         let chat = results[this.msg.mentionedJidList[x]];
-                        let name = chat.contact.formattedName || chat.contact.verifiedName || chat.contact.pushname;
+                        let contact = await chat.contact();
+                        let name = contact.formattedName || contact.verifiedName || contact.pushname;
                         body = body.replace('@' + this.msg.mentionedJidList[x].split('@')[0], `<span class='mention-symbol'>@</span><span class='btn-link' dir="ltr">${name}</span>`);
                     }
                 }

@@ -428,9 +428,9 @@ const store = new Vuex.Store({
                                     let init = performance.now();
                                     context.dispatch('getAllChats').then(async chats => {
                                         console.log('chats::', chats);
-                                        console.log('time get all chats::', performance.now() - init);
                                         await context.dispatch('handleSetChats', chats);
                                         await context.dispatch('sortChatsByTime');
+                                        console.log('time get all chats::', performance.now() - init);
                                         for await (let func of context.state.poolContext) {
                                             func();
                                         }
@@ -1031,6 +1031,13 @@ const store = new Vuex.Store({
                         }
                     }
                 }, 150);
+                el.contact = async function () {
+                    if (this.__x_contact) {
+                        return this.__x_contact;
+                    }
+                    this.__x_contact = await context.dispatch('findContactFromId', { id: el.id });
+                    return this.__x_contact;
+                };
                 el.addMsg = function (msg) {
                     if (el.__x_intervalPool === 0) {
                         el.__x_intervalPoolCreate();
