@@ -10,9 +10,9 @@
      onDone: onDone,
      x: false,
      y: true
- }">
+ }" v-if="senderObj">
         <div class="box-content">
-            <Author :color="color" :senderObj="quotedMsg.senderObj"/>
+            <Author :color="color" :senderObj="senderObj"/>
             <QuotedMsgContent :msg="quotedMsg"/>
         </div>
 
@@ -24,7 +24,7 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 import Author from './author/Author';
 import QuotedMsgContent from './quotedMsgContent/quotedMsgContent';
 import QuotedMedia from './quotedMedia/QuotedMedia';
@@ -42,15 +42,6 @@ export default {
     computed: {
         ...mapState(['self', 'activeChat']),
 
-        color () {
-            if (this.activeChat.isGroup && this.quotedMsg.senderObj.id !== this.self.id) {
-                return this.activeChat.getColor(this.quotedMsg.senderObj.id);
-            } else if (this.quotedMsg.senderObj.id !== this.self.id) {
-                return '#74cff8';
-            }
-            return '#35cd96';
-        },
-
         encodedQuotedMsgId () {
             return this.quotedMsg.id._serialized.replace(/[^\w\s]/gi, '').replace(/[_]/gi, '');
         },
@@ -62,6 +53,30 @@ export default {
                 }
             }
             return '';
+        }
+    },
+    asyncComputed: {
+        senderObj: {
+            async get () {
+                return this.quotedMsg.senderObj();
+            },
+            default () {
+                return false;
+            }
+        },
+        color: {
+            async get () {
+                let senderObj = await this.quotedMsg.senderObj();
+                if (this.activeChat.isGroup && senderObj.id !== this.self.id) {
+                    return this.activeChat.getColor(senderObj.id);
+                } else if (senderObj.id !== this.self.id) {
+                    return '#74cff8';
+                }
+                return '#35cd96';
+            },
+            default () {
+                return false;
+            }
         }
     },
     methods: {

@@ -14,11 +14,11 @@
             </span>
 
             <span v-else-if=" isAdd ">
-                {{ isMe }} adicionou {{ formatedNumbers }}
+                {{ isMe }} adicionou {{ formattedNumbers }}
             </span>
 
             <span v-else-if=" isRemove ">
-                {{ isMe }} removeu {{ formatedNumbers }}
+                {{ isMe }} removeu {{ formattedNumbers }}
             </span>
 
             <span v-else-if=" isPromote ">
@@ -30,11 +30,11 @@
             </span>
 
             <span v-else-if=" isLeave ">
-                {{ formatedNumbers }} saiu
+                {{ formattedNumbers }} saiu
             </span>
 
             <span v-else-if=" isInvite ">
-                {{ formatedNumbers }} entrou usando o link de convite deste grupo
+                {{ formattedNumbers }} entrou usando o link de convite deste grupo
             </span>
         </div>
     </div>
@@ -57,17 +57,6 @@ export default {
     },
     computed: {
         ...mapState(['activeChat', 'self']),
-
-        isMe () {
-            if (this.msg.senderObj && this.msg.senderObj.id === this.self.id) {
-                return 'Você';
-            } else if (this.msg.senderObj && this.msg.senderObj.formattedName) {
-                return this.msg.senderObj.formattedName;
-            } else if (this.msg.senderObj) {
-                return '+' + this.msg.senderObj.id.replace('@c.us', '');
-            }
-            return 'Você';
-        },
 
         isEncrypt () {
             return this.msg.type === 'e2e_notification' && this.msg.subtype === 'encrypt';
@@ -101,7 +90,7 @@ export default {
         ...mapActions(['findFormattedNameFromId'])
     },
     asyncComputed: {
-        formatedNumbers: {
+        formattedNumbers: {
             async get () {
                 if (this.msg.recipients && this.msg.recipients.length >= 1) {
                     let promises = this.msg.recipients.map((e) => {
@@ -116,6 +105,22 @@ export default {
                 if (this.msg.recipients) {
                     return this.msg.recipients.join(', ');
                 }
+                return '';
+            }
+        },
+        isMe: {
+            async get () {
+                let senderObj = await this.msg.senderObj();
+                if (senderObj && senderObj.id === this.self.id) {
+                    return 'Você';
+                } else if (senderObj && senderObj.formattedName) {
+                    return senderObj.formattedName;
+                } else if (senderObj) {
+                    return '+' + senderObj.id.replace('@c.us', '');
+                }
+                return 'Você';
+            },
+            default () {
                 return '';
             }
         }

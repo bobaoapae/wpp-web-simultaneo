@@ -2,7 +2,7 @@
     <div class="message-audio" :class="{'played' : msg.ack === 4}" v-b-visible.once="onVisible">
         <div class="audio-container">
             <div class="audio-picture">
-                <Picture :id="msg.senderObj.id" v-if="msg.isPtt"/>
+                <Picture :id="msg.author ? msg.author : msg.from" v-if="msg.isPtt"/>
                 <img src="@/assets/images/wpp-icon-audio.svg" v-else/>
             </div>
             <div class="audio-wrapper">

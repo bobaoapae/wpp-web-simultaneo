@@ -3,8 +3,8 @@
         <template v-if="chat.lastMsg">
             <MessageIconStatus :ack="chat.lastMsg.ack" class="icon-status" v-if="chat.lastMsg.id.fromMe"/>
 
-            <span :inner-html.prop="`${chat.lastMsg.senderObj.formattedName}: ` | emojify"
-                  v-if="chat.isGroup && chat.lastMsg && chat.lastMsg.senderObj && !chat.lastMsg.id.fromMe"></span>
+            <span :inner-html.prop="`${formattedNameLastMsg}: ` | emojify"
+                  v-if="chat.isGroup && formattedNameLastMsg"></span>
 
             <MessageBody :lastMsg="chat.lastMsg"/>
         </template>
@@ -21,6 +21,17 @@ export default {
     components: {
         MessageIconStatus,
         MessageBody
+    },
+    asyncComputed: {
+        formattedNameLastMsg: {
+            async get () {
+                let senderObj = await this.chat.lastMsg.senderObj();
+                return senderObj.formattedName;
+            },
+            default () {
+                return false;
+            }
+        }
     },
     props: {
         chat: {

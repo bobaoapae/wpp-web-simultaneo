@@ -36,15 +36,15 @@
                 <!-- Identificador de mensagens no grupo -->
                 <div class="identify-msg-group pb-0 pt-2 pl-2 pr-2"
                      v-if="activeChat.isGroup && !msg.id.fromMe && showTail">
-                    <div :style="{color: activeChat.getColor(msg.senderObj.id)}" @click="handleClick" class="btn-link"
-                         v-if="msg.senderObj.name">
-                        {{msg.senderObj.name | emojify}}
+                    <div :style="{color: colorMsgGroup}" @click="handleClick" class="btn-link"
+                         v-if="name">
+                        {{name | emojify}}
                     </div>
 
                     <div class="d-flex justify-content-between" v-else>
-                    <span :style="{color: activeChat.getColor(msg.senderObj.id)}" @click="handleClick"
-                          class="btn-link number">{{msg.senderObj.formattedName | emojify}}</span>
-                        <span class="name">~{{msg.senderObj.pushname}}</span>
+                    <span :style="{color: colorMsgGroup}" @click="handleClick"
+                          class="btn-link number">{{formattedName | emojify}}</span>
+                        <span class="name">~{{pushName}}</span>
                     </div>
                 </div>
 
@@ -82,6 +82,7 @@ import QuotedMsg from '../quotedMsg/QuotedMsg';
 import MessageRevoked from '../messageRevoked/MessageRevoked';
 import MessageLocation from '../messageLocation/MessageLocation';
 import MessageContact from '../messageContact/MessageContact';
+import randomColor from 'random-color';
 
 export default {
     name: 'MessageContainer',
@@ -149,16 +150,63 @@ export default {
     computed: {
         ...mapState(['activeChat', 'user', 'selectMsgs']),
 
-        showTail () {
-            return !this.previousMsg || !this.msg.senderObj || !this.previousMsg.senderObj || (this.previousMsg.isSticker && !this.msg.isSticker) || this.msg.senderObj.id !== this.previousMsg.senderObj.id || this.msg.hasQuotedMsg || this.msg.isSticker || this.msg.fomattedDate !== this.previousMsg.fomattedDate;
-        },
-
         showSelectMsgs () {
             return this.selectMsgs && this.selectMsgs.show;
         },
 
         isMsgSelected () {
             return this.selectMsgs.msgs.includes(this.msg);
+        }
+    },
+    asyncComputed: {
+        colorMsgGroup: {
+            async get () {
+                if (this.activeChat.isGroup) {
+                    let senderObj = await this.msg.senderObj();
+                    return this.activeChat.getColor(senderObj.id);
+                }
+                return false;
+            },
+            default () {
+                return randomColor().hexString();
+            }
+        },
+        name: {
+            async get () {
+                let senderObj = await this.msg.senderObj();
+                return senderObj.name;
+            },
+            default () {
+                return '';
+            }
+        },
+        pushName: {
+            async get () {
+                let senderObj = await this.msg.senderObj();
+                return senderObj.pushname;
+            },
+            default () {
+                return '';
+            }
+        },
+        formattedName: {
+            async get () {
+                let senderObj = await this.msg.senderObj();
+                return senderObj.formattedName;
+            },
+            default () {
+                return '';
+            }
+        },
+        showTail: {
+            async get () {
+                let senderObj = await this.msg.senderObj();
+                let previousMsgSenderObj = this.previousMsg ? await this.previousMsg.senderObj() : false;
+                return !this.previousMsg || !senderObj || !previousMsgSenderObj || (this.previousMsg.isSticker && !this.msg.isSticker) || senderObj.id !== previousMsgSenderObj.id || this.msg.hasQuotedMsg || this.msg.isSticker || this.msg.fomattedDate !== this.previousMsg.fomattedDate;
+            },
+            default () {
+                return false;
+            }
         }
     },
     methods: {

@@ -35,7 +35,7 @@ export default {
         ...mapState(['contacts']),
 
         contactsFiltered () {
-            let contacts = this.contacts;
+            let contacts = this.contacts.filter(value => value.isMyContact);
 
             if (this.filter !== '') {
                 contacts = contacts.filter(contact => {

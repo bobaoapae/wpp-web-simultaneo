@@ -26,6 +26,8 @@ const store = new Vuex.Store({
         contacts: [],
         findChats: {},
         findChatsByNumber: {},
+        findContacts: {},
+        findContactsByNumber: {},
         chats: [],
         myChats: [],
         quickReplies: [],
@@ -221,6 +223,10 @@ const store = new Vuex.Store({
             state.chats.push(payload);
         },
 
+        ADD_NEW_CONTACT (state, payload) {
+            state.contacts.push(payload);
+        },
+
         REMOVE_CHAT (state, payload) {
             state.chats = state.chats.filter(e => e.id !== payload.id);
             if (state.activeChat && state.activeChat.id === payload.id) {
@@ -345,6 +351,13 @@ const store = new Vuex.Store({
             payload.promise.finally(() => {
                 delete state.findChatsByNumber[payload.id];
             });
+        },
+
+        ADD_FIND_CONTACT (state, payload) {
+            state.findContacts[payload.id] = payload;
+            payload.promise.finally(() => {
+                delete state.findContacts[payload.id];
+            });
         }
     },
 
@@ -429,6 +442,7 @@ const store = new Vuex.Store({
                                     });
 
                                     context.dispatch('getAllContacts').then(contacts => {
+                                        console.log('contacts::', contacts);
                                         context.commit('SET_CONTACTS', contacts);
                                     });
 
@@ -617,9 +631,9 @@ const store = new Vuex.Store({
 
         findFormattedNameFromId (context, payload) {
             return new Promise((resolve, reject) => {
-                context.dispatch('findChatFromId', payload).then(el => {
-                    if (el && el.contact && el.contact.formattedName) {
-                        resolve(el.contact.formattedName);
+                context.dispatch('findContactFromId', payload).then(el => {
+                    if (el && el.formattedName) {
+                        resolve(el.formattedName);
                     } else {
                         resolve('+' + (payload.id.split('@')[0]));
                     }
@@ -645,6 +659,7 @@ const store = new Vuex.Store({
                         });
                         context.commit('ADD_FIND_CHAT', { id: payload.id, promise: findChat });
                     } else {
+                        console.log('findChat cache::', findChat);
                         findChat = findChat.promise;
                     }
                     findChat.then(value => resolve(value)).catch(reason => reject(reason));
@@ -675,6 +690,31 @@ const store = new Vuex.Store({
                     findChat.then(value => resolve(value)).catch(reason => reject(reason));
                 } else {
                     resolve(chat);
+                }
+            });
+        },
+
+        findContactFromId (context, payload) {
+            return new Promise((resolve, reject) => {
+                const contact = context.state.contacts.find(contact => contact.id === payload.id);
+                let findContact = context.state.findContacts[payload.id];
+                if (!contact) {
+                    if (!findContact) {
+                        // eslint-disable-next-line promise/param-names
+                        findContact = new Promise((resolve1, reject1) => {
+                            context.dispatch('sendWsMessage', { event: 'findContact', payload: payload.id }).then(chat => {
+                                context.dispatch('newContact', chat).then((contact) => {
+                                    resolve1(contact);
+                                });
+                            }).catch(reason => reject1(reason));
+                        });
+                        context.commit('ADD_FIND_CONTACT', { id: payload.id, promise: findContact });
+                    } else {
+                        findContact = findContact.promise;
+                    }
+                    findContact.then(value => resolve(value)).catch(reason => reject(reason));
+                } else {
+                    resolve(contact);
                 }
             });
         },
@@ -933,13 +973,26 @@ const store = new Vuex.Store({
             return chat;
         },
 
-        async setChatProperties (context, el) {
-            if (!Array.isArray(el)) {
-                await setProperties(el);
+        async newContact (context, payload) {
+            let contact = context.state.chats.find((element) => {
+                return element.id === payload.id;
+            });
+
+            if (!contact) {
+                contact = payload;
+                await context.commit('ADD_NEW_CONTACT', payload);
+            }
+
+            return contact;
+        },
+
+        async setChatProperties (context, payload) {
+            if (!Array.isArray(payload)) {
+                await setProperties(payload);
             } else {
-                await Promise.all(el.map(el => {
-                    return setProperties(el);
-                }));
+                for await (let chat of payload) {
+                    await setProperties(chat);
+                }
             }
 
             async function setProperties (el) {
@@ -954,13 +1007,13 @@ const store = new Vuex.Store({
                 el.__x_msgsIndex = 1;
                 el.__x_poolAddMsgs = [];
                 el.__x_intervalPool = 0;
-                el.__x_intervalPoolCreate = () => setInterval(() => {
+                el.__x_intervalPoolCreate = () => setInterval(async () => {
                     let msgs = [];
                     while (el.__x_poolAddMsgs.length) {
                         msgs.push(el.__x_poolAddMsgs.pop());
                     }
                     if (msgs && msgs.length > 0) {
-                        context.dispatch('setMsgsProperties', msgs);
+                        await context.dispatch('setMsgsProperties', msgs);
                         el.msgs.push(...msgs);
                         el.msgs.sort(function (a, b) {
                             if (a.t > b.t) {
@@ -971,10 +1024,10 @@ const store = new Vuex.Store({
                             }
                             return 0;
                         });
-                        context.dispatch('sortChatsByTime');
+                        await context.dispatch('sortChatsByTime');
                         let newMsgIn = msgs.find(value => !value.id.fromMe && value.isNewMsg);
                         if (newMsgIn && el.muteExpiration === 0 && (el !== context.state.activeChat || !context.state.visible)) {
-                            context.dispatch('playNewMsgNotification');
+                            await context.dispatch('playNewMsgNotification');
                         }
                     }
                 }, 150);
@@ -1053,7 +1106,7 @@ const store = new Vuex.Store({
                 el.subscribePresence = function () {
                     if (!this.presenceSubscribed) {
                         return context.dispatch('subscribePresence', { chatId: this.id }).then(value => {
-                            this.isSubscribeToPresence = true;
+                            this.presenceSubscribed = true;
                         });
                     }
                 };
@@ -1155,16 +1208,16 @@ const store = new Vuex.Store({
             }
         },
 
-        setMsgsProperties (context, payload) {
+        async setMsgsProperties (context, payload) {
             if (!Array.isArray(payload)) {
-                setProperties(payload);
+                await setProperties(payload);
             } else {
-                payload.forEach(msg => {
-                    setProperties(msg);
-                });
+                for await (let msg of payload) {
+                    await setProperties(msg);
+                }
             }
 
-            function setProperties (msg) {
+            async function setProperties (msg) {
                 Object.defineProperty(msg, 'isChat', {
                     get () {
                         return this.type === 'chat';
@@ -1281,8 +1334,15 @@ const store = new Vuex.Store({
                         return text;
                     }
                 });
+                msg.senderObj = async function () {
+                    if (this.__x_senderObj) {
+                        return this.__x_senderObj;
+                    }
+                    this.__x_senderObj = await context.dispatch('findContactFromId', { id: this.author ? this.author : this.from });
+                    return this.__x_senderObj;
+                };
                 if (msg.hasQuotedMsg) {
-                    setProperties(msg.quotedMsgObject);
+                    await setProperties(msg.quotedMsgObject);
                 }
                 if (msg.isVcard) {
                     msg.vCard = vCardParse.parse(msg.body);
