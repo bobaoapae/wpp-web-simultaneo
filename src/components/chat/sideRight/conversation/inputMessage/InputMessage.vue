@@ -285,11 +285,7 @@ export default {
         handleSendPtt (data) {
             let currentChat = this.chat;
             this.uploadFile(new File([data], new Date().getTime() + '.ptt', { type: data.type })).then(tag => {
-                let msg = {
-                    fileUUID: tag
-                };
-
-                currentChat.buildAndSendMessage(msg);
+                currentChat.buildAndSendMessage({ file: { uuid: tag, forceDocument: false } });
             });
         },
 
@@ -333,7 +329,7 @@ export default {
                 let currentChat = this.chat;
                 files.forEach(async file => {
                     let tag = await this.uploadFile(file);
-                    await currentChat.buildAndSendMessage({ fileUUID: tag });
+                    await currentChat.buildAndSendMessage({ file: { uuid: tag, forceDocument: false } });
                 });
             } else {
                 const textMsg = this.$options.filters.emojify(evt.clipboardData.getData('text'));

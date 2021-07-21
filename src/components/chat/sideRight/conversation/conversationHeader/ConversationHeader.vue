@@ -140,7 +140,7 @@ export default {
             let currentChat = this.chat;
             files.forEach(file => {
                 this.uploadFile(file).then(tag => {
-                    currentChat.buildAndSendMessage({ fileUUID: tag });
+                    currentChat.buildAndSendMessage({ file: { uuid: tag, forceDocument: false } });
                 }).catch(error => {
                     alert(`Upload File Error: ${error}`);
                     console.log('Upload Error::', error);

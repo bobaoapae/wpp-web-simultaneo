@@ -1055,14 +1055,14 @@ const store = new Vuex.Store({
                     if (!payload) {
                         payload = {};
                     }
-                    if (!payload.message) {
-                        payload.message = el.message;
+                    if (this.message && !payload.text) {
+                        payload.text = this.message;
                     }
-                    if (el.quotedMsg) {
+                    if (this.quotedMsg) {
                         payload.quotedMsg = el.quotedMsg.id._serialized;
                     }
-                    el.clearInputMessage();
-                    return el.sendMessage(payload);
+                    this.clearInputMessage();
+                    return this.sendMessage(payload);
                 };
                 el.sendMessage = function (payload) {
                     Object.assign(payload, {
