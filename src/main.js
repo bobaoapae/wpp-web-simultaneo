@@ -16,6 +16,8 @@ import VueTelInput from 'vue-tel-input';
 import { msg } from '@/helper.js';
 import vueDebounce from 'vue-debounce';
 import VueVirtualScroller from 'vue-virtual-scroller';
+import VueSweetalert2 from 'vue-sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 
 Vue.config.productionTip = false;
 
@@ -26,6 +28,7 @@ Vue.use(VueScrollTo);
 Vue.use(VueTelInput);
 Vue.use(vueDebounce);
 Vue.use(VueVirtualScroller);
+Vue.use(VueSweetalert2);
 
 Vue.filter('uppercase', function (value) {
     if (!value) return '';

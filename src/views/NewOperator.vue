@@ -9,17 +9,17 @@
 
                     <input id="name" placeholder="Nome" required type="text" v-model="form.name" />
 
-                    <input id="login" placeholder="Login" required type="text" v-model="form.login" minlength="5" maxlength="40" />
+                    <input id="login" placeholder="Login" required type="text" v-model="form.login" minlength="4" maxlength="40" />
 
                     <input id="password" placeholder="Senha" required type="password" v-model="form.password" />
-
-                    <span class="error" v-if="error.active">
-                        {{error.msg}}
-                    </span>
 
                     <button :disabled="btn.loading" type="submit">
                         {{btn.label}}
                     </button>
+
+                    <div class="text-center">
+                        <router-link class="text-center" to="/">Voltar</router-link>
+                    </div>
 
                     <hr/>
                 </form>
@@ -65,8 +65,9 @@ export default {
                 .then((r) => {
                     this.btn.label = 'ENVIAR';
                     this.btn.loading = false;
-                    alert('Operador Criado com Sucesso!');
-                    this.$router.push('/');
+                    this.$swal({ title: `Operador ${r.data.nome} criado com sucesso`, html: `Utilize o login <strong>${r.data.login}</strong> e senha <strong>${this.form.password}</strong> para entrar no sistema`, icon: 'success', heightAuto: false }).then(result => {
+                        this.$router.push('/');
+                    });
                 })
                 .catch(r => {
                     let data = r.response.data;
@@ -79,6 +80,7 @@ export default {
                     } else {
                         this.error.msg = error;
                     }
+                    this.$swal({ title: 'Erro', text: this.error.msg, icon: 'error', heightAuto: false });
                 });
         }
     }

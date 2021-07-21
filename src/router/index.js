@@ -4,6 +4,7 @@ import Login from '@/views/Login';
 import Wpp from '@/views/Wpp';
 import ForgotPassword from '@/views/ForgotPassword';
 import NewOperator from '@/views/NewOperator';
+import ManageOperators from '@/views/ManageOperators';
 import ChangePassword from '@/views/ChangePassword';
 import ChangeNumber from '@/views/ChangeNumber';
 import SendMessageToNumber from '@/views/SendMessageToNumber';
@@ -45,6 +46,11 @@ const routes = [
         path: '/newoperator',
         name: 'new-operator',
         component: NewOperator
+    },
+    {
+        path: '/manageoperators',
+        name: 'manage-operators',
+        component: ManageOperators
     },
     {
         path: '/changepassword',

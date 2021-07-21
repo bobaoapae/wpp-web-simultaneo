@@ -3,11 +3,11 @@ module.exports = {
     env: {
         node: true
     },
-    'extends': [
+    extends: [
         'plugin:vue/essential',
         '@vue/standard'
     ],
-    'rules': {
+    rules: {
         'no-else-return': 'error',
         'no-multi-spaces': 'error',
         'no-whitespace-before-property': 'error',

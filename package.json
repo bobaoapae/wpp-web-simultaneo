@@ -33,6 +33,7 @@
     "vue-mapbox": "^0.4.1",
     "vue-router": "^3.5.2",
     "vue-scrollto": "^2.20.0",
+    "vue-sweetalert2": "^5.0.2",
     "vue-tel-input": "^5.5.0",
     "vue-virtual-scroller": "github:bobaoapae/vue-virtual-scroller#1.0.11",
     "vue-visibility-change": "^1.2.1",
