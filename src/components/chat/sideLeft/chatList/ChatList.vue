@@ -58,7 +58,7 @@ export default {
         return {
             active_el: null,
             inputFilter: '',
-            showOnlyMyChats: true
+            showOnlyMyChats: false
         };
     },
     async mounted () {

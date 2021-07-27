@@ -30,6 +30,10 @@
                                          v-if="user.canCreateOperator || user.superConfiguracao.operadorPodeExcluirMsg">
                             Apagar mensagem
                         </b-dropdown-item>
+                        <b-dropdown-item @click="handleClickDownload"
+                                         v-if="msg.isAudio || msg.isPtt">
+                            Download
+                        </b-dropdown-item>
                     </b-dropdown>
                 </div>
 
@@ -211,7 +215,7 @@ export default {
     },
     methods: {
         ...mapMutations(['SET_ACTIVE_CHAT', 'SET_SELECT_MSGS', 'TOGGLE_SELECT_MSG']),
-        ...mapActions(['findChatFromId']),
+        ...mapActions(['findChatFromId', 'downloadMedia']),
 
         handleHover (isHover) {
             this.showMenuIcon = isHover;
@@ -249,6 +253,23 @@ export default {
             if (this.selectMsgs.show) {
                 this.TOGGLE_SELECT_MSG({ msg: this.msg });
             }
+        },
+
+        handleClickDownload () {
+            this.downloadMedia({ id: this.msg.id._serialized, base64: false }).then(e => {
+                const element = document.createElement('a');
+                element.setAttribute('href', e);
+                element.toggleAttribute('download');
+
+                element.style.display = 'none';
+                document.body.appendChild(element);
+
+                element.click();
+
+                document.body.removeChild(element);
+            }).catch(reason => {
+                alert('Falha ao baixar o arquivo, atualize a pagina e tente novamente.');
+            });
         }
     }
 };
