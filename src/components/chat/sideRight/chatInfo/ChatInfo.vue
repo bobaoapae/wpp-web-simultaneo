@@ -21,35 +21,52 @@
                 </div>
             </div>
         </div>
+        <div class="box-wrapper" v-if="activeChat.customProperties && activeChat.customProperties.currentOperator" :key="activeChat.id">
+            <div class="box-current-user">
+                <span class="title">Operator Atribuido</span>
+                <span class="value">{{currentOperator}}</span>
+            </div>
+        </div>
         <div class="box-wrapper">
             <div class="box-chat-custom-properties">
                 <span class="title">Anotações</span>
-                <ul v-if="activeChat.customProperties">
+                <ul v-if="customProperties" :key="activeChat.id">
                     <li :key="value.key" v-for="(value, name) in activeChat.customProperties">
-                        <div class="col-12 chat-custom-properties" v-if="name !== 'currentOperator'">
+                        <div class="col-12 chat-custom-properties" v-if="name !== 'currentOperator' && name !== 'lastUserSendMessage'">
                             <span class="col-5 p-0 mr-2" type="text">{{name}}:</span>
                             <span class="col-5 p-0" type="text">{{value}}</span>
-                            <button @click="deleteProperty(name)" class="col-2 p-0"></button>
+                            <!--<button @click="deleteProperty(name)" class="col-2 p-0"></button>-->
                         </div>
                     </li>
                 </ul>
                 <div class="loading-properties" v-else>
-                    <LoadginSpinner/>
+                    <LoadingSpinner/>
                 </div>
+                <b-button class="btn btn-success" @click="addProperty">Adicionar Nova Anotação</b-button>
             </div>
         </div>
     </div>
 </template>
 
 <script>
-import { mapState } from 'vuex';
-import LoadginSpinner from '@/components/shared/loadingSpinner/LoadingSpinner';
+import { mapActions, mapState } from 'vuex';
+import api from '@/api';
+import LoadingSpinner from '@/components/shared/loadingSpinner/LoadingSpinner';
 import Picture from '@/components/shared/picture/Picture.vue';
 import PresenceChat from '@/components/shared/presenceChat/PresenceChat';
 
 export default {
     name: 'ChatInfo',
-    components: { Picture, LoadginSpinner, PresenceChat },
+    components: { Picture, LoadingSpinner, PresenceChat },
+    mounted () {
+        this.$root.$on('keyDown', (evt) => {
+            if (this.activeChat && this.activeChat.openChatInfo) {
+                if (evt.key === 'Escape') {
+                    this.handleClose();
+                }
+            }
+        });
+    },
     computed: {
         ...mapState(['activeChat']),
 
@@ -61,16 +78,25 @@ export default {
             return this.timeConverterCreated(this.activeChat.id.split('@')[0].split('-')[1]);
         }
     },
-    mounted () {
-        this.$root.$on('keyDown', (evt) => {
-            if (this.activeChat && this.activeChat.openChatInfo) {
-                if (evt.key === 'Escape') {
-                    this.handleClose();
-                }
+    asyncComputed: {
+        currentOperator: {
+            async get () {
+                let result = await api.get(`/api/users/${this.activeChat.customProperties.currentOperator}`);
+                return result.data.nome;
             }
-        });
+        },
+        customProperties: {
+            async get () {
+                let result = await this.getChatProperties({ chatId: this.activeChat.id });
+                for await (let property of result) {
+                    await this.changeCustomPropertyChat(property);
+                }
+                return !!result;
+            }
+        }
     },
     methods: {
+        ...mapActions(['addAnnotation', 'getChatProperties', 'changeCustomPropertyChat']),
         timeConverterPresence (unixTimeStamp) {
             let a = new Date(unixTimeStamp * 1000);
             let year = a.getFullYear();
@@ -139,6 +165,31 @@ export default {
 
         handleClose () {
             this.activeChat.openChatInfo = false;
+        },
+
+        async addProperty () {
+            let result = await this.$swal({
+                title: 'Adicionar Nova Anotação',
+                html:
+                    `
+                    <div class="box-create-annotation" style="display: flex;flex-direction: column">
+                        <label for="swal-input1">Nome</label><input id="swal-input1" class="swal2-input">
+                        <label for="swal-input2">Conteudo</label><textarea id="swal-input2" class="swal2-input"></textarea>
+                    </div>`,
+                preConfirm: () => {
+                    return {
+                        name: document.getElementById('swal-input1').value,
+                        value: document.getElementById('swal-input2').value
+                    };
+                },
+                showCancelButton: true,
+                confirmButtonText: 'Adicionar',
+                cancelButtonText: 'Cancelar',
+                icon: 'info',
+                focusConfirm: false,
+                heightAuto: false
+            });
+            if (result.value) { await this.addAnnotation({ chat: this.activeChat, name: result.value.name, value: result.value.value }); }
         }
     }
 };
@@ -199,6 +250,20 @@ export default {
     font-size: 14px;
     line-height: 20px;
     color: rgba(0, 0, 0, .45);
+}
+
+.box-current-user {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.box-current-user .title {
+    display: flex;
+}
+.box-current-user .value {
+    display: flex;
 }
 
 .box-chat-custom-properties ul {

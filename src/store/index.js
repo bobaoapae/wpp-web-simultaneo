@@ -783,12 +783,50 @@ const store = new Vuex.Store({
             return context.dispatch('addChatProperty', property);
         },
 
+        async addAnnotation (context, payload) {
+            let property = await context.dispatch('getChatProperty', { chatId: payload.chat.id, name: payload.name });
+            if (property) {
+                property.value = payload.value;
+                return context.dispatch('updateChatProperty', property);
+            }
+            property = {
+                whatsAppId: payload.chat.id,
+                key: payload.name,
+                value: payload.value
+            };
+            return context.dispatch('addChatProperty', property);
+        },
+
         addChatProperty (context, payload) {
             return api.post('/api/properties/chat', payload);
         },
 
         updateChatProperty (context, payload) {
             return api.put('/api/properties/chat', payload);
+        },
+
+        getChatProperty (context, payload) {
+            return api.get(`/api/properties/chat/${payload.chatId}/${payload.name}`).then(value => {
+                return value.data;
+            }).catch(reason => {
+                if (reason.response.status !== 404) {
+                    throw reason;
+                } else {
+                    return null;
+                }
+            });
+        },
+
+        getChatProperties (context, payload) {
+            return api.get(`/api/properties/chat/${payload.chatId}`).then(value => {
+                return value.data;
+            }).catch(reason => {
+                if (reason.response.status !== 404) {
+                    throw reason;
+                } else {
+                    return null;
+                }
+            });
         },
 
         getChatsWithProperty (context, payload) {
