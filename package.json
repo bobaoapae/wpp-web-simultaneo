@@ -20,7 +20,8 @@
     "fast-sort": "^3.0.2",
     "hacktimer": "^1.1.3",
     "html-escaper": "^3.0.3",
-    "mapbox-gl": "^2.2.0",
+    "mapbox-gl": "^2.3.1",
+    "mapbox-gl-vue": "^2.0.4",
     "opus-media-recorder": "^0.8.0",
     "pako": "^1.0.11",
     "random-color": "^1.0.1",
@@ -30,7 +31,6 @@
     "vue": "^2.6.14",
     "vue-async-computed": "^3.9.0",
     "vue-debounce": "^2.6.0",
-    "vue-mapbox": "^0.4.1",
     "vue-router": "^3.5.2",
     "vue-scrollto": "^2.20.0",
     "vue-sweetalert2": "^5.0.2",
@@ -52,7 +52,8 @@
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.0.0",
     "lint-staged": "^9.4.3",
-    "vue-template-compiler": "^2.6.14"
+    "vue-template-compiler": "^2.6.14",
+    "webpack": "^4.46.0"
   },
   "postcss": {
     "plugins": {
