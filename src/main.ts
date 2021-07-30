@@ -7,6 +7,7 @@ import VueVirtualScroller from 'vue-virtual-scroller'
 import VueSweetalert2 from 'vue-sweetalert2';
 // @ts-ignore
 import VueTelInput from 'vue-tel-input';
+// @ts-ignore
 import BootstrapVue from 'bootstrap-vue-3';
 import ObserveVisibility from './observe-visibility'
 
