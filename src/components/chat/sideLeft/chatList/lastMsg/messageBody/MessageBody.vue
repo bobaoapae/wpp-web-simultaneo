@@ -1,5 +1,5 @@
 <template>
-    <span v-html="filters.emojify(lastMsg.body)" v-if="lastMsg.isChat"></span>
+    <span v-html="msgBody" v-if="lastMsg.isChat"></span>
 
     <span v-else-if="lastMsg.isImage">
         <img src="@/assets/images/wpp-type-foto.svg">
@@ -65,6 +65,8 @@
 
 <script>
 import filters from '@/filters';
+import { asyncComputed } from '@/AsyncComputed';
+import { useStore } from 'vuex';
 
 export default {
     name: 'MessageBody',
@@ -73,6 +75,33 @@ export default {
             type: Object,
             required: true
         }
+    },
+    setup (props) {
+        const store = useStore();
+
+        const msgBody = asyncComputed(async () => {
+            let body = filters.emojify(filters.formatMsg(props.lastMsg.body));
+            if (props.lastMsg.mentionedJidList && props.lastMsg.mentionedJidList.length > 0) {
+                let promises = [];
+                let results = {};
+                for (let x = 0; x < props.lastMsg.mentionedJidList.length; x++) {
+                    promises.push(store.dispatch('findContactFromId', { id: props.lastMsg.mentionedJidList[x] }).then(contact => {
+                        results[props.lastMsg.mentionedJidList[x]] = contact;
+                    }));
+                }
+                await Promise.all(promises);
+                for (let x = 0; x < props.lastMsg.mentionedJidList.length; x++) {
+                    let contact = results[props.lastMsg.mentionedJidList[x]];
+                    let name = contact.formattedName || contact.verifiedName || contact.pushname;
+                    body = body.replace('@' + props.lastMsg.mentionedJidList[x].split('@')[0], `<span class='mention-symbol'>@</span><span dir="ltr">${name}</span>`);
+                }
+            }
+            return filters.emojify(body);
+        }, { default: props.lastMsg.body, lazy: true });
+
+        return {
+            msgBody
+        };
     },
     computed: {
         duration () {
@@ -91,11 +120,7 @@ export default {
             return `${m}:${s}`;
         }
     },
-    data () {
-        return {
-            filters
-        };
-    }
+
 };
 </script>
 

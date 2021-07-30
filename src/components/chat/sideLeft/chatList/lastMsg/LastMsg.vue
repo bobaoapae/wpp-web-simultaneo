@@ -3,8 +3,8 @@
         <template v-if="lastMsg">
             <MessageIconStatus :ack="lastMsg.ack" class="icon-status" v-if="lastMsg.id.fromMe"/>
 
-            <span v-html="`${formattedNameLastMsg}: `"
-                  v-if="chat.isGroup && formattedNameLastMsg"></span>
+            <span v-html="`${formattedName}: `"
+                  v-if="chat.isGroup && !lastMsg.id.fromMe"></span>
 
             <MessageBody :lastMsg="lastMsg"/>
         </template>
@@ -13,6 +13,7 @@
 
 <script>
 import filters from '@/filters';
+import { asyncComputed } from '@/AsyncComputed';
 import MessageBody from './messageBody/MessageBody.vue';
 import MessageIconStatus from '@/components/shared/messageIconStatus/MessageIconStatus.vue';
 
@@ -28,21 +29,21 @@ export default {
             required: true
         }
     },
+    setup (props) {
+        const formattedName = asyncComputed(async () => {
+            let senderObj = await props.chat.lastMsg.senderObj();
+            let name = senderObj.formattedName || senderObj.verifiedName || senderObj.pushname;
+            return filters.emojify(name);
+        }, { default: '', lazy: true });
+
+        return {
+            formattedName
+        };
+    },
     computed: {
         lastMsg () {
             return this.chat.lastMsg;
         }
-    },
-    data () {
-        return {
-            formattedNameLastMsg: null
-        };
-    },
-    created () {
-        this.loadFormattedName();
-    },
-    watch: {
-        'lastMsg': 'loadFormattedName'
     },
     methods: {
         async loadFormattedName () {
