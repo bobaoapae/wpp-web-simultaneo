@@ -1,15 +1,15 @@
 <template>
     <div id="conversation-header">
         <div class="box-img">
-            <Picture :group="chat.isGroup" :id="chat.id" :key="chat.id"/>
+            <Picture :group="activeChat.isGroup" :id="activeChat.id" :key="activeChat.id"/>
         </div>
 
         <div @click.prevent="openChatInfo" class="box-info">
             <div v-html="filters.emojify(nameEmojify)" class="nome"></div>
 
             <div class="info">
-                <PresenceChat :chat="chat"
-                              :key="chat.id" v-if="chat.isChat"/>
+                <PresenceChat :chat="activeChat"
+                              :key="activeChat.id" v-if="activeChat.isChat"/>
             </div>
         </div>
 
@@ -32,7 +32,7 @@
                     <img src="@/assets/images/wpp-icon-kebab-menu.svg">
                 </template>
 
-                <b-dropdown-item @click.stop="handlePinChat" v-if="!chat.pin || chat.pin === 0">Fixar a
+                <b-dropdown-item @click.stop="handlePinChat" v-if="!activeChat.pin || activeChat.pin === 0">Fixar a
                     Conversa
                 </b-dropdown-item>
                 <b-dropdown-item @click.stop="handleUnPinChat" v-else>Desafixar a Conversa</b-dropdown-item>
@@ -41,7 +41,7 @@
                     Limpar Conversa
                 </b-dropdown-item>
                 <b-dropdown-item @click.stop="handleDeleteChat"
-                                 v-if="chat.isChat && user.canCreateOperator || user.superConfiguracao.operadorPodeExcluirMsg">
+                                 v-if="activeChat.isChat && user.canCreateOperator || user.superConfiguracao.operadorPodeExcluirMsg">
                     Deletar Conversa
                 </b-dropdown-item>
             </b-dropdown>
@@ -62,12 +62,6 @@ export default {
         Picture,
         PresenceChat
     },
-    props: {
-        chat: {
-            type: Object,
-            required: true
-        }
-    },
     data () {
         return {
             filters,
@@ -75,17 +69,17 @@ export default {
         };
     },
     computed: {
-        ...mapState(['user']),
+        ...mapState(['user', 'activeChat']),
 
         nameEmojify () {
-            if (this.chat.formattedTitle) {
-                return this.chat.formattedTitle;
+            if (this.activeChat.formattedTitle) {
+                return this.activeChat.formattedTitle;
             }
-            return '+' + this.chat.id.replace('@c.us', '');
+            return '+' + this.activeChat.id.replace('@c.us', '');
         },
 
         lastTimeAvailable () {
-            return this.timeConverter(this.chat.lastPresenceAvailableTime);
+            return this.timeConverter(this.activeChat.lastPresenceAvailableTime);
         }
     },
     methods: {
@@ -139,7 +133,7 @@ export default {
 
         handleSendMsg () {
             let files = [...this.files];
-            let currentChat = this.chat;
+            let currentChat = this.activeChat;
             files.forEach(file => {
                 this.uploadFile(file).then(tag => {
                     currentChat.buildAndSendMessage({ file: { uuid: tag, forceDocument: false } });
@@ -152,24 +146,23 @@ export default {
         },
 
         handlePinChat () {
-            this.chat.pinChat();
+            this.activeChat.pinChat();
         },
 
         handleUnPinChat () {
-            this.chat.unPinChat();
+            this.activeChat.unPinChat();
         },
 
         handleDeleteChat () {
-            this.chat.deleteChat();
+            this.activeChat.deleteChat();
         },
 
         handleClearChat () {
-            this.chat.clearChat();
+            this.activeChat.clearChat();
         },
 
         openChatInfo () {
-            //TODO chat openChatInfo
-            //this.chat.openChatInfo = !this.chat.openChatInfo;
+            this.activeChat.openChatInfo = !this.activeChat.openChatInfo;
         }
     }
 };

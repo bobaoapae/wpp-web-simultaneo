@@ -1,6 +1,6 @@
 <template>
-    <!--TODO v-b-hover="handleHoverChat"-->
-    <div class="chat-row" @contextmenu.prevent="handleContextMenu">
+    <div class="chat-row" @contextmenu.prevent="handleContextMenu" @mouseover="handleHover(true)"
+         @mouseout="handleHover(false)">
         <Picture :group="chat.isGroup" :id="chat.id"/>
 
         <div class="box-info-chat" @click="handleClick">
@@ -112,7 +112,7 @@ export default {
             this.$refs.dropdown.show();
         },
 
-        handleHoverChat (flag) {
+        handleHover (flag) {
             this.showMenuIcon = flag;
         },
 

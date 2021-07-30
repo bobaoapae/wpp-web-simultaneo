@@ -42,16 +42,15 @@ export default {
             let promises = [];
             let results = {};
             for (let x = 0; x < this.msg.mentionedJidList.length; x++) {
-                promises.push(this.findChatFromId({ id: this.msg.mentionedJidList[x] }).then(value => {
-                    results[this.msg.mentionedJidList[x]] = value;
+                promises.push(this.findContactFromId({ id: this.msg.mentionedJidList[x] }).then(contact => {
+                    results[this.msg.mentionedJidList[x]] = contact;
                 }));
             }
             await Promise.all(promises);
             for (let x = 0; x < this.msg.mentionedJidList.length; x++) {
-                let chat = results[this.msg.mentionedJidList[x]];
-                let contact = await chat.contact();
+                let contact = results[this.msg.mentionedJidList[x]];
                 let name = contact.formattedName || contact.verifiedName || contact.pushname;
-                body = body.replace('@' + this.msg.mentionedJidList[x].split('@')[0], `<span class='mention-symbol'>@</span><span class='btn-link' dir="ltr">${name}</span>`);
+                body = body.replace('@' + this.msg.mentionedJidList[x].split('@')[0], `<span class='mention-symbol'>@</span><span class='btn-link' dir="ltr" @click="clickMention('${this.msg.mentionedJidList[x]}')">${name}</span>`);
             }
         }
 
@@ -60,7 +59,7 @@ export default {
             template: `
                 <div>${body}</div>`,
             methods: {
-                ...mapActions(['getGroupInviteInfo']),
+                ...mapActions(['getGroupInviteInfo', 'findChatFromId']),
 
                 groupInviteLinkClick (link) {
                     this.getGroupInviteInfo({ link }).then(inviteLinkInfo => {
@@ -72,12 +71,17 @@ export default {
                     this.getGroupInviteInfo({ link }).then(inviteLinkInfo => {
                         console.log(inviteLinkInfo);
                     });
+                },
+
+                async clickMention (id) {
+                    let chat = await this.findChatFromId({ id: id });
+                    console.log(chat);
                 }
             }
         }));
     },
     methods: {
-        ...mapActions(['findChatFromId'])
+        ...mapActions(['findContactFromId'])
     }
 };
 </script>

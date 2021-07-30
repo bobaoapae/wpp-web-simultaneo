@@ -2,7 +2,7 @@
     <div class="messages-list" @scroll="handleMessageListChange" @mousewheel="handleMessageListChange"
          @touchmove="handleMessageListChange"
          ref="messageList">
-        <LoadingEarlyMsg v-show="chat.loadingEarly"/>
+        <LoadingEarlyMsg v-show="activeChat.loadingEarly"/>
         <div :id="encodedMsgId(item)" :key="encodedMsgId(item)" @dblclick.left.prevent="handleDoubleClick(item)"
              v-for="(item, index) in msgs" v-for-callback="{key: index, array: msgs, callback: handleLoadMsgFinish}">
             <MessageDateFormatted :formattedDate="item.fomattedDate"
@@ -27,12 +27,6 @@ export default {
         MessageInfo,
         MessageDateFormatted,
         LoadingEarlyMsg
-    },
-    props: {
-        chat: {
-            type: Object,
-            required: true
-        }
     },
     mounted () {
         //TODO fix scroll when open emoji
@@ -82,7 +76,7 @@ export default {
         }
         this.$nextTick(() => {
             this.scrollToBottom();
-            if (!this.chat.noEarlierMsgs && this.chat.msgsParted.length <= 10) {
+            if (!this.activeChat.noEarlierMsgs && this.activeChat.msgsParted.length <= 10) {
                 this.handleLoadEarly().then((val) => {
                     if (val) {
                         this.scrollToBottom();
@@ -104,9 +98,9 @@ export default {
         };
     },
     computed: {
-        ...mapState(['visible', 'idle']),
+        ...mapState(['visible', 'idle', 'activeChat']),
         msgs () {
-            return this.chat.msgsParted;
+            return this.activeChat.msgsParted;
         },
 
         active () {
@@ -114,13 +108,12 @@ export default {
         }
     },
     watch: {
-        'chat.id': function () {
-            //TODO chat msgIndex
-            //this.chat.__x_msgsIndex = 1;
+        'activeChat.id': function () {
+            this.activeChat.__x_msgsIndex = 1;
             this.$nextTick(() => {
                 this.scrollToBottom();
             });
-            if (!this.chat.noEarlierMsgs && this.chat.msgsParted.length <= 10) {
+            if (!this.activeChat.noEarlierMsgs && this.activeChat.msgsParted.length <= 10) {
                 this.handleLoadEarly().then((val) => {
                     if (val) {
                         this.scrollToBottom();
@@ -128,14 +121,14 @@ export default {
                 });
             }
         },
-        'chat.lastMsg.id._serialized': function (val) {
-            if (val && !this.chat.loadingEarly && this.visible && (this.chat.lastMsg.id.fromMe || this.isInBottom())) {
+        'activeChat.lastMsg.id._serialized': function (val) {
+            if (val && !this.activeChat.loadingEarly && this.visible && (this.activeChat.lastMsg.id.fromMe || this.isInBottom())) {
                 this.scrollToBottom();
             }
         },
         'active': function (val) {
             if (val && this.isInBottom()) {
-                this.chat.seeChat();
+                this.activeChat.seeChat();
             }
         },
         'msgs': function () {
@@ -158,8 +151,7 @@ export default {
 
         handleDoubleClick (msg) {
             if (!this.isNotification(msg)) {
-                //TODO chat quotedMsg
-                //this.chat.quotedMsg = msg;
+                this.activeChat.quotedMsg = msg;
             }
         },
 
@@ -179,25 +171,24 @@ export default {
             this.scrollHeight = props.scrollHeight;
             this.scrollTop = props.scrollTop;
             this.clientHeight = props.clientHeight;
-            if (e && this.chat.loadingEarly) {
+            if (e && this.activeChat.loadingEarly) {
                 e.preventDefault();
-            } else if (!this.chat.loadingEarly && !this.chat.noEarlierMsgs && ((props.scrollHeight > 1050 && props.calc <= 1050) || props.scrollTop === 0)) {
+            } else if (!this.activeChat.loadingEarly && !this.activeChat.noEarlierMsgs && ((props.scrollHeight > 1050 && props.calc <= 1050) || props.scrollTop === 0)) {
                 this.handleLoadEarly();
-            } else if (this.active && this.isInBottom() && this.chat.isUnread) {
-                this.chat.seeChat();
+            } else if (this.active && this.isInBottom() && this.activeChat.isUnread) {
+                this.activeChat.seeChat();
             }
         },
 
         async handleLoadEarly () {
-            if (!this.chat.loadingEarly) {
-                //TODO chat loadingEarly
-                //this.chat.loadingEarly = true;
+            if (!this.activeChat.loadingEarly) {
+                this.activeChat.loadingEarly = true;
                 try {
-                    await this.chat.loadEarly();
+                    await this.activeChat.loadEarly();
                 } catch (e) {
                     console.error('LoadEarly Error::', e);
                 }
-                //this.chat.loadingEarly = false;
+                //this.activeChat.loadingEarly = false;
                 return true;
             }
             return Promise.resolve(false);

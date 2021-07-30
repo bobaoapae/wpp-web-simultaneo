@@ -1,10 +1,10 @@
 <template>
     <div tabindex="0" id="conversation" @keydown="handleKeyDown">
-        <ConversationHeader :chat="chat"/>
+        <ConversationHeader/>
 
-        <MessagesList :chat="chat"/>
+        <MessagesList/>
 
-        <InputMessage :chat="chat"/>
+        <InputMessage/>
     </div>
 </template>
 
@@ -12,7 +12,6 @@
 import ConversationHeader from './conversationHeader/ConversationHeader.vue';
 import InputMessage from './inputMessage/InputMessage';
 import MessagesList from './messagesList/MessagesList';
-import { mapState } from 'vuex';
 
 export default {
     name: 'Conversation',
@@ -21,18 +20,9 @@ export default {
         InputMessage,
         ConversationHeader
     },
-    props: {
-        chat: {
-            type: Object,
-            required: true
-        }
-    },
-    computed: {
-        ...mapState(['user'])
-    },
     methods: {
-        handleKeyDown (evt) {
-            this.$root.$emit('keyDown', evt);
+        handleKeyDown () {
+            //TODO: focus input on keydown
         }
     }
 };

@@ -304,7 +304,7 @@ export default {
     margin: auto;
 }
 
-.box-img ::v-deep(.mg) {
+.box-img ::v-deep(img) {
     display: block;
     margin: 0 auto;
     height: 100%;

@@ -7,8 +7,8 @@
                     <div class="select-msg-check"></div>
                 </div>
             </div>
-            <!--TODO v-b-hover="handleHover" -->
-            <div :class="showTail ? 'tail' : ''" class="message-body">
+            <div :class="showTail ? 'tail' : ''" class="message-body" @mouseover="handleHover(true)"
+                 @mouseout="handleHover(false)">
                 <div class="tail-container" v-if="showTail"></div>
                 <div
                     class="msg-menu"
@@ -74,9 +74,10 @@
 </template>
 
 <script>
+import { ref } from 'vue';
+import { mapActions, mapMutations, mapState, useStore } from 'vuex';
 import filters from '@/filters';
 import { asyncComputed } from '@/AsyncComputed.ts';
-import { mapActions, mapMutations, mapState } from 'vuex';
 import MessageText from '@/components/shared/messageText/MessageText.vue';
 import MessagePhoto from '@/components/shared/messagePhoto/MessagePhoto.vue';
 import MessageSticker from '@/components/shared/messageSticker/MessageSticker.vue';
@@ -107,12 +108,15 @@ export default {
         MessageContact,
         MessageGif
     },
-    data () {
-        return {
-            filters,
-            showMenuIcon: false,
-            menuAberto: false
-        };
+    props: {
+        msg: {
+            type: Object,
+            required: true
+        },
+        previousMsg: {
+            type: Object,
+            required: false
+        }
     },
     mounted () {
         //TODO remove selected msg on esc press
@@ -124,6 +128,49 @@ export default {
                 }
             }
         });*/
+    },
+    setup (props) {
+        const store = useStore();
+
+        const colorMsgGroup = asyncComputed(async () => {
+            if (store.state.activeChat.isGroup) {
+                let senderObj = await props.msg.senderObj();
+                return store.state.activeChat.getColor(senderObj.id);
+            }
+            return false;
+        }, { default: randomColor().hexString(), lazy: true });
+
+        const name = asyncComputed(async () => {
+            let senderObj = await props.msg.senderObj();
+            return senderObj.name;
+        }, { default: '', lazy: true });
+
+        const pushName = asyncComputed(async () => {
+            let senderObj = await props.msg.senderObj();
+            return senderObj.pushname;
+        }, { default: '', lazy: true });
+
+        const formattedName = asyncComputed(async () => {
+            let senderObj = await props.msg.senderObj();
+            return senderObj.formattedName;
+        }, { default: '', lazy: true });
+
+        const showTail = asyncComputed(async () => {
+            let senderObj = await props.msg.senderObj();
+            let previousMsgSenderObj = props.previousMsg ? await props.previousMsg.senderObj() : false;
+            return !props.previousMsg || !senderObj || !previousMsgSenderObj || (props.previousMsg.isSticker && !props.msg.isSticker) || senderObj.id !== previousMsgSenderObj.id || props.msg.hasQuotedMsg || props.msg.isSticker || props.msg.fomattedDate !== props.previousMsg.fomattedDate;
+        }, { default: false, lazy: true });
+
+        return {
+            colorMsgGroup,
+            name,
+            pushName,
+            formattedName,
+            showTail,
+            filters,
+            showMenuIcon: ref(false),
+            menuAberto: ref(false)
+        };
     },
     watch: {
         'activeChat.quotedMsg': function (val) {
@@ -147,16 +194,6 @@ export default {
             }
         }
     },
-    props: {
-        msg: {
-            type: Object,
-            required: true
-        },
-        previousMsg: {
-            type: Object,
-            required: false
-        }
-    },
     computed: {
         ...mapState(['activeChat', 'user', 'selectMsgs']),
 
@@ -168,46 +205,8 @@ export default {
             return this.selectMsgs.msgs.includes(this.msg);
         }
     },
-    setup () {
-        const colorMsgGroup = asyncComputed(async () => {
-            if (this.activeChat.isGroup) {
-                let senderObj = await this.msg.senderObj();
-                return this.activeChat.getColor(senderObj.id);
-            }
-            return false;
-        }, { default: randomColor().hexString(), lazy: true });
-
-        const name = asyncComputed(async () => {
-            let senderObj = await this.msg.senderObj();
-            return senderObj.name;
-        }, { default: '', lazy: true });
-
-        const pushName = asyncComputed(async () => {
-            let senderObj = await this.msg.senderObj();
-            return senderObj.pushname;
-        }, { default: '', lazy: true });
-
-        const formattedName = asyncComputed(async () => {
-            let senderObj = await this.msg.senderObj();
-            return senderObj.formattedName;
-        }, { default: '', lazy: true });
-
-        const showTail = asyncComputed(async () => {
-            let senderObj = await this.msg.senderObj();
-            let previousMsgSenderObj = this.previousMsg ? await this.previousMsg.senderObj() : false;
-            return !this.previousMsg || !senderObj || !previousMsgSenderObj || (this.previousMsg.isSticker && !this.msg.isSticker) || senderObj.id !== previousMsgSenderObj.id || this.msg.hasQuotedMsg || this.msg.isSticker || this.msg.fomattedDate !== this.previousMsg.fomattedDate;
-        }, { default: false, lazy: true });
-
-        return {
-            colorMsgGroup,
-            name,
-            pushName,
-            formattedName,
-            showTail,
-        };
-    },
     methods: {
-        ...mapMutations(['SET_ACTIVE_CHAT', 'SET_SELECT_MSGS', 'TOGGLE_SELECT_MSG']),
+        ...mapMutations(['SET_ACTIVE_CHAT', 'SET_SELECT_MSGS', 'TOGGLE_SELECT_MSG', 'TOGGLE_MODAL_DELETE_MSG']),
         ...mapActions(['findChatFromId', 'downloadMedia']),
 
         handleHover (isHover) {
@@ -231,7 +230,7 @@ export default {
         },
 
         handleClickDelete () {
-            this.$root.$emit('showModalDeleteMsg', this.msg);
+            this.TOGGLE_MODAL_DELETE_MSG({ show: true, msg: this.msg });
         },
 
         handleClick () {

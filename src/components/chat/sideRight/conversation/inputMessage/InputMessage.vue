@@ -1,8 +1,7 @@
 <template>
     <div ref="container">
         <div class="input-msg" v-show="!showSelectMsgs">
-            <!--TODO emojiVIsible -->
-            <b-collapse id="collapse-emoji" v-model="emojiVisible" @show="handleEmojiOpening"
+            <b-collapse id="collapse-emoji" v-model="activeChat.emojiVisible" @show="handleEmojiOpening"
                         @shown="handleEmojiOpened" @hide="handleEmojiClosing" @hidden="handleEmojiClosed">
                 <picker
                     :color="'#009688'"
@@ -35,7 +34,7 @@
 
             <b-collapse id="collapse-answer-msg" v-model="answerVisible">
                 <div class="box-answer">
-                    <QuotedMsg :quotedMsg="chat.quotedMsg" class="flex-grow-1" v-if="answerVisible"/>
+                    <QuotedMsg :quotedMsg="activeChat.quotedMsg" class="flex-grow-1" v-if="answerVisible"/>
 
                     <div @click="handleClickCloseAnswer" class="close-answer">
                         <img src="@/assets/images/wpp-icon-close-answer.svg">
@@ -88,7 +87,7 @@
                 <div class="box-icon-send">
                     <div>
                         <img @click="handleSendMessage" src="@/assets/images/wpp-icon-send.svg"
-                             v-if="chat.message"/>
+                             v-if="activeChat.message"/>
                         <img @click="startRecording" src="@/assets/images/wpp-icon-mic.svg" v-else-if="!recording"/>
                     </div>
 
@@ -121,6 +120,7 @@ import { rageSave } from '@/rangeSelectionSaveRestore.js';
 import QuotedMsg from '../../../../shared/quotedMsg/QuotedMsg';
 import OpusMediaRecorder from 'opus-media-recorder';
 import EncoderWorker from '@/opus-worker';
+import filters from '@/filters';
 
 const OggOpusWasm = import('opus-media-recorder/OggOpusEncoder.wasm');
 const WebMOpusWasm = import('opus-media-recorder/WebMOpusEncoder.wasm');
@@ -132,12 +132,6 @@ export default {
     components: {
         QuotedMsg,
         Picker
-    },
-    props: {
-        chat: {
-            type: Object,
-            required: true
-        }
     },
     data () {
         return {
@@ -155,6 +149,7 @@ export default {
             filteredQuickReplies: [],
             canBindToOperator: false,
             emojiVisible: false,
+            filters
         };
     },
     mounted () {
@@ -182,7 +177,7 @@ export default {
             this.checkCurrentOperator();
             this.bindToOperator = true;
             this.preventOverrideRestore = true;
-            this.$refs.input.innerHTML = this.chat.htmlInput;
+            this.$refs.input.innerHTML = this.activeChat.htmlInput;
             this.$refs.input.focus();
             this.preventOverrideRestore = false;
             this.savePosition();
@@ -193,7 +188,7 @@ export default {
 
     },
     computed: {
-        ...mapState(['quickReplies', 'user', 'selectMsgs']),
+        ...mapState(['quickReplies', 'user', 'selectMsgs', 'activeChat']),
 
         timeConverter () {
             let a = new Date(this.time * 1000);
@@ -296,16 +291,15 @@ export default {
             if (this.user.isOperator && this.canBindToOperator && this.bindToOperator) {
                 this.setCurrentOperator({ chat: this.chat });
             }
-            this.chat.buildAndSendMessage();
+            this.activeChat.buildAndSendMessage();
             this.$refs.input.innerHTML = '';
         },
 
         onInput () {
             this.savePosition();
-            //TODO chat htmlinput chat message
-            //this.chat.htmlInput = this.$refs.input.innerHTML;
-            //this.chat.message = this.formatar(this.$refs.input);
-            this.quickRepliesVisible = this.chat.message.charAt(0) === '/' && this.quickReplies && this.quickReplies.length > 0;
+            this.activeChat.htmlInput = this.$refs.input.innerHTML;
+            this.activeChat.message = this.formatar(this.$refs.input);
+            this.quickRepliesVisible = this.activeChat.message.charAt(0) === '/' && this.quickReplies && this.quickReplies.length > 0;
             if (this.quickRepliesVisible) {
                 this.filteredQuickReplies = this.getQuickRepliesToShow();
             }
@@ -313,14 +307,13 @@ export default {
 
         getQuickRepliesToShow () {
             return this.quickReplies.filter(quickReply => {
-                return ('/' + quickReply.shortcut).toLowerCase().includes(this.chat.message.toLowerCase());
+                return ('/' + quickReply.shortcut).toLowerCase().includes(this.activeChat.message.toLowerCase());
             });
         },
 
         handleClickCloseAnswer () {
             this.answerVisible = false;
-            //TODO chat quotedMsg
-            //this.chat.quotedMsg = undefined;
+            this.answerVisible.quotedMsg = null;
         },
 
         onPaste (evt) {
@@ -343,24 +336,21 @@ export default {
         },
 
         restorePosition () {
-            if (this.chat.restoreInput) {
-                rageSave.restoreSelection(this.chat.restoreInput);
-                //TODO chat restoreInput
-                //this.chat.restoreInput = null;
+            if (this.activeChat.restoreInput) {
+                rageSave.restoreSelection(this.activeChat.restoreInput);
+                this.activeChat.restoreInput = null;
             }
         },
 
         savePosition () {
             if (!this.preventOverrideRestore) {
-                if (this.chat.restoreInput) {
-                    rageSave.removeMarkers(this.chat.restoreInput);
+                if (this.activeChat.restoreInput) {
+                    rageSave.removeMarkers(this.activeChat.restoreInput);
                 }
                 if (this.$refs.input.textContent.length > 0) {
-                    //TODO chat restoreInput
-                    //this.chat.restoreInput = rageSave.saveSelection();
+                    this.activeChat.restoreInput = rageSave.saveSelection();
                 }
-                //TODO chat htmlInput
-                //this.chat.htmlInput = this.$refs.input.innerHTML;
+                this.activeChat.htmlInput = this.$refs.input.innerHTML;
             }
         },
 
@@ -373,7 +363,7 @@ export default {
         handleEnterPress () {
             if (this.quickRepliesVisible && this.filteredQuickReplies.length === 1) {
                 this.handleClickQuickReply(this.filteredQuickReplies[0]);
-            } else if (this.chat.message !== '') {
+            } else if (this.activeChat.message !== '') {
                 this.handleSendMessage();
             }
         },
@@ -381,8 +371,7 @@ export default {
         handleClickQuickReply (quickReply) {
             this.$refs.input.focus();
             this.$refs.input.innerHTML = '';
-            //TODO chat message
-            //this.chat.message = '';
+            this.activeChat.message = '';
             document.execCommand('insertHTML', false, quickReply.message);
         },
 
@@ -423,11 +412,11 @@ export default {
                 }
             });
 
-            return this.$options.filters.capitalize(msg);
+            return this.filters.capitalize(msg);
         },
 
         async checkCurrentOperator () {
-            let currentOperatorProperty = await this.getCurrentOperator({ chatId: this.chat.id });
+            let currentOperatorProperty = await this.getCurrentOperator({ chatId: this.activeChat.id });
             if (currentOperatorProperty) {
                 await this.changeCustomPropertyChat(currentOperatorProperty);
             }
