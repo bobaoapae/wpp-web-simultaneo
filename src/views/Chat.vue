@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 import ChatInfo from '@/components/chat/sideRight/chatInfo/ChatInfo';
 import SideLeft from '@/components/chat/sideLeft/SideLeft.vue';
 import SideRight from '@/components/chat/sideRight/SideRight.vue';

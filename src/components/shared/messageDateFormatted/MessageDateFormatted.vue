@@ -1,12 +1,14 @@
 <template>
     <div class="message-info">
         <div class="message-info-container">
-            <span>{{formattedDate | uppercase}}</span>
+            <span>{{ filters.uppercase(formattedDate) }}</span>
         </div>
     </div>
 </template>
 
 <script>
+import filters from '@/filters';
+
 export default {
     name: 'MessageDateFormatted',
     props: {
@@ -14,6 +16,11 @@ export default {
             type: String,
             required: true
         }
+    },
+    data () {
+        return {
+            filters
+        };
     }
 };
 </script>

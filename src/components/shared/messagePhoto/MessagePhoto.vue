@@ -1,5 +1,9 @@
 <template>
-    <div class="message-photo" v-b-visible.once="onVisible">
+    <div class="message-photo" v-observe-visibility="{
+         throttle: 300,
+         callback: onVisible,
+         once: true
+    }">
         <div class="photo-container">
             <div class="box-image">
                 <img
@@ -165,7 +169,7 @@ img {
     bottom: 6px;
 }
 
-.box-caption >>> .mention-symbol {
+.box-caption ::v-deep(.mention-symbol) {
     color: rgba(0, 0, 0, 0.25);
 }
 </style>

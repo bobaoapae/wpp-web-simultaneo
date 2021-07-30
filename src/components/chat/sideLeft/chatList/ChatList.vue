@@ -2,7 +2,7 @@
     <div id="chat-list">
         <div class="box-input-search">
             <input placeholder="Procurar" style="outline: none;" type="text"
-                   @keydown.exact.esc="handleEscPress" v-debounce:200ms.lock="handleInput"/>
+                   @keydown.exact.esc="handleEscPress" @input="handleInput"/>
         </div>
 
         <div class="chat-filter-container">
@@ -46,13 +46,11 @@
 <script>
 import { mapActions, mapState } from 'vuex';
 import ChatRow from './chatRow/ChatRow';
-import { RecycleScroller } from 'vue-virtual-scroller';
 
 export default {
     name: 'ChatList',
     components: {
-        ChatRow,
-        RecycleScroller
+        ChatRow
     },
     data () {
         return {
@@ -119,7 +117,7 @@ export default {
 
 <style scoped>
 .scroller {
-    max-height: calc(100vh - 234px);
+    max-height: calc(100vh - 193px);
 }
 
 .active {

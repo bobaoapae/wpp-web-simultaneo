@@ -1,5 +1,9 @@
 <template>
-    <div class="picture" v-b-visible.once="handleChatVisible">
+    <div class="picture" v-observe-visibility="{
+         throttle: 300,
+         callback: handleChatVisible,
+         once: true
+    }">
         <transition mode="out-in" name="component-fade" v-if="!group">
             <img :key="'user'" src="@/assets/images/wpp-photo-user.svg" v-if="!picture"/>
 

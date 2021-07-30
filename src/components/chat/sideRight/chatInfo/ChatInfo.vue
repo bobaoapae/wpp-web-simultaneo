@@ -59,13 +59,14 @@ export default {
     name: 'ChatInfo',
     components: { Picture, LoadingSpinner, PresenceChat },
     mounted () {
-        this.$root.$on('keyDown', (evt) => {
+        //TODO close with esc
+        /*this.$root.$on('keyDown', (evt) => {
             if (this.activeChat && this.activeChat.openChatInfo) {
                 if (evt.key === 'Escape') {
                     this.handleClose();
                 }
             }
-        });
+        });*/
     },
     computed: {
         ...mapState(['activeChat']),
@@ -303,7 +304,7 @@ export default {
     margin: auto;
 }
 
-.box-img >>> img {
+.box-img ::v-deep(.mg) {
     display: block;
     margin: 0 auto;
     height: 100%;

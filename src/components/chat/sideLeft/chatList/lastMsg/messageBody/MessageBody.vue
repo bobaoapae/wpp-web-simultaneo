@@ -1,5 +1,5 @@
 <template>
-    <span :inner-html.prop="lastMsg.body | emojify" v-if="lastMsg.isChat"></span>
+    <span v-html="filters.emojify(lastMsg.body)" v-if="lastMsg.isChat"></span>
 
     <span v-else-if="lastMsg.isImage">
         <img src="@/assets/images/wpp-type-foto.svg">
@@ -40,7 +40,7 @@
 
     <span v-else-if="lastMsg.isVcard">
         <img src="@/assets/images/wpp-type-vcard.svg">
-        <span :inner-html.prop="lastMsg.vCard.fn[0].value | emojify"></span>
+        <span v-html="filters.emojify(lastMsg.vCard.fn[0].value)"></span>
     </span>
 
     <span v-else-if="lastMsg.isLocation">
@@ -64,6 +64,8 @@
 </template>
 
 <script>
+import filters from '@/filters';
+
 export default {
     name: 'MessageBody',
     props: {
@@ -88,6 +90,11 @@ export default {
 
             return `${m}:${s}`;
         }
+    },
+    data () {
+        return {
+            filters
+        };
     }
 };
 </script>

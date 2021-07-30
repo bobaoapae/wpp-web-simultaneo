@@ -1,34 +1,33 @@
-import Vue from 'vue';
-import VueRouter from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router';
+import NotFound from '@/views/NotFound';
 import Login from '@/views/Login';
 import Wpp from '@/views/Wpp';
-import ForgotPassword from '@/views/ForgotPassword';
+/*import ForgotPassword from '@/views/ForgotPassword';
 import NewOperator from '@/views/NewOperator';
 import ManageOperators from '@/views/ManageOperators';
 import ChangePassword from '@/views/ChangePassword';
 import ChangeNumber from '@/views/ChangeNumber';
 import SendMessageToNumber from '@/views/SendMessageToNumber';
-import ConfirmChangeNumber from '@/views/ConfirmChangeNumber';
-import NotFound from '@/views/NotFound';
+import ConfirmChangeNumber from '@/views/ConfirmChangeNumber';*/
 import store from '@/store';
-
-Vue.use(VueRouter);
 
 const routes = [
     {
         path: '/',
         name: 'wpp',
         component: Wpp,
-        beforeEnter: (to, from, next) => {
+        beforeEnter: async (to, from, next) => {
             if (sessionStorage.TOKEN) {
-                store.dispatch('closeWs');
-                store.dispatch('fetchUser').then(value => {
+                await store.dispatch('closeWs');
+                await store.dispatch('fetchUser').then(() => {
                     next();
                 }).catch(reason => {
+                    console.error(reason);
                     router.push('/login');
                 });
             } else {
-                router.push('/login');
+                next();
+                await router.push('/login');
             }
         }
     },
@@ -38,51 +37,15 @@ const routes = [
         component: Login
     },
     {
-        path: '/forgotpassword',
-        name: 'forgot-password',
-        component: ForgotPassword
-    },
-    {
-        path: '/newoperator',
-        name: 'new-operator',
-        component: NewOperator
-    },
-    {
-        path: '/manageoperators',
-        name: 'manage-operators',
-        component: ManageOperators
-    },
-    {
-        path: '/changepassword',
-        name: 'change-password',
-        component: ChangePassword
-    },
-    {
-        path: '/changenumber',
-        name: 'change-number',
-        component: ChangeNumber
-    },
-    {
-        path: '/confirmchangenumber',
-        name: 'confirm-change-number',
-        component: ConfirmChangeNumber
-    },
-    {
-        path: '/sendmessagetonumber',
-        name: 'send-message-to-number',
-        component: SendMessageToNumber
-    },
-    {
-        path: '*',
+        path: '/notFound',
         name: 'not-found',
         component: NotFound
     }
 ];
 
-const router = new VueRouter({
-    mode: 'history',
-    base: process.env.BASE_URL,
-    routes
+const router = createRouter({
+    history: createWebHistory(),
+    routes: routes
 });
 
 export default router;

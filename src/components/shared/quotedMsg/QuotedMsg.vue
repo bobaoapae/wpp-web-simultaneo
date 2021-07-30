@@ -82,11 +82,12 @@ export default {
     methods: {
         ...mapActions(['updateMsg']),
 
-        onDone (element) {
-            this.quotedMsg.blink = true;
+        onDone () {
+            //TODO: blink quotedMsg
+            //this.quotedMsg.blink = true;
             this.updateMsg(this.quotedMsg);
             setTimeout(() => {
-                this.quotedMsg.blink = false;
+                //this.quotedMsg.blink = false;
                 this.updateMsg(this.quotedMsg);
             }, 1500);
         }

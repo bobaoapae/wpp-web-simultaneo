@@ -1,6 +1,6 @@
 <template>
     <div class="loading-box">
-        <LoadginSpinner/>
+        <LoadingSpinner/>
         <div class="logout" v-if="showLogout">
             <span>Demorando muito? <button class="btn btn-link" @click="logout">Clique aqui</button> para deslogar e reiniciar</span>
         </div>
@@ -8,13 +8,13 @@
 </template>
 
 <script>
-import LoadginSpinner from '@/components/shared/loadingSpinner/LoadingSpinner';
+import LoadingSpinner from '@/components/shared/loadingSpinner/LoadingSpinner';
 import { mapActions } from 'vuex';
 
 export default {
     name: 'Loading',
     components: {
-        LoadginSpinner
+        LoadingSpinner
     },
     data () {
         return {

@@ -5,7 +5,7 @@
         </div>
 
         <div @click.prevent="openChatInfo" class="box-info">
-            <div :inner-html.prop="nameEmojify | emojify" class="nome"></div>
+            <div v-html="filters.emojify(nameEmojify)" class="nome"></div>
 
             <div class="info">
                 <PresenceChat :chat="chat"
@@ -51,6 +51,7 @@
 </template>
 
 <script>
+import filters from '@/filters';
 import { mapActions, mapState } from 'vuex';
 import Picture from '@/components/shared/picture/Picture.vue';
 import PresenceChat from '@/components/shared/presenceChat/PresenceChat';
@@ -69,6 +70,7 @@ export default {
     },
     data () {
         return {
+            filters,
             files: []
         };
     },
@@ -166,7 +168,8 @@ export default {
         },
 
         openChatInfo () {
-            this.chat.openChatInfo = !this.chat.openChatInfo;
+            //TODO chat openChatInfo
+            //this.chat.openChatInfo = !this.chat.openChatInfo;
         }
     }
 };
@@ -198,13 +201,13 @@ label {
     align-items: center;
 }
 
-.box-img >>> img {
+.box-img ::v-deep(.mg) {
     width: 40px;
     height: 40px;
     border-radius: 50%;
 }
 
-.box-img >>> .picture {
+.box-img ::v-deep(.picture) {
     padding: 0;
 }
 

@@ -2,7 +2,7 @@
     <div class="contact-container">
         <div class="contact">
             <Picture :id="vCardChatId"/>
-            <div :inner-html.prop="msg.vCard.fn[0].value | emojify" class="contact-name"></div>
+            <div v-html="filters.emojify(msg.vCard.fn[0].value)" class="contact-name"></div>
             <MessageTime :msg="msg"/>
         </div>
         <hr/>
@@ -13,6 +13,8 @@
 </template>
 
 <script>
+import filters from '@/filters';
+
 import Picture from '../picture/Picture';
 import MessageTime from '../messageTime/MessageTime';
 import { mapActions, mapMutations } from 'vuex';
@@ -38,6 +40,11 @@ export default {
             }
             return '';
         }
+    },
+    data () {
+        return {
+            filters
+        };
     },
     methods: {
         ...mapMutations(['SET_ACTIVE_CHAT']),

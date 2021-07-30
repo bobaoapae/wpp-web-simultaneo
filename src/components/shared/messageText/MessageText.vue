@@ -12,10 +12,11 @@
 </template>
 
 <script>
+import filters from '@/filters';
 import MessageTime from '../messageTime/MessageTime';
 import Thumbnail from '../thumbnail/Thumbnail';
 import { mapActions } from 'vuex';
-import Vue from 'vue';
+import { defineComponent, shallowRef } from 'vue';
 
 export default {
     name: 'MessageText',
@@ -25,7 +26,8 @@ export default {
     },
     data () {
         return {
-            componentMsg: null
+            componentMsg: null,
+            filters
         };
     },
     props: {
@@ -35,7 +37,7 @@ export default {
         }
     },
     async mounted () {
-        let body = this.$options.filters.emojify(this.$options.filters.formatMsg(this.msg.body));
+        let body = this.filters.emojify(this.filters.formatMsg(this.msg.body));
         if (this.msg.mentionedJidList && this.msg.mentionedJidList.length > 0) {
             let promises = [];
             let results = {};
@@ -53,8 +55,10 @@ export default {
             }
         }
 
-        this.componentMsg = Vue.component('componentMsg', {
-            template: `<div>${body}</div>`,
+        this.componentMsg = shallowRef(defineComponent({
+            name: 'componentMsg',
+            template: `
+                <div>${body}</div>`,
             methods: {
                 ...mapActions(['getGroupInviteInfo']),
 
@@ -70,7 +74,7 @@ export default {
                     });
                 }
             }
-        });
+        }));
     },
     methods: {
         ...mapActions(['findChatFromId'])
@@ -98,7 +102,7 @@ export default {
     font-size: 14.2px;
 }
 
-.message-body >>> .mention-symbol {
+.message-body ::v-deep(.mention-symbol) {
     color: rgba(0, 0, 0, 0.25)
 }
 </style>

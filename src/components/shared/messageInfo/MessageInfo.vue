@@ -45,7 +45,7 @@
 // e2e_notification encrypt
 
 // gp2
-import { mapState, mapActions } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 
 export default {
     name: 'MessageInfo',

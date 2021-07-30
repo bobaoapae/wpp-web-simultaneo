@@ -1,64 +1,59 @@
-import Vue from 'vue';
-import Vuex from 'vuex';
+import { reactive } from 'vue';
+import { createStore } from 'vuex';
 import uniqueid from 'uniqid';
 import visibility from 'vue-visibility-change';
-import VuexReset from '@ianwalter/vuex-reset';
 import vCardParse from 'vcard-parser';
 import api from '@/api';
 import randomColor from 'random-color';
-import WebSocketWorker from 'worker-loader!@/webSocketWorker';
+import WebSocketWorker from '@/ws-worker';
 import throttledQueue from 'throttled-queue';
 import pako from 'pako';
 
-Vue.use(Vuex);
-
-const store = new Vuex.Store({
-    plugins: [VuexReset()],
-    state: {
-        user: {},
-        token: '',
-        isLogged: false,
-        isQrCodeLogged: false,
-        isLoadingChat: true,
-        imgQrCode: '',
-        QrCodeStatus: '',
-        self: {},
-        contacts: [],
-        findChats: {},
-        findChatsByNumber: {},
-        findContacts: {},
-        findContactsByNumber: {},
-        chats: [],
-        myChats: [],
-        quickReplies: [],
-        pictures: {},
-        medias: {},
-        timeOutChats: -1,
-        activeChat: null,
-        selectMsgs: { show: false, msgs: [] },
-        selectChats: { show: false, chats: [] },
-        poolContext: [],
-        modal: {
-            type: '',
-            media: '',
-            show: false,
-            id: ''
-        },
-        wsEvents: {},
-        promisesWsEvents: {},
-        intervalPong: -1,
-        timeoutPresence: -1,
-        timeoutIdle: -1,
-        audio: null,
-        visible: true,
-        idle: false,
-        wsWorker: null,
-        driverState: ''
+const store = createStore({
+    state () {
+        return {
+            user: {},
+            token: '',
+            isLogged: false,
+            isQrCodeLogged: false,
+            isLoadingChat: true,
+            imgQrCode: '',
+            QrCodeStatus: '',
+            self: {},
+            contacts: [],
+            findChats: {},
+            findChatsByNumber: {},
+            findContacts: {},
+            findContactsByNumber: {},
+            chats: [],
+            myChats: [],
+            quickReplies: [],
+            pictures: {},
+            medias: {},
+            timeOutChats: -1,
+            activeChat: null,
+            selectMsgs: { show: false, msgs: [] },
+            selectChats: { show: false, chats: [] },
+            poolContext: [],
+            modal: {
+                type: '',
+                media: '',
+                show: false,
+                id: ''
+            },
+            wsEvents: {},
+            promisesWsEvents: {},
+            intervalPong: -1,
+            timeoutPresence: -1,
+            timeoutIdle: -1,
+            audio: null,
+            visible: true,
+            idle: false,
+            wsWorker: null,
+            driverState: ''
+        };
     },
     mutations: {
-        reset: (state) => {
-        },
-
         RESET_WPP (state) {
             state.self = {};
             state.contacts = [];
@@ -180,19 +175,19 @@ const store = new Vuex.Store({
         },
 
         SET_CONTACTS (state, payload) {
-            Vue.set(state, 'contacts', [...payload]);
+            state.contacts = payload;
         },
 
         SET_QUICK_REPLIES (state, payload) {
-            Vue.set(state, 'quickReplies', [...payload]);
+            state.quickReplies = payload;
         },
 
         SET_CHATS (state, payload) {
-            Vue.set(state, 'chats', [...payload]);
+            state.chats = payload;
         },
 
         SET_MY_CHATS (state, payload) {
-            Vue.set(state, 'myChats', [...payload]);
+            state.myChats = payload;
         },
 
         SET_MODAL (state, payload) {
@@ -365,7 +360,7 @@ const store = new Vuex.Store({
         setNewEvent (context) {
             context.commit('RESET_WPP');
             context.commit('SET_TOKEN', sessionStorage.TOKEN);
-            context.commit('SET_WS_WORKER', new WebSocketWorker());
+            context.commit('SET_WS_WORKER', WebSocketWorker);
             const wsWorker = context.state.wsWorker;
 
             wsWorker.postMessage({ cmd: 'ws-init', data: `${localStorage.baseURL.replace('http', 'ws')}/api/ws` });
@@ -379,6 +374,7 @@ const store = new Vuex.Store({
                             event: 'token',
                             payload: sessionStorage.TOKEN
                         }).catch(reason => {
+                            console.error(reason);
                             sessionStorage.removeItem('TOKEN');
                             sessionStorage.removeItem('USER');
                             window.location.reload();
@@ -649,7 +645,6 @@ const store = new Vuex.Store({
                 let findChat = context.state.findChats[payload.id];
                 if (!chat) {
                     if (!findChat) {
-                        // eslint-disable-next-line promise/param-names
                         findChat = new Promise((resolve1, reject1) => {
                             context.dispatch('sendWsMessage', { event: 'findChat', payload: payload.id }).then(chat => {
                                 context.dispatch('newChat', chat).then((chat) => {
@@ -675,7 +670,6 @@ const store = new Vuex.Store({
                 let findChat = context.state.findChatsByNumber[payload.number];
                 if (!chat) {
                     if (!findChat) {
-                        // eslint-disable-next-line promise/param-names
                         findChat = new Promise((resolve1, reject1) => {
                             context.dispatch('sendWsMessage', { event: 'findChatByNumber', payload: payload.number }).then(chat => {
                                 context.dispatch('newChat', chat).then((chat) => {
@@ -700,7 +694,6 @@ const store = new Vuex.Store({
                 let findContact = context.state.findContacts[payload.id];
                 if (!contact) {
                     if (!findContact) {
-                        // eslint-disable-next-line promise/param-names
                         findContact = new Promise((resolve1, reject1) => {
                             context.dispatch('sendWsMessage', { event: 'findContact', payload: payload.id }).then(chat => {
                                 context.dispatch('newContact', chat).then((contact) => {
@@ -719,26 +712,26 @@ const store = new Vuex.Store({
             });
         },
 
-        getSelfInfo (context, payload) {
+        getSelfInfo (context) {
             return context.dispatch('sendWsMessage', { event: 'getSelfInfo' });
         },
 
-        getAllChats (context, payload) {
+        getAllChats (context) {
             return context.dispatch('sendWsMessage', { event: 'getAllChats' });
         },
 
-        getAllContacts (context, payload) {
+        getAllContacts (context) {
             return context.dispatch('sendWsMessage', { event: 'getAllContacts' });
         },
 
-        getAllQuickReplies (context, payload) {
+        getAllQuickReplies (context) {
             return context.dispatch('sendWsMessage', { event: 'getAllQuickReplies' });
         },
 
-        logout (context, payload) {
+        logout (context) {
             return context.dispatch('sendWsMessage', {
                 event: 'logout'
-            }).then(value => {
+            }).then(() => {
                 localStorage.clear();
                 sessionStorage.clear();
                 window.location.refresh();
@@ -884,7 +877,7 @@ const store = new Vuex.Store({
         checkDelayToServer (context) {
             return new Promise((resolve, reject) => {
                 let time = new Date().getTime();
-                context.dispatch('sendWsMessage', { event: 'pong' }).then(result => {
+                context.dispatch('sendWsMessage', { event: 'pong' }).then(() => {
                     resolve(new Date().getTime() - time);
                 }).catch(reason => reject(reason));
             });
@@ -1025,6 +1018,7 @@ const store = new Vuex.Store({
         },
 
         async setChatProperties (context, payload) {
+            payload = reactive(payload);
             if (!Array.isArray(payload)) {
                 await setProperties(payload);
             } else {
@@ -1150,7 +1144,7 @@ const store = new Vuex.Store({
                 };
                 el.subscribePresence = function () {
                     if (!this.presenceSubscribed) {
-                        return context.dispatch('subscribePresence', { chatId: this.id }).then(value => {
+                        return context.dispatch('subscribePresence', { chatId: this.id }).then(() => {
                             this.presenceSubscribed = true;
                         });
                     }
@@ -1254,6 +1248,7 @@ const store = new Vuex.Store({
         },
 
         async setMsgsProperties (context, payload) {
+            payload = reactive(payload);
             if (!Array.isArray(payload)) {
                 await setProperties(payload);
             } else {
@@ -1477,7 +1472,7 @@ const store = new Vuex.Store({
             }, 50));
         },
 
-        playNewMsgNotification (context, payload) {
+        playNewMsgNotification (context) {
             if (!context.state.audio) {
                 context.commit('SET_AUDIO', new Audio(require('@/assets/audio/web_whatsapp.mp3')));
             }

@@ -39,7 +39,7 @@ export default {
             this.showLogout = true;
         }, 30000);
     },
-    destroyed () {
+    unmounted () {
         clearInterval(this.intervalId);
         clearTimeout(this.timeout);
     },

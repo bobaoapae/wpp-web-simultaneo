@@ -31,10 +31,11 @@ export default {
         };
     },
     mounted () {
-        this.$root.$on('showModalDeleteMsg', data => {
+        //TODO showModal
+        /*this.$root.$on('showModalDeleteMsg', data => {
             this.show = true;
             this.msg = data;
-        });
+        });*/
     },
     methods: {
         handleClick (fromAll) {

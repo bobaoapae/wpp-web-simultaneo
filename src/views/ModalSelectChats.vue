@@ -24,7 +24,7 @@
 </template>
 
 <script>
-import { mapState, mapMutations } from 'vuex';
+import { mapMutations, mapState } from 'vuex';
 import InputSearch from '../components/chat/sideLeft/newChat/inputSearch/InputSearch';
 import ListContact from '../components/chat/sideLeft/newChat/listContact/ListContact';
 
@@ -38,14 +38,15 @@ export default {
         ...mapState(['selectChats', 'selectMsgs', 'activeChat'])
     },
     mounted () {
-        this.$root.$on('keyDown', (evt) => {
+        //TODO close on esc
+        /*this.$root.$on('keyDown', (evt) => {
             if (this.selectChats.show) {
                 evt.preventDefault();
                 if (evt.key === 'Escape') {
                     this.closeModal();
                 }
             }
-        });
+        });*/
     },
     methods: {
         ...mapMutations(['TOGGLE_SELECT_CHAT', 'SET_SELECT_CHATS']),

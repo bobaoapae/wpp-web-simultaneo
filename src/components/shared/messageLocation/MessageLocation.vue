@@ -1,7 +1,11 @@
 <template>
     <div class="location">
-        <a :href="link" target="_blank" v-b-visible="handleVisible">
-            <MapboxVue
+        <a :href="link" target="_blank" v-observe-visibility="{
+         throttle: 300,
+         callback: handleVisible,
+         once: true
+    }">
+            <!--<MapboxVue
                 v-if="visible"
                 :access-token="mapboxAccessToken"
                 :map-options="{
@@ -13,22 +17,16 @@
                 :attributionControl="false"
                 :nav-control="{ show: false }"
                 @map-load="loaded"
-            />
+            />-->
         </a>
         <MessageTime :class="{'no-caption' : !msg.hasCaption, 'custom-time' : !msg.hasCaption}" :msg="msg"/>
     </div>
 </template>
 
 <script>
-import MapboxVue from 'mapbox-gl-vue';
 import Mapbox from 'mapbox-gl';
-import MessageTime from '../messageTime/MessageTime';
 
 export default {
-    components: {
-        MapboxVue,
-        MessageTime
-    },
     data () {
         return {
             mapboxAccessToken: 'pk.eyJ1IjoiYm9iYW9hcGFlIiwiYSI6ImNrNnR6ZG56djA0bHozbG4yZDMxMW42YjMifQ.iR0-urBMWuzYfqW2-St0gA',

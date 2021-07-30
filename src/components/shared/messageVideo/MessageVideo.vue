@@ -1,5 +1,9 @@
 <template>
-    <div class="message-video" v-b-visible.once="onVisible">
+    <div class="message-video" v-observe-visibility="{
+         throttle: 300,
+         callback: onVisible,
+         once: true
+    }">
         <div @click="handleClick" class="video-container">
             <div class="box-preview blur">
                 <img :src=" 'data:image/jpeg;base64,'+ msg.body" alt="body">
@@ -150,7 +154,7 @@ img {
     bottom: 3px;
 }
 
-.box-caption >>> .mention-symbol {
+.box-caption ::v-deep(.mention-symbol) {
     color: rgba(0, 0, 0, 0.25);
 }
 </style>

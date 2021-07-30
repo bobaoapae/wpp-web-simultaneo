@@ -127,6 +127,7 @@ export default {
 
                     document.body.removeChild(element);
                 }).catch(reason => {
+                    console.error(reason);
                     alert('Falha ao baixar o arquivo, atualize a pagina e tente novamente.');
                 }).finally(() => {
                     this.generatingLink = false;

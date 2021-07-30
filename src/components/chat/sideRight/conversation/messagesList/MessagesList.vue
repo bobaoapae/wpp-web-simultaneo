@@ -35,7 +35,8 @@ export default {
         }
     },
     mounted () {
-        this.$root.$on('startOpenEmoji', () => {
+        //TODO fix scroll when open emoji
+        /*this.$root.$on('startOpenEmoji', () => {
             if (this.isInBottom()) {
                 this.isBottomWhenOpening = true;
                 this.intervalBottom = setInterval(() => {
@@ -64,7 +65,7 @@ export default {
                 this.scrollToBottom();
             }
             clearInterval(this.intervalBottom);
-        });
+        });*/
         this.clientHeight = this.$el.clientHeight;
         this.scrollTop = this.$el.scrollTop;
         this.scrollHeight = this.$el.scrollHeight;
@@ -114,7 +115,8 @@ export default {
     },
     watch: {
         'chat.id': function () {
-            this.chat.__x_msgsIndex = 1;
+            //TODO chat msgIndex
+            //this.chat.__x_msgsIndex = 1;
             this.$nextTick(() => {
                 this.scrollToBottom();
             });
@@ -156,7 +158,8 @@ export default {
 
         handleDoubleClick (msg) {
             if (!this.isNotification(msg)) {
-                this.chat.quotedMsg = msg;
+                //TODO chat quotedMsg
+                //this.chat.quotedMsg = msg;
             }
         },
 
@@ -187,13 +190,14 @@ export default {
 
         async handleLoadEarly () {
             if (!this.chat.loadingEarly) {
-                this.chat.loadingEarly = true;
+                //TODO chat loadingEarly
+                //this.chat.loadingEarly = true;
                 try {
                     await this.chat.loadEarly();
                 } catch (e) {
                     console.error('LoadEarly Error::', e);
                 }
-                this.chat.loadingEarly = false;
+                //this.chat.loadingEarly = false;
                 return true;
             }
             return Promise.resolve(false);

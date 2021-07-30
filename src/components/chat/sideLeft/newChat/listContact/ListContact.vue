@@ -48,9 +48,10 @@ export default {
         }
     },
     mounted () {
-        this.$root.$on('searchNewChat', data => {
+        //TODO searchNewChat
+        /*this.$root.$on('searchNewChat', data => {
             this.filter = data;
-        });
+        });*/
     },
     methods: {
         handleChatClick (chat) {

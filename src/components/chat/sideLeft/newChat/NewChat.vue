@@ -23,9 +23,10 @@ export default {
         };
     },
     mounted () {
-        this.$root.$on('showNewChat', data => {
+        //TODO showNewChat
+        /*this.$root.$on('showNewChat', data => {
             this.show = data;
-        });
+        });*/
     },
     methods: {
         ...mapMutations(['SET_ACTIVE_CHAT']),

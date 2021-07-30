@@ -1,7 +1,8 @@
 <template>
     <div ref="container">
         <div class="input-msg" v-show="!showSelectMsgs">
-            <b-collapse id="collapse-emoji" v-model="chat.emojiVisible" @show="handleEmojiOpening"
+            <!--TODO emojiVIsible -->
+            <b-collapse id="collapse-emoji" v-model="emojiVisible" @show="handleEmojiOpening"
                         @shown="handleEmojiOpened" @hide="handleEmojiClosing" @hidden="handleEmojiClosed">
                 <picker
                     :color="'#009688'"
@@ -113,13 +114,13 @@
 </template>
 
 <script>
-import { Picker } from 'emoji-mart-vue-fast';
+import { Picker } from 'emoji-mart-vue-fast/src';
 import { mapActions, mapMutations, mapState } from 'vuex';
 import { msg } from '@/helper.js';
 import { rageSave } from '@/rangeSelectionSaveRestore.js';
 import QuotedMsg from '../../../../shared/quotedMsg/QuotedMsg';
 import OpusMediaRecorder from 'opus-media-recorder';
-import Worker from 'worker-loader!opus-media-recorder/encoderWorker.js';
+import EncoderWorker from '@/opus-worker';
 
 const OggOpusWasm = import('opus-media-recorder/OggOpusEncoder.wasm');
 const WebMOpusWasm = import('opus-media-recorder/WebMOpusEncoder.wasm');
@@ -152,18 +153,20 @@ export default {
             interval: null,
             bindToOperator: true,
             filteredQuickReplies: [],
-            canBindToOperator: false
+            canBindToOperator: false,
+            emojiVisible: false,
         };
     },
     mounted () {
-        this.$root.$on('keyDown', (evt) => {
+        //TODO fix focus
+        /*this.$root.$on('keyDown', (evt) => {
             if (!evt.ctrlKey && evt.target.placeholder !== 'Buscar emoji') {
                 this.$refs.input.focus();
             }
         });
         this.$root.$on('focusInput', () => {
             this.$refs.input.focus();
-        });
+        });*/
         this.$refs.input.focus();
     },
     watch: {
@@ -175,7 +178,7 @@ export default {
                 this.answerVisible = false;
             }
         },
-        'chat': function (val) {
+        'chat': function () {
             this.checkCurrentOperator();
             this.bindToOperator = true;
             this.preventOverrideRestore = true;
@@ -253,7 +256,7 @@ export default {
                         const ogg = await OggOpusWasm;
                         const webm = await WebMOpusWasm;
                         const workerOptions = {
-                            encoderWorkerFactory: _ => new Worker(),
+                            encoderWorkerFactory: () => EncoderWorker,
                             OggOpusEncoderWasmPath: ogg.default,
                             WebMOpusEncoderWasmPath: webm.default
                         };
@@ -297,10 +300,11 @@ export default {
             this.$refs.input.innerHTML = '';
         },
 
-        onInput (evt) {
+        onInput () {
             this.savePosition();
-            this.chat.htmlInput = this.$refs.input.innerHTML;
-            this.chat.message = this.formatar(this.$refs.input);
+            //TODO chat htmlinput chat message
+            //this.chat.htmlInput = this.$refs.input.innerHTML;
+            //this.chat.message = this.formatar(this.$refs.input);
             this.quickRepliesVisible = this.chat.message.charAt(0) === '/' && this.quickReplies && this.quickReplies.length > 0;
             if (this.quickRepliesVisible) {
                 this.filteredQuickReplies = this.getQuickRepliesToShow();
@@ -315,7 +319,8 @@ export default {
 
         handleClickCloseAnswer () {
             this.answerVisible = false;
-            this.chat.quotedMsg = undefined;
+            //TODO chat quotedMsg
+            //this.chat.quotedMsg = undefined;
         },
 
         onPaste (evt) {
@@ -340,7 +345,8 @@ export default {
         restorePosition () {
             if (this.chat.restoreInput) {
                 rageSave.restoreSelection(this.chat.restoreInput);
-                this.chat.restoreInput = null;
+                //TODO chat restoreInput
+                //this.chat.restoreInput = null;
             }
         },
 
@@ -350,9 +356,11 @@ export default {
                     rageSave.removeMarkers(this.chat.restoreInput);
                 }
                 if (this.$refs.input.textContent.length > 0) {
-                    this.chat.restoreInput = rageSave.saveSelection();
+                    //TODO chat restoreInput
+                    //this.chat.restoreInput = rageSave.saveSelection();
                 }
-                this.chat.htmlInput = this.$refs.input.innerHTML;
+                //TODO chat htmlInput
+                //this.chat.htmlInput = this.$refs.input.innerHTML;
             }
         },
 
@@ -373,7 +381,8 @@ export default {
         handleClickQuickReply (quickReply) {
             this.$refs.input.focus();
             this.$refs.input.innerHTML = '';
-            this.chat.message = '';
+            //TODO chat message
+            //this.chat.message = '';
             document.execCommand('insertHTML', false, quickReply.message);
         },
 
@@ -605,7 +614,8 @@ export default {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.input-msg >>> .emoji-mart-category-label h3{
+
+.input-msg ::v-deep(.emoji-mart-category-label) h3 {
     background-color: transparent;
 }
 </style>
