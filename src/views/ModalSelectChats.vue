@@ -14,7 +14,6 @@
             <div class="chats">
                 <transition name="slide-fade">
                     <div id="chat-forward">
-                        <InputSearch/>
                         <ListContact @chatClick="handleChatClick"/>
                     </div>
                 </transition>
@@ -25,13 +24,11 @@
 
 <script>
 import { mapMutations, mapState } from 'vuex';
-import InputSearch from '../components/chat/sideLeft/newChat/inputSearch/InputSearch';
-import ListContact from '../components/chat/sideLeft/newChat/listContact/ListContact';
+import ListContact from '@/components/chat/sideLeft/newChat/listContact/ListContact';
 
 export default {
     name: 'ModalSelectChats',
     components: {
-        InputSearch,
         ListContact
     },
     computed: {

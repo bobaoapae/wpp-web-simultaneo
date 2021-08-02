@@ -54,8 +54,6 @@ export default {
             this.findChatFromId({ id: this.vCardChatId }).then(chat => {
                 this.SET_ACTIVE_CHAT(chat);
             });
-
-            this.$root.$emit('showNewChat', false);
         }
     }
 };

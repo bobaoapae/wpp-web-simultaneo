@@ -72,7 +72,7 @@ export default {
             this.btn.loading = true;
             this.btn.label = 'PROCESSANDO';
             api.put('/api/users/alterarNumero', f)
-                .then((r) => {
+                .then(() => {
                     this.success = true;
                 })
                 .catch(reason => {

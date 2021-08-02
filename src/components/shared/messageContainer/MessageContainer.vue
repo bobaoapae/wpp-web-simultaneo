@@ -238,7 +238,6 @@ export default {
                 this.SET_ACTIVE_CHAT(chat);
             });
 
-            this.$root.$emit('showNewChat', false);
         },
 
         handleClickMessageContainer () {

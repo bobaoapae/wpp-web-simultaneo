@@ -69,7 +69,7 @@ export default {
             this.btn.label = 'PROCESSANDO...';
             const f = new FormData();
             f.append('login', this.form.login);
-            api.put('/api/auth/resetPassword/', f).then(value => {
+            api.put('/api/auth/resetPassword/', f).then(() => {
                 this.success = true;
             }).catch(reason => {
                 if (reason.response && reason.response.data) {

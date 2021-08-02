@@ -79,10 +79,10 @@ export default {
         }
     },
     methods: {
-        ...mapMutations(['SET_CURRENT_USER']),
+        ...mapMutations(['SET_CURRENT_USER', 'SET_SHOW_NEW_CHAT']),
 
         handleClick () {
-            this.$root.$emit('showNewChat', true);
+            this.SET_SHOW_NEW_CHAT(true);
         }
     }
 };

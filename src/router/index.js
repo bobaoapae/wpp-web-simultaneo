@@ -2,13 +2,13 @@ import { createRouter, createWebHistory } from 'vue-router';
 import NotFound from '@/views/NotFound';
 import Login from '@/views/Login';
 import Wpp from '@/views/Wpp';
-/*import ForgotPassword from '@/views/ForgotPassword';
+import ForgotPassword from '@/views/ForgotPassword';
 import NewOperator from '@/views/NewOperator';
 import ManageOperators from '@/views/ManageOperators';
 import ChangePassword from '@/views/ChangePassword';
 import ChangeNumber from '@/views/ChangeNumber';
 import SendMessageToNumber from '@/views/SendMessageToNumber';
-import ConfirmChangeNumber from '@/views/ConfirmChangeNumber';*/
+import ConfirmChangeNumber from '@/views/ConfirmChangeNumber';
 import store from '@/store';
 
 const routes = [
@@ -35,6 +35,41 @@ const routes = [
         path: '/login',
         name: 'login',
         component: Login
+    },
+    {
+        path: '/forgotpassword',
+        name: 'forgot-password',
+        component: ForgotPassword
+    },
+    {
+        path: '/newoperator',
+        name: 'new-operator',
+        component: NewOperator
+    },
+    {
+        path: '/manageoperators',
+        name: 'manage-operators',
+        component: ManageOperators
+    },
+    {
+        path: '/changepassword',
+        name: 'change-password',
+        component: ChangePassword
+    },
+    {
+        path: '/changenumber',
+        name: 'change-number',
+        component: ChangeNumber
+    },
+    {
+        path: '/confirmchangenumber',
+        name: 'confirm-change-number',
+        component: ConfirmChangeNumber
+    },
+    {
+        path: '/sendmessagetonumber',
+        name: 'send-message-to-number',
+        component: SendMessageToNumber
     },
     {
         path: '/notFound',

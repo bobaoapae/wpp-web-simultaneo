@@ -45,6 +45,7 @@ const store = createStore({
                 show: false,
                 msg: null
             },
+            showNewChat: false,
             wsEvents: {},
             promisesWsEvents: {},
             intervalPong: -1,
@@ -175,9 +176,12 @@ const store = createStore({
         },
 
         TOGGLE_MODAL_DELETE_MSG (state, payload) {
-            console.log(payload);
             state.modalDeleteMsg.show = payload.show;
             state.modalDeleteMsg.msg = payload.msg;
+        },
+
+        SET_SHOW_NEW_CHAT (state, payload) {
+            state.showNewChat = payload;
         },
 
         SET_SELF (state, payload) {

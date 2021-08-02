@@ -152,6 +152,7 @@ export default {
             filters
         };
     },
+    emits: ['startOpenEmoji', 'finishOpenEmoji', 'startCloseEmoji', 'finishCloseEmoji'],
     mounted () {
         //TODO fix focus
         /*this.$root.$on('keyDown', (evt) => {
@@ -376,19 +377,19 @@ export default {
         },
 
         handleEmojiOpening () {
-            this.$root.$emit('startOpenEmoji');
+            this.$emit('startOpenEmoji');
         },
 
         handleEmojiOpened () {
-            this.$root.$emit('finishOpenEmoji');
+            this.$emit('finishOpenEmoji');
         },
 
         handleEmojiClosing () {
-            this.$root.$emit('startCloseEmoji');
+            this.$emit('startCloseEmoji');
         },
 
         handleEmojiClosed () {
-            this.$root.$emit('finishCloseEmoji');
+            this.$emit('finishCloseEmoji');
         },
 
         handleClickCloseSelectMsgs () {

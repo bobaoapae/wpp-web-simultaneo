@@ -81,7 +81,6 @@ export default {
             this.btn.label = 'PROCESSANDO';
             this.findChatFromNumber({ number }).then(chat => {
                 this.SET_ACTIVE_CHAT(chat);
-                this.$root.$emit('showNewChat', false);
                 router.push({ name: 'wpp' });
             }).catch(() => {
                 this.error.active = true;
