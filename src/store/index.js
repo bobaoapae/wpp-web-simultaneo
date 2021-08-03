@@ -592,6 +592,22 @@ const store = new Vuex.Store({
                                 break;
                             }
 
+                            case 'remove-property-chat': {
+                                const r = JSON.parse(payload);
+
+                                let funcao = async () => {
+                                    await context.dispatch('removeCustomPropertyChat', r);
+                                };
+
+                                if (context.state.isLoadingChat) {
+                                    context.state.poolContext.push(funcao);
+                                } else {
+                                    await funcao();
+                                }
+
+                                break;
+                            }
+
                             default: {
                                 context.commit('NEW_MSG_WS', { tag: eventOrTag, data: payload });
                             }
@@ -719,6 +735,10 @@ const store = new Vuex.Store({
             });
         },
 
+        getGroupParticipants (context, payload) {
+            return context.dispatch('sendWsMessage', { event: 'getGroupParticipants', payload: payload.chatId });
+        },
+
         getSelfInfo (context, payload) {
             return context.dispatch('sendWsMessage', { event: 'getSelfInfo' });
         },
@@ -797,12 +817,16 @@ const store = new Vuex.Store({
             return context.dispatch('addChatProperty', property);
         },
 
+        updateChatProperty (context, payload) {
+            return api.put('/api/properties/chat', payload);
+        },
+
         addChatProperty (context, payload) {
             return api.post('/api/properties/chat', payload);
         },
 
-        updateChatProperty (context, payload) {
-            return api.put('/api/properties/chat', payload);
+        deleteChatProperty (context, payload) {
+            return api.delete(`/api/properties/chat/${payload.chatId}/${payload.name}`);
         },
 
         getChatProperty (context, payload) {
@@ -1012,7 +1036,7 @@ const store = new Vuex.Store({
         },
 
         async newContact (context, payload) {
-            let contact = context.state.chats.find((element) => {
+            let contact = context.state.contacts.find((element) => {
                 return element.id === payload.id;
             });
 
@@ -1248,6 +1272,9 @@ const store = new Vuex.Store({
                         }
                         this.colors[id] = randomColor().hexString();
                         return this.colors[id];
+                    };
+                    el.getParticipants = function () {
+                        return context.dispatch('getGroupParticipants', { chatId: this.id });
                     };
                 }
             }
@@ -1622,6 +1649,14 @@ const store = new Vuex.Store({
                 if (payload.key === 'currentOperator') {
                     await context.dispatch('updateMyChats');
                 }
+            }
+        },
+
+        async removeCustomPropertyChat (context, payload) {
+            let chatId = payload.whatsAppId;
+            let chat = await context.dispatch('findChatFromId', { id: chatId });
+            if (chat) {
+                Vue.delete(chat.customProperties, payload.key);
             }
         }
 
