@@ -51,7 +51,7 @@ export default {
         };
     },
     methods: {
-        handleSubmit () {
+        async handleSubmit () {
             this.btn.label = 'CRIANDO...';
             this.btn.loading = true;
 
@@ -61,27 +61,30 @@ export default {
                 'senha': this.form.password
             };
 
-            api.post('/api/operators', data)
-                .then((r) => {
-                    this.btn.label = 'ENVIAR';
-                    this.btn.loading = false;
-                    this.$swal({ title: `Operador ${r.data.nome} criado com sucesso`, html: `Utilize o login <strong>${r.data.login}</strong> e senha <strong>${this.form.password}</strong> para entrar no sistema`, icon: 'success', heightAuto: false }).then(result => {
-                        this.$router.push('/');
-                    });
-                })
-                .catch(r => {
-                    let data = r.response.data;
-                    this.btn.label = 'ENVIAR';
-                    this.btn.loading = false;
-                    this.error.active = true;
-                    let error = data.error;
-                    if (error.includes('duplicate key')) {
-                        this.error.msg = 'Este usuário já está em uso';
-                    } else {
-                        this.error.msg = error;
-                    }
-                    this.$swal({ title: 'Erro', text: this.error.msg, icon: 'error', heightAuto: false });
+            try {
+                let result = await api.post('/api/operators', data);
+                this.btn.label = 'ENVIAR';
+                this.btn.loading = false;
+                await this.$swal({
+                    title: `Operador ${result.data.nome} criado com sucesso`,
+                    html: `Utilize o login <strong>${result.data.login}</strong> e senha <strong>${this.form.password}</strong> para entrar no sistema`,
+                    icon: 'success',
+                    heightAuto: false
                 });
+                await this.$router.push('/');
+            } catch (e) {
+                let data = e.response.data;
+                this.btn.label = 'ENVIAR';
+                this.btn.loading = false;
+                this.error.active = true;
+                let error = data.error;
+                if (error instanceof String && error.includes('duplicate key')) {
+                    this.error.msg = 'Este usuário já está em uso';
+                } else {
+                    this.error.msg = JSON.stringify(error);
+                }
+                this.$swal({ title: 'Erro', text: this.error.msg, icon: 'error', heightAuto: false });
+            }
         }
     }
 };
