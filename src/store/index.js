@@ -1632,6 +1632,7 @@ const store = new Vuex.Store({
                     msg.ack = payload.ack;
                     msg.type = payload.type;
                     msg.id = payload.id;
+                    msg.canBeRevoke = payload.canBeRevoke;
                     if (payload.blink !== undefined) {
                         msg.blink = payload.blink;
                     }
