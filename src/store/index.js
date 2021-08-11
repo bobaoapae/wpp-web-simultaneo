@@ -1666,7 +1666,7 @@ const store = createStore({
             let chatId = payload.whatsAppId;
             let chat = await context.dispatch('findChatFromId', { id: chatId });
             if (chat) {
-                Vue.delete(chat.customProperties, payload.key);
+                delete chat.customProperties[payload.key];
             }
         }
 
