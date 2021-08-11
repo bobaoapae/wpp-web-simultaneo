@@ -75,8 +75,8 @@ export default {
 
             if (this.inputFilter) {
                 chatVisible = chatVisible.filter(chat => {
-                    return chat.formattedTitle.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(this.inputFilter.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')) ||
-                        chat.id.replace('@c.us', '').includes(this.inputFilter.toLowerCase());
+                    return chat.formattedTitle && (chat.formattedTitle.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(this.inputFilter.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')) ||
+                        chat.id.replace('@c.us', '').includes(this.inputFilter.toLowerCase()));
                 });
             }
 
