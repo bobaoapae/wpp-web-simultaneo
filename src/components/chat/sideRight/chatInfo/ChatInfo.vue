@@ -5,44 +5,55 @@
             <span>Dados do {{activeChat.isChat ? 'Contato' :'Grupo'}}</span>
         </div>
         <div class="box-wrapper">
-            <div class="chat-profile">
+            <div class="box-content chat-profile">
                 <div class="box-img">
                     <Picture :full="true" :group="activeChat.isGroup" :id="activeChat.id" :key="activeChat.id"/>
                 </div>
                 <div class="chat-desc">
-                    <span class="chat-title">{{activeChat.formattedTitle}}</span>
+                    <span class="chat-title">{{ activeChat.formattedTitle }}</span>
                     <div class="chat-sub-title">
                         <PresenceChat :chat="activeChat"
                                       :key="activeChat.id" v-if="activeChat.isChat"/>
                         <div v-else>
-                            <span>Criado em {{createdTime}}</span>
+                            <span>Criado em {{ createdTime }}</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="box-wrapper" v-if="activeChat.customProperties && activeChat.customProperties.currentOperator" :key="activeChat.id">
-            <div class="box-current-user">
-                <span class="title">Operator Atribuido</span>
-                <span class="value">{{currentOperator}}</span>
+        <div class="box-wrapper" v-if="activeChat.customProperties && activeChat.customProperties.currentOperator"
+             :key="activeChat.id">
+            <div class="box-content box-current-user">
+                <span class="box-title">Operator Atribuido</span>
+                <span class="value">{{ currentOperator }}</span>
             </div>
         </div>
         <div class="box-wrapper">
-            <div class="box-chat-custom-properties">
-                <span class="title">Anotações</span>
-                <ul v-if="customProperties" :key="activeChat.id">
-                    <li :key="value.key" v-for="(value, name) in activeChat.customProperties">
-                        <div class="col-12 chat-custom-properties" v-if="name !== 'currentOperator' && name !== 'lastUserSendMessage'">
-                            <span class="col-5 p-0 mr-2" type="text">{{name}}:</span>
-                            <span class="col-5 p-0" type="text">{{value}}</span>
-                            <!--<button @click="deleteProperty(name)" class="col-2 p-0"></button>-->
+            <div class="box-content custom-properties">
+                <span class="box-title">Anotações</span>
+                <template v-if="customProperties">
+                    <div :key="value.key" v-for="(value, name) in activeChat.customProperties">
+                        <div class="custom-property"
+                             v-if="name !== 'currentOperator' && name !== 'lastUserSendMessage'">
+                            <span class="col-5 p-0 mr-2" type="text">{{ name }}:</span>
+                            <span class="col-5 p-0" type="text">{{ value }}</span>
+                            <span @click="deleteProperty(name)" id="delete-property"><img
+                                src="@/assets/images/wpp-icon-close-answer.svg"></span>
                         </div>
-                    </li>
-                </ul>
+                        <hr>
+                    </div>
+                </template>
                 <div class="loading-properties" v-else>
                     <LoadingSpinner/>
                 </div>
                 <b-button class="btn btn-success" @click="addProperty">Adicionar Nova Anotação</b-button>
+            </div>
+        </div>
+        <div class="box-wrapper" v-if="activeChat.isGroup && participants">
+            <div class="box-content group-participants">
+                <span class="box-title">{{ participants.length }} Participantes</span>
+                <ParticipantInfo :key="participant.id" :id="participant.id" :isAdmin="participant.isAdmin"
+                                 v-for="participant in participants"/>
             </div>
         </div>
     </div>
@@ -54,10 +65,11 @@ import api from '@/api';
 import LoadingSpinner from '@/components/shared/loadingSpinner/LoadingSpinner';
 import Picture from '@/components/shared/picture/Picture.vue';
 import PresenceChat from '@/components/shared/presenceChat/PresenceChat';
+import ParticipantInfo from '@/components/chat/sideRight/chatInfo/ParticipantInfo';
 
 export default {
     name: 'ChatInfo',
-    components: { Picture, LoadingSpinner, PresenceChat },
+    components: { ParticipantInfo, Picture, LoadingSpinner, PresenceChat },
     mounted () {
         //TODO close with esc
         /*this.$root.$on('keyDown', (evt) => {
@@ -93,11 +105,20 @@ export default {
                     await this.changeCustomPropertyChat(property);
                 }
                 return !!result;
+            },
+            default () {
+                return [];
+            }
+        },
+        participants: {
+            async get () {
+                let result = await this.activeChat.getParticipants();
+                return result;
             }
         }
     },
     methods: {
-        ...mapActions(['addAnnotation', 'getChatProperties', 'changeCustomPropertyChat']),
+        ...mapActions(['addAnnotation', 'getChatProperties', 'changeCustomPropertyChat', 'deleteChatProperty', 'findFormattedNameFromId']),
         timeConverterPresence (unixTimeStamp) {
             let a = new Date(unixTimeStamp * 1000);
             let year = a.getFullYear();
@@ -175,7 +196,7 @@ export default {
                     `
                     <div class="box-create-annotation" style="display: flex;flex-direction: column">
                         <label for="swal-input1">Nome</label><input id="swal-input1" class="swal2-input">
-                        <label for="swal-input2">Conteudo</label><textarea id="swal-input2" class="swal2-input"></textarea>
+                        <label for="swal-input2">Conteudo</label><textarea id="swal-input2" class="swal2-input" style="height: 20vh"></textarea>
                     </div>`,
                 preConfirm: () => {
                     return {
@@ -190,7 +211,24 @@ export default {
                 focusConfirm: false,
                 heightAuto: false
             });
-            if (result.value) { await this.addAnnotation({ chat: this.activeChat, name: result.value.name, value: result.value.value }); }
+            if (result.value) {
+                await this.addAnnotation({ chat: this.activeChat, name: result.value.name, value: result.value.value });
+            }
+        },
+
+        async deleteProperty (propertyName) {
+            let result = await this.$swal({
+                title: `Deseja excluir a anotação ${propertyName} ?`,
+                showCancelButton: true,
+                confirmButtonText: 'Sim',
+                cancelButtonText: 'Não',
+                icon: 'question',
+                focusConfirm: false,
+                heightAuto: false
+            });
+            if (result.value) {
+                await this.deleteChatProperty({ chatId: this.activeChat.id, name: propertyName });
+            }
         }
     }
 };
@@ -218,19 +256,20 @@ export default {
 }
 
 .box-wrapper {
-    padding-top: 5px;
-    padding-left: 30px;
-    padding-right: 30px;
-    padding-bottom: 20px;
+    padding: 5px 30px 20px;
     background-color: white;
     margin-bottom: 10px;
     animation: animation 1s cubic-bezier(.1, .82, .25, 1);
     box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+    display: flex;
+    justify-content: center;
 }
 
-.chat-profile {
-    height: 40%;
+.box-content {
     background: white;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
 }
 
 .chat-info {
@@ -239,62 +278,6 @@ export default {
     color: #4a4a4a;
     text-rendering: optimizeLegibility;
     font-feature-settings: "kern";
-
-}
-
-.chat-title {
-    font-size: 19px;
-    line-height: 28px;
-}
-
-.chat-sub-title {
-    font-size: 14px;
-    line-height: 20px;
-    color: rgba(0, 0, 0, .45);
-}
-
-.box-current-user {
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-}
-
-.box-current-user .title {
-    display: flex;
-}
-.box-current-user .value {
-    display: flex;
-}
-
-.box-chat-custom-properties ul {
-    margin: 0;
-    padding: 0;
-}
-
-.box-chat-custom-properties li {
-    list-style: none;
-}
-
-.chat-custom-properties input {
-    border-style: none;
-}
-
-.chat-custom-properties {
-    padding: 0;
-    margin: 0;
-}
-
-.loading-properties {
-    max-width: 50px;
-    width: 50px;
-    margin: auto;
-}
-
-.title {
-    color: #009688;
-    font-size: 14px;
-    line-height: normal;
 }
 
 .box-img {
@@ -310,6 +293,56 @@ export default {
     height: 100%;
     width: 100%;
     border-radius: 50%;
+}
+
+.chat-title {
+    font-size: 19px;
+    line-height: 28px;
+}
+
+.chat-sub-title {
+    font-size: 14px;
+    line-height: 20px;
+    color: rgba(0, 0, 0, .45);
+}
+
+.custom-properties ul {
+    margin: 0;
+    padding: 0;
+}
+
+.custom-properties li {
+    list-style: none;
+}
+
+.custom-properties input {
+    border-style: none;
+}
+
+.custom-property {
+    display: flex;
+}
+
+.delete-property {
+    color: red;
+}
+
+hr {
+    width: 100%;
+    text-align: center;
+    margin: 0;
+}
+
+.loading-properties {
+    max-width: 50px;
+    width: 50px;
+    margin: auto;
+}
+
+.box-title {
+    color: #009688;
+    font-size: 14px;
+    line-height: normal;
 }
 
 .close-info {
