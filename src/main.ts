@@ -6,7 +6,6 @@ import store from './store';
 import VueVirtualScroller from 'vue-virtual-scroller'
 import VueSweetalert2 from 'vue-sweetalert2';
 // @ts-ignore
-import VueTelInput from 'vue-tel-input';
 // @ts-ignore
 import BootstrapVue from 'bootstrap-vue-3';
 import ObserveVisibility from './observe-visibility'
@@ -16,13 +15,12 @@ import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 import 'sweetalert2/dist/sweetalert2.min.css';
 import 'emoji-mart-vue-fast/css/emoji-mart.css';
 
-const app = createApp({App});
+const app = createApp(App);
 
 app.use(store);
 app.use(router);
 app.use(VueVirtualScroller)
 app.use(VueSweetalert2);
-app.use(VueTelInput);
 app.use(BootstrapVue);
 app.use(ObserveVisibility);
 app.provide('appInstance', app);

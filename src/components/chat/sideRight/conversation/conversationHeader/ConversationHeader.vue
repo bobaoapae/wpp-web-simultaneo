@@ -54,7 +54,7 @@
 import filters from '@/filters';
 import { mapActions, mapState } from 'vuex';
 import Picture from '@/components/shared/picture/Picture.vue';
-import PresenceChat from '@/components/shared/presenceChat/PresenceChat';
+import PresenceChat from '@/components/shared/presenceChat/PresenceChat.vue';
 
 export default {
     name: 'ConversationHeader',

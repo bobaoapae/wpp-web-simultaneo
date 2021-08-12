@@ -54,8 +54,8 @@
 import filters from '@/filters';
 
 import { mapActions } from 'vuex';
-import MessageTime from '../messageTime/MessageTime';
-import Picture from '../picture/Picture';
+import MessageTime from '../messageTime/MessageTime.vue';
+import Picture from '../picture/Picture.vue';
 
 export default {
     name: 'MessageAudio',

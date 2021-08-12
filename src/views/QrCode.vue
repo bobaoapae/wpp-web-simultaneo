@@ -109,7 +109,7 @@
 
 <script>
 import { mapActions, mapState } from 'vuex';
-import LoadginSpinner from '../components/shared/loadingSpinner/LoadingSpinner';
+import LoadginSpinner from '../components/shared/loadingSpinner/LoadingSpinner.vue';
 
 export default {
     name: 'QrCode',

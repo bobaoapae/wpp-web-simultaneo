@@ -60,12 +60,14 @@
 </template>
 
 <script>
+import { defineAsyncComponent } from 'vue';
 import { mapActions, mapState } from 'vuex';
 import api from '@/api';
-import LoadingSpinner from '@/components/shared/loadingSpinner/LoadingSpinner';
-import Picture from '@/components/shared/picture/Picture.vue';
-import PresenceChat from '@/components/shared/presenceChat/PresenceChat';
-import ParticipantInfo from '@/components/chat/sideRight/chatInfo/ParticipantInfo';
+
+const LoadingSpinner = defineAsyncComponent(() => import('@/components/shared/loadingSpinner/LoadingSpinner.vue'));
+const Picture = defineAsyncComponent(() => import('@/components/shared/picture/Picture.vue'));
+const PresenceChat = defineAsyncComponent(() => import('@/components/shared/presenceChat/PresenceChat.vue'));
+const ParticipantInfo = defineAsyncComponent(() => import('@/components/chat/sideRight/chatInfo/ParticipantInfo.vue'));
 
 export default {
     name: 'ChatInfo',

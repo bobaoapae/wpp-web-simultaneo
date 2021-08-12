@@ -13,8 +13,8 @@
 
 <script>
 import filters from '@/filters';
-import MessageTime from '../messageTime/MessageTime';
-import Thumbnail from '../thumbnail/Thumbnail';
+import MessageTime from '../messageTime/MessageTime.vue';
+import Thumbnail from '../thumbnail/Thumbnail.vue';
 import { mapActions } from 'vuex';
 import { defineComponent, shallowRef } from 'vue';
 

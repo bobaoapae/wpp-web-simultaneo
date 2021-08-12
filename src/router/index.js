@@ -1,15 +1,16 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import NotFound from '@/views/NotFound';
-import Login from '@/views/Login';
-import Wpp from '@/views/Wpp';
-import ForgotPassword from '@/views/ForgotPassword';
-import NewOperator from '@/views/NewOperator';
-import ManageOperators from '@/views/ManageOperators';
-import ChangePassword from '@/views/ChangePassword';
-import ChangeNumber from '@/views/ChangeNumber';
-import SendMessageToNumber from '@/views/SendMessageToNumber';
-import ConfirmChangeNumber from '@/views/ConfirmChangeNumber';
 import store from '@/store';
+
+const NotFound = () => import('@/views/NotFound.vue');
+const Login = () => import('@/views/Login.vue');
+const Wpp = () => import('@/views/Wpp.vue');
+const ForgotPassword = () => import('@/views/ForgotPassword.vue');
+const NewOperator = () => import('@/views/NewOperator.vue');
+const ManageOperators = () => import('@/views/ManageOperators.vue');
+const ChangePassword = () => import('@/views/ChangePassword.vue');
+const ChangeNumber = () => import('@/views/ChangeNumber.vue');
+const SendMessageToNumber = () => import('@/views/SendMessageToNumber.vue');
+const ConfirmChangeNumber = () => import('@/views/ConfirmChangeNumber.vue');
 
 const routes = [
     {
@@ -72,7 +73,7 @@ const routes = [
         component: SendMessageToNumber
     },
     {
-        path: '/notFound',
+        path: '/:catchAll(.*)',
         name: 'not-found',
         component: NotFound
     }

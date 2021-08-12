@@ -1,11 +1,11 @@
 import { reactive } from 'vue';
 import { createStore } from 'vuex';
-import uniqueid from 'uniqid';
+import { v4 as uuid } from 'uuid';
 import visibility from 'vue-visibility-change';
 import vCardParse from 'vcard-parser';
 import api from '@/api';
 import randomColor from 'random-color';
-import WebSocketWorker from '@/ws-worker';
+import WebSocketWorker from '@/ws-worker/worker.js?worker';
 import throttledQueue from 'throttled-queue';
 import pako from 'pako';
 
@@ -374,7 +374,7 @@ const store = createStore({
         setNewEvent (context) {
             context.commit('RESET_WPP');
             context.commit('SET_TOKEN', sessionStorage.TOKEN);
-            context.commit('SET_WS_WORKER', WebSocketWorker);
+            context.commit('SET_WS_WORKER', WebSocketWorker());
             const wsWorker = context.state.wsWorker;
 
             wsWorker.postMessage({ cmd: 'ws-init', data: `${localStorage.baseURL.replace('http', 'ws')}/api/ws` });
@@ -631,7 +631,7 @@ const store = createStore({
         sendWsMessage (context, payload) {
             return new Promise((resolve, reject) => {
                 let payLoadSend = {
-                    tag: uniqueid(),
+                    tag: uuid(),
                     webSocketRequestPayLoad: payload
                 };
                 if (typeof (payLoadSend.webSocketRequestPayLoad.payload) === 'object') {

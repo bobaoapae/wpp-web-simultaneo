@@ -44,7 +44,7 @@
 
 <script>
 import { mapState } from 'vuex';
-import Contact from './contact/Contact';
+import Contact from './contact/Contact.vue';
 import { sort } from 'fast-sort';
 
 export default {

@@ -12,8 +12,8 @@
 
 <script>
 import { mapActions } from 'vuex';
-import MsgSymbol from './msgSymbol/MsgSymbol';
-import MsgType from './msgType/MsgType';
+import MsgSymbol from './msgSymbol/MsgSymbol.vue';
+import MsgType from './msgType/MsgType.vue';
 
 export default {
     name: 'quotedMsgContent',

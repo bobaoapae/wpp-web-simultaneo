@@ -16,7 +16,7 @@
 
 <script>
 import { mapActions } from 'vuex';
-import Picture from '@/components/shared/picture/Picture';
+import Picture from '@/components/shared/picture/Picture.vue';
 
 export default {
     name: 'ParticipantInfo',

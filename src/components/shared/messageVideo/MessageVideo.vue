@@ -25,7 +25,7 @@
 import { mapActions, mapMutations } from 'vuex';
 import LoadingMedia from '../loadingMedia/LoadingMedia.vue';
 import MessageTime from '../messageTime/MessageTime.vue';
-import PlayMedia from '../playMedia/PlayMedia';
+import PlayMedia from '../playMedia/PlayMedia.vue';
 
 export default {
     name: 'MessageVideo',

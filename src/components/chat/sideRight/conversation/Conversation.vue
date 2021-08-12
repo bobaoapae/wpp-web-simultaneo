@@ -9,9 +9,11 @@
 </template>
 
 <script>
+import { defineAsyncComponent } from 'vue';
 import ConversationHeader from './conversationHeader/ConversationHeader.vue';
-import InputMessage from './inputMessage/InputMessage';
-import MessagesList from './messagesList/MessagesList';
+import MessagesList from './messagesList/MessagesList.vue';
+
+const InputMessage = defineAsyncComponent(() => import('./inputMessage/InputMessage.vue'));
 
 export default {
     name: 'Conversation',

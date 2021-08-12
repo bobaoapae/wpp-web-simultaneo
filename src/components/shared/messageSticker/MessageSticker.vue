@@ -16,7 +16,7 @@
 <script>
 import { mapActions, mapState } from 'vuex';
 import MessageTime from '@/components/shared/messageTime/MessageTime.vue';
-import LoadingMedia from '../loadingMedia/LoadingMedia';
+import LoadingMedia from '../loadingMedia/LoadingMedia.vue';
 
 export default {
     name: 'MessageSticker',

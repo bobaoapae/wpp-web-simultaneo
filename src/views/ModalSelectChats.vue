@@ -24,7 +24,7 @@
 
 <script>
 import { mapMutations, mapState } from 'vuex';
-import ListContact from '@/components/chat/sideLeft/newChat/listContact/ListContact';
+import ListContact from '@/components/chat/sideLeft/newChat/listContact/ListContact.vue';
 
 export default {
     name: 'ModalSelectChats',

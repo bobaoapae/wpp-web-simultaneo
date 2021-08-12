@@ -45,7 +45,7 @@
 
 <script>
 import { mapActions, mapState } from 'vuex';
-import ChatRow from './chatRow/ChatRow';
+import ChatRow from './chatRow/ChatRow.vue';
 
 export default {
     name: 'ChatList',

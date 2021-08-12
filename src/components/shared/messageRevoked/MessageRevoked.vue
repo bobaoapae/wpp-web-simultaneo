@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import MessageTime from '../messageTime/MessageTime';
+import MessageTime from '../messageTime/MessageTime.vue';
 
 export default {
     name: 'MessageRevoked',

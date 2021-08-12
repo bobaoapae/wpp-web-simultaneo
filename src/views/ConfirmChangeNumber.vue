@@ -45,7 +45,7 @@
 
 <script>
 import api from '@/api';
-import LoadingSpinner from '@/components/shared/loadingSpinner/LoadingSpinner';
+import LoadingSpinner from '@/components/shared/loadingSpinner/LoadingSpinner.vue';
 import PhoneAwesome from 'awesome-phonenumber';
 
 export default {

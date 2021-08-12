@@ -74,23 +74,24 @@
 </template>
 
 <script>
-import { ref } from 'vue';
+import { defineAsyncComponent, ref } from 'vue';
 import { mapActions, mapMutations, mapState, useStore } from 'vuex';
 import filters from '@/filters';
 import { asyncComputed } from '@/AsyncComputed.ts';
-import MessageText from '@/components/shared/messageText/MessageText.vue';
-import MessagePhoto from '@/components/shared/messagePhoto/MessagePhoto.vue';
-import MessageSticker from '@/components/shared/messageSticker/MessageSticker.vue';
-import MessageVideo from '@/components/shared/messageVideo/MessageVideo.vue';
-import MessageGif from '@/components/shared/messageGif/MessageGif.vue';
-import MessageDocument from '@/components/shared/messageDocument/MessageDocument';
-import ForwardedIndicator from '@/components/shared/forwardedIndicator/ForwardedIndicator';
-import MessageAudio from '@/components/shared/messageAudio/MessageAudio';
-import QuotedMsg from '../quotedMsg/QuotedMsg';
-import MessageRevoked from '../messageRevoked/MessageRevoked';
-import MessageLocation from '../messageLocation/MessageLocation';
-import MessageContact from '../messageContact/MessageContact';
 import randomColor from 'random-color';
+
+const MessageText = defineAsyncComponent(() => import('@/components/shared/messageText/MessageText.vue'));
+const MessagePhoto = defineAsyncComponent(() => import('@/components/shared/messagePhoto/MessagePhoto.vue'));
+const MessageSticker = defineAsyncComponent(() => import('@/components/shared/messageSticker/MessageSticker.vue'));
+const MessageVideo = defineAsyncComponent(() => import('@/components/shared/messageVideo/MessageVideo.vue'));
+const MessageGif = defineAsyncComponent(() => import('@/components/shared/messageGif/MessageGif.vue'));
+const MessageDocument = defineAsyncComponent(() => import('@/components/shared/messageDocument/MessageDocument.vue'));
+const ForwardedIndicator = defineAsyncComponent(() => import('@/components/shared/forwardedIndicator/ForwardedIndicator.vue'));
+const MessageAudio = defineAsyncComponent(() => import('@/components/shared/messageAudio/MessageAudio.vue'));
+const QuotedMsg = defineAsyncComponent(() => import('../quotedMsg/QuotedMsg.vue'));
+const MessageRevoked = defineAsyncComponent(() => import('../messageRevoked/MessageRevoked.vue'));
+const MessageLocation = defineAsyncComponent(() => import('../messageLocation/MessageLocation.vue'));
+const MessageContact = defineAsyncComponent(() => import('../messageContact/MessageContact.vue'));
 
 export default {
     name: 'MessageContainer',

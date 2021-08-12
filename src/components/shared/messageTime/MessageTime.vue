@@ -6,10 +6,10 @@
 </template>
 
 <script>
-import MessageIconStatus from '../messageIconStatus/MessageIconStatus';
+import MessageIconStatus from '../messageIconStatus/MessageIconStatus.vue';
 
 export default {
-    name: 'MessageTime',
+    name: 'MessageTime.vue',
     components: {
         MessageIconStatus
     },

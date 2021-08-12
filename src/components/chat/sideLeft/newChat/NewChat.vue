@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import ListContact from './listContact/ListContact';
+import ListContact from './listContact/ListContact.vue';
 import { mapMutations, mapState } from 'vuex';
 
 export default {

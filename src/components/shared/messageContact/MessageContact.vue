@@ -15,8 +15,8 @@
 <script>
 import filters from '@/filters';
 
-import Picture from '../picture/Picture';
-import MessageTime from '../messageTime/MessageTime';
+import Picture from '../picture/Picture.vue';
+import MessageTime from '../messageTime/MessageTime.vue';
 import { mapActions, mapMutations } from 'vuex';
 
 export default {

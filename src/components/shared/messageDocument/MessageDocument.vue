@@ -57,7 +57,7 @@
 </template>
 
 <script>
-import MessageTime from '../messageTime/MessageTime';
+import MessageTime from '../messageTime/MessageTime.vue';
 import { mapActions } from 'vuex';
 
 export default {

@@ -16,7 +16,7 @@
                               :showOnline="false"
                               v-if="chat.isChat"
                               :key="chat.id"/>
-                <LastMsg :chat="chat" v-if="!chat.isChat || (!chat.isComposing && !chat.isRecording)"
+                <LastMsg :chat="chat" v-if="chat.lastMsg && (!chat.isChat || (!chat.isComposing && !chat.isRecording))"
                          :key="chat.lastMsg.id._serialized"/>
                 <Icons :chat="chat"/>
                 <div v-if="!processing" :class="{'chat-menu-open' : showMenuIcon || menuOpen}">
@@ -69,7 +69,7 @@ import NameChat from '../nameChat/NameChat.vue';
 import Picture from '@/components/shared/picture/Picture.vue';
 import PresenceChat from '@/components/shared/presenceChat/PresenceChat.vue';
 import { mapMutations, mapState } from 'vuex';
-import LoadingSpinner from '../../../../shared/loadingSpinner/LoadingSpinner';
+import LoadingSpinner from '../../../../shared/loadingSpinner/LoadingSpinner.vue';
 
 export default {
     name: 'ChatRow',

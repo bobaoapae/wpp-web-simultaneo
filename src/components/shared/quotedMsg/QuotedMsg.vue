@@ -25,9 +25,9 @@
 
 <script>
 import { mapActions, mapState } from 'vuex';
-import Author from './author/Author';
-import QuotedMsgContent from './quotedMsgContent/quotedMsgContent';
-import QuotedMedia from './quotedMedia/QuotedMedia';
+import Author from './author/Author.vue';
+import QuotedMsgContent from './quotedMsgContent/quotedMsgContent.vue';
+import QuotedMedia from './quotedMedia/QuotedMedia.vue';
 import Picture from '@/components/shared/picture/Picture.vue';
 
 export default {

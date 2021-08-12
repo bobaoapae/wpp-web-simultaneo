@@ -113,14 +113,16 @@
 </template>
 
 <script>
-import { Picker } from 'emoji-mart-vue-fast/src';
+import { defineAsyncComponent } from 'vue';
 import { mapActions, mapMutations, mapState } from 'vuex';
 import { msg } from '@/helper.js';
-import { rageSave } from '@/rangeSelectionSaveRestore.js';
-import QuotedMsg from '../../../../shared/quotedMsg/QuotedMsg';
-import OpusMediaRecorder from 'opus-media-recorder';
-import EncoderWorker from '@/opus-worker';
 import filters from '@/filters';
+import { rageSave } from '@/rangeSelectionSaveRestore.js';
+import opusWorker from 'opus-media-recorder/encoderWorker.js?worker';
+import OpusMediaRecorder from 'opus-media-recorder';
+
+const Picker = defineAsyncComponent(() => import('emoji-mart-vue-fast/src'));
+const QuotedMsg = defineAsyncComponent(() => import('@/components/shared/quotedMsg/QuotedMsg.vue'));
 
 const OggOpusWasm = import('opus-media-recorder/OggOpusEncoder.wasm');
 const WebMOpusWasm = import('opus-media-recorder/WebMOpusEncoder.wasm');
@@ -252,7 +254,7 @@ export default {
                         const ogg = await OggOpusWasm;
                         const webm = await WebMOpusWasm;
                         const workerOptions = {
-                            encoderWorkerFactory: () => EncoderWorker,
+                            encoderWorkerFactory: () => opusWorker,
                             OggOpusEncoderWasmPath: ogg.default,
                             WebMOpusEncoderWasmPath: webm.default
                         };

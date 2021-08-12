@@ -11,10 +11,12 @@
 </template>
 
 <script>
+import { defineAsyncComponent } from 'vue';
+import { mapState } from 'vuex';
 import LeftHeader from './leftHeader/LeftHeader.vue';
 import ChatList from './chatList/ChatList.vue';
-import NewChat from './newChat/NewChat.vue';
-import { mapState } from 'vuex';
+
+const NewChat = defineAsyncComponent(() => import('./newChat/NewChat.vue'));
 
 export default {
     name: 'SideLeft',

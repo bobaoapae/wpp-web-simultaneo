@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import LoadingSpinner from '@/components/shared/loadingSpinner/LoadingSpinner';
+import LoadingSpinner from '@/components/shared/loadingSpinner/LoadingSpinner.vue';
 import { mapActions } from 'vuex';
 
 export default {

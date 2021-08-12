@@ -14,11 +14,13 @@
 </template>
 
 <script>
-import MessageContainer from '@/components/shared/messageContainer/MessageContainer.vue';
-import MessageInfo from '@/components/shared/messageInfo/MessageInfo.vue';
-import MessageDateFormatted from '@/components/shared/messageDateFormatted/MessageDateFormatted.vue';
-import LoadingEarlyMsg from '@/components/shared/loadingEarlyMsg/LoadingEarlyMsg';
+import { defineAsyncComponent } from 'vue';
 import { mapState } from 'vuex';
+
+const MessageContainer = defineAsyncComponent(() => import('@/components/shared/messageContainer/MessageContainer.vue'));
+const MessageInfo = defineAsyncComponent(() => import('@/components/shared/messageInfo/MessageInfo.vue'));
+const MessageDateFormatted = defineAsyncComponent(() => import('@/components/shared/messageDateFormatted/MessageDateFormatted.vue'));
+const LoadingEarlyMsg = defineAsyncComponent(() => import('@/components/shared/loadingEarlyMsg/LoadingEarlyMsg.vue'));
 
 export default {
     name: 'MessagesList',

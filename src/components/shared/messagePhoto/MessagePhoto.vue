@@ -28,8 +28,8 @@
 </template>
 
 <script>
-import MessageTime from '../messageTime/MessageTime';
-import LoadingMedia from '../loadingMedia/LoadingMedia';
+import MessageTime from '../messageTime/MessageTime.vue';
+import LoadingMedia from '../loadingMedia/LoadingMedia.vue';
 import { mapActions, mapMutations } from 'vuex';
 
 export default {
