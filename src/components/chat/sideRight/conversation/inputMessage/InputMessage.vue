@@ -118,16 +118,11 @@ import { mapActions, mapMutations, mapState } from 'vuex';
 import { msg } from '@/helper.js';
 import filters from '@/filters';
 import { rageSave } from '@/rangeSelectionSaveRestore.js';
-import opusWorker from 'opus-media-recorder/encoderWorker.js?worker';
-import OpusMediaRecorder from 'opus-media-recorder';
+import Recorder from 'opus-recorder';
+import encoderPath from 'opus-recorder/dist/encoderWorker.min.js?url';
 
 const Picker = defineAsyncComponent(() => import('emoji-mart-vue-fast/src'));
 const QuotedMsg = defineAsyncComponent(() => import('@/components/shared/quotedMsg/QuotedMsg.vue'));
-
-const OggOpusWasm = import('opus-media-recorder/OggOpusEncoder.wasm');
-const WebMOpusWasm = import('opus-media-recorder/WebMOpusEncoder.wasm');
-
-window.MediaRecorder = OpusMediaRecorder;
 
 export default {
     name: 'InputMessage',
@@ -141,8 +136,7 @@ export default {
             emojiIndex: msg.emojiIndex(),
             answerVisible: false,
             quickRepliesVisible: false,
-            recorder: {},
-            gumStream: {},
+            recorder: null,
             recording: false,
             ignoreRecording: false,
             time: 0,
@@ -232,40 +226,25 @@ export default {
         ...mapActions(['uploadFile', 'getCurrentOperator', 'changeCustomPropertyChat', 'setCurrentOperator']),
         ...mapMutations(['SET_SELECT_MSGS', 'SET_SELECT_CHATS']),
 
-        toggleRecording () {
+        async toggleRecording () {
             this.recording = !this.recording;
 
-            if (this.recorder && this.recorder.state === 'recording') {
+            if (this.recorder) {
                 this.recorder.stop();
-                this.gumStream.getAudioTracks().forEach(value => value.stop());
-                clearInterval(this.interval);
+                this.recorder = null;
                 this.time = 0;
+                clearInterval(this.interval);
             } else {
-                navigator.mediaDevices.getUserMedia({
-                    audio: true
-                })
-                    .then(async (stream) => {
-                        this.interval = setInterval(() => {
-                            this.time++;
-                        }, 1000);
-
-                        this.gumStream = stream;
-                        const options = { mimeType: 'audio/ogg' };
-                        const ogg = await OggOpusWasm;
-                        const webm = await WebMOpusWasm;
-                        const workerOptions = {
-                            encoderWorkerFactory: () => opusWorker,
-                            OggOpusEncoderWasmPath: ogg.default,
-                            WebMOpusEncoderWasmPath: webm.default
-                        };
-                        this.recorder = new MediaRecorder(stream, options, workerOptions);
-                        this.recorder.ondataavailable = (e) => {
-                            if (!this.ignoreRecording) {
-                                this.handleSendPtt(e.data);
-                            }
-                        };
-                        this.recorder.start();
-                    });
+                this.recorder = new Recorder({ encoderPath });
+                this.recorder.ondataavailable = (e) => {
+                    if (!this.ignoreRecording) {
+                        this.handleSendPtt(e);
+                    }
+                };
+                this.interval = setInterval(() => {
+                    this.time++;
+                }, 1000);
+                this.recorder.start();
             }
         },
 
@@ -284,15 +263,15 @@ export default {
         },
 
         handleSendPtt (data) {
-            let currentChat = this.chat;
-            this.uploadFile(new File([data], new Date().getTime() + '.ptt', { type: data.type })).then(tag => {
+            let currentChat = this.activeChat;
+            this.uploadFile(new File([data], new Date().getTime() + '.ptt', { type: 'audio/ogg' })).then(tag => {
                 currentChat.buildAndSendMessage({ file: { uuid: tag, forceDocument: false } });
             });
         },
 
         handleSendMessage () {
             if (this.user.isOperator && this.canBindToOperator && this.bindToOperator) {
-                this.setCurrentOperator({ chat: this.chat });
+                this.setCurrentOperator({ chat: this.activeChat });
             }
             this.activeChat.buildAndSendMessage();
             this.$refs.input.innerHTML = '';
@@ -327,7 +306,7 @@ export default {
                 files.push(items[i].getAsFile());
             }
             if (files.length > 0) {
-                let currentChat = this.chat;
+                let currentChat = this.activeChat;
                 files.forEach(async file => {
                     let tag = await this.uploadFile(file);
                     await currentChat.buildAndSendMessage({ file: { uuid: tag, forceDocument: false } });
