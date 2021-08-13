@@ -4,8 +4,7 @@
   "private": true,
   "scripts": {
     "serve": "vite",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "build": "vite build"
   },
   "dependencies": {
     "awesome-phonenumber": "^2.56.2",
