@@ -35,15 +35,14 @@
                 <b-dropdown-item to="/manageoperators" v-if="user.canCreateOperator">Gerenciar Operadores
                 </b-dropdown-item>
                 <b-dropdown-form class="text-nowrap" v-if="user.canCreateOperator">
-                    <!--<b-form-checkbox name="check-button" switch v-model="user.configuracao.enviarNomeOperadores">
+                    <b-form-checkbox name="check-button" switch v-model="user.configuracao.enviarNomeOperadores">
                         Enviar Nome Operadores
-                    </b-form-checkbox>-->
+                    </b-form-checkbox>
                 </b-dropdown-form>
                 <b-dropdown-form class="text-nowrap" v-if="user.canCreateOperator">
-                    <!--TODO checkBox
                     <b-form-checkbox name="check-button" switch v-model="user.configuracao.operadorPodeExcluirMsg">
-                       Operadores podem excluir mensagens?
-                   </b-form-checkbox>-->
+                        Operadores podem excluir mensagens?
+                    </b-form-checkbox>
                 </b-dropdown-form>
             </b-dropdown>
         </div>

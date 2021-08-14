@@ -1,4 +1,4 @@
-import emojiRegex from 'emoji-regex';
+import emojiRegex from 'emoji-regex/RGI_Emoji';
 import data from 'emoji-mart-vue-fast/data/apple.json';
 import { EmojiIndex } from 'emoji-mart-vue-fast/src';
 import { escape, unescape } from 'html-escaper';

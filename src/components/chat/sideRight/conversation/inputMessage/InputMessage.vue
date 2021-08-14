@@ -3,7 +3,7 @@
         <div class="input-msg" v-show="!showSelectMsgs">
             <b-collapse id="collapse-emoji" v-model="activeChat.emojiVisible" @show="handleEmojiOpening"
                         @shown="handleEmojiOpened" @hide="handleEmojiClosing" @hidden="handleEmojiClosed">
-                <picker
+                <Picker
                     :color="'#009688'"
                     :data="emojiIndex"
                     :emojiSize="32"
@@ -53,13 +53,12 @@
 
             <div id="input-message">
                 <div class="box-icon-emoji">
-                    <b-img
-                        @mousedown.prevent
+                    <img
                         alt="Button emoji"
                         class="btn-emoji-open"
                         role="button"
                         src="@/assets/images/wpp-icon-emoji.svg"
-                        v-b-toggle.collapse-emoji
+                        v-b-toggle:collapse-emoji
                     />
                 </div>
 
@@ -120,8 +119,8 @@ import filters from '@/filters';
 import { rageSave } from '@/rangeSelectionSaveRestore.js';
 import Recorder from 'opus-recorder';
 import encoderPath from 'opus-recorder/dist/encoderWorker.min.js?url';
+import { Picker } from 'emoji-mart-vue-fast/src';
 
-const Picker = defineAsyncComponent(() => import('emoji-mart-vue-fast/src'));
 const QuotedMsg = defineAsyncComponent(() => import('@/components/shared/quotedMsg/QuotedMsg.vue'));
 
 export default {
@@ -339,7 +338,7 @@ export default {
         addEmoji (emoji) {
             this.$refs.input.focus();
             emoji = emoji.native;
-            document.execCommand('insertHTML', false, this.$options.filters.emojify(emoji));
+            document.execCommand('insertHTML', false, this.filters.emojify(emoji));
         },
 
         handleEnterPress () {

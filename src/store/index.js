@@ -282,6 +282,7 @@ const store = createStore({
                         wsEvent.resolve(webSocketResponse.response);
                     }
                 } else {
+                    console.error(webSocketResponse);
                     wsEvent.reject(webSocketResponse);
                 }
             }

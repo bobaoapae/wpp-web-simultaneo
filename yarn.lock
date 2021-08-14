@@ -574,10 +574,10 @@ bluebird@^3.7.2:
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.7.2.tgz#9f229c15be272454ffa973ace0dbee79a1b0c36f"
   integrity sha512-XpNj6GDQzdfW+r2Wnn7xiSAd7TM3jzkxGXBGTtWKuSXv1xUV+azxAm8jdWZN06QTQk+2N2XB9jRDkvbmQmcRtg==
 
-bootstrap-vue-3@^0.0.1-alpha.3:
-  version "0.0.1-alpha.3"
-  resolved "https://registry.yarnpkg.com/bootstrap-vue-3/-/bootstrap-vue-3-0.0.1-alpha.3.tgz#2f07460c0eccc6ff80a06bf619db1aeaa0fa7e99"
-  integrity sha512-tPezgQWtvRoCJfExYVGZuEUGsvR2pU0kMXWI3StW7B7Lo+q2teSWq2gCz8IN9bzfdxeTMk0FWeWlBjAmndQowA==
+bootstrap-vue-3@^0.0.1-alpha.4:
+  version "0.0.1-alpha.4"
+  resolved "https://registry.yarnpkg.com/bootstrap-vue-3/-/bootstrap-vue-3-0.0.1-alpha.4.tgz#d56e438dfa658248c1392a97ab3158b1e118d09e"
+  integrity sha512-g3R4+wXBDVWNUnbaZh+M0vqq3xPnogQznZFlEdDHuRFY/RFpSBBHIiqxmS7g77KzjYCRDOs1Msonl3XZOsjzNQ==
   dependencies:
     bootstrap "^5.0.2"
     core-js "^3.6.5"
@@ -816,6 +816,11 @@ emoji-regex@^8.0.0:
   version "8.0.0"
   resolved "https://registry.yarnpkg.com/emoji-regex/-/emoji-regex-8.0.0.tgz#e818fd69ce5ccfcb404594f842963bf53164cc37"
   integrity sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==
+
+emoji-regex@^9.2.2:
+  version "9.2.2"
+  resolved "https://registry.yarnpkg.com/emoji-regex/-/emoji-regex-9.2.2.tgz#840c8803b0d8047f4ff0cf963176b32d4ef3ed72"
+  integrity sha512-L18DaJsXSUk2+42pv8mLs5jJT2hqFkFE4j21wOmgbUqsZ2hL72NsUU785g9RXgo3s0ZNgVl42TiHp3ZtOv/Vyg==
 
 emojis-list@^3.0.0:
   version "3.0.0"
