@@ -117,7 +117,7 @@ export default {
 
 <style scoped>
 .scroller {
-    max-height: calc(100vh - 193px);
+    max-height: calc(100vh - 234px);
 }
 
 .active {

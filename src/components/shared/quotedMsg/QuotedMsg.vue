@@ -1,5 +1,7 @@
 <template>
-    <div :style="{borderColor: color}" class="quoted-msg" v-scroll-to="{
+    <!--
+    TODO: scroll-to
+    v-scroll-to="{
      el: `#${encodedQuotedMsgId}`,
      container: '.messages-list',
      duration: 500,
@@ -10,7 +12,9 @@
      onDone: onDone,
      x: false,
      y: true
- }" v-if="senderObj">
+ }"
+    -->
+    <div :style="{borderColor: color}" class="quoted-msg" v-if="senderObj">
         <div class="box-content">
             <Author :color="color" :senderObj="senderObj"/>
             <QuotedMsgContent :msg="quotedMsg"/>
@@ -24,7 +28,8 @@
 </template>
 
 <script>
-import { mapActions, mapState } from 'vuex';
+import { mapActions, useStore } from 'vuex';
+import { asyncComputed } from '@/AsyncComputed';
 import Author from './author/Author.vue';
 import QuotedMsgContent from './quotedMsgContent/quotedMsgContent.vue';
 import QuotedMedia from './quotedMedia/QuotedMedia.vue';
@@ -39,9 +44,29 @@ export default {
             type: Object
         }
     },
-    computed: {
-        ...mapState(['self', 'activeChat']),
+    setup (props) {
+        const store = useStore();
 
+        const senderObj = asyncComputed(async () => {
+            return props.quotedMsg.senderObj();
+        }, { default: false, lazy: true });
+
+        const color = asyncComputed(async () => {
+            let senderObj = await props.quotedMsg.senderObj();
+            if (store.state.activeChat.isGroup && senderObj.id !== store.state.self.id) {
+                return store.state.activeChat.getColor(senderObj.id);
+            } else if (senderObj.id !== store.state.self.id) {
+                return '#74cff8';
+            }
+            return '#35cd96';
+        });
+
+        return {
+            senderObj,
+            color
+        };
+    },
+    computed: {
         encodedQuotedMsgId () {
             return this.quotedMsg.id._serialized.replace(/[^\w\s]/gi, '').replace(/[_]/gi, '');
         },
@@ -53,30 +78,6 @@ export default {
                 }
             }
             return '';
-        }
-    },
-    asyncComputed: {
-        senderObj: {
-            async get () {
-                return this.quotedMsg.senderObj();
-            },
-            default () {
-                return false;
-            }
-        },
-        color: {
-            async get () {
-                let senderObj = await this.quotedMsg.senderObj();
-                if (this.activeChat.isGroup && senderObj.id !== this.self.id) {
-                    return this.activeChat.getColor(senderObj.id);
-                } else if (senderObj.id !== this.self.id) {
-                    return '#74cff8';
-                }
-                return '#35cd96';
-            },
-            default () {
-                return false;
-            }
         }
     },
     methods: {

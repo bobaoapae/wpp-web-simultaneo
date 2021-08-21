@@ -41,11 +41,8 @@
 </template>
 
 <script>
-// e2e_notification identity
-// e2e_notification encrypt
-
-// gp2
-import { mapActions, mapState } from 'vuex';
+import { mapState, useStore } from 'vuex';
+import { asyncComputed } from '@/AsyncComputed';
 
 export default {
     name: 'MessageInfo',
@@ -54,6 +51,38 @@ export default {
             type: Object,
             required: true
         }
+    },
+    setup (props) {
+
+        const store = useStore();
+
+        const formattedNumbers = asyncComputed(async () => {
+            if (props.msg.recipients && props.msg.recipients.length >= 1) {
+                let promises = props.msg.recipients.map((e) => {
+                    return store.dispatch('findFormattedNameFromId', { id: e });
+                });
+                let results = await Promise.all(promises);
+                return results.join(', ');
+            }
+            return '';
+        }, { default: props.msg.recipients ? props.msg.recipients.join(', ') : '', lazy: true });
+
+        const isMe = asyncComputed(async () => {
+            let senderObj = await props.msg.senderObj();
+            if (senderObj && senderObj.id === store.state.self.id) {
+                return 'Você';
+            } else if (senderObj && senderObj.formattedName) {
+                return senderObj.formattedName;
+            } else if (senderObj) {
+                return '+' + senderObj.id.replace('@c.us', '');
+            }
+            return 'Você';
+        }, { default: '', lazy: true });
+
+        return {
+            formattedNumbers,
+            isMe
+        };
     },
     computed: {
         ...mapState(['activeChat', 'self']),
@@ -84,45 +113,6 @@ export default {
         },
         isInvite () {
             return this.msg.type === 'gp2' && this.msg.subtype === 'invite';
-        }
-    },
-    methods: {
-        ...mapActions(['findFormattedNameFromId'])
-    },
-    asyncComputed: {
-        formattedNumbers: {
-            async get () {
-                if (this.msg.recipients && this.msg.recipients.length >= 1) {
-                    let promises = this.msg.recipients.map((e) => {
-                        return this.findFormattedNameFromId({ id: e });
-                    });
-                    let results = await Promise.all(promises);
-                    return results.join(', ');
-                }
-                return '';
-            },
-            default () {
-                if (this.msg.recipients) {
-                    return this.msg.recipients.join(', ');
-                }
-                return '';
-            }
-        },
-        isMe: {
-            async get () {
-                let senderObj = await this.msg.senderObj();
-                if (senderObj && senderObj.id === this.self.id) {
-                    return 'Você';
-                } else if (senderObj && senderObj.formattedName) {
-                    return senderObj.formattedName;
-                } else if (senderObj) {
-                    return '+' + senderObj.id.replace('@c.us', '');
-                }
-                return 'Você';
-            },
-            default () {
-                return '';
-            }
         }
     }
 };

@@ -58,6 +58,7 @@ export function asyncComputed<T>(func: (() => Promise<T>), options: { default?: 
                 }
             }, error => {
                 if (lastRetryCalled === me) {
+                    console.error(error);
                     state.status = AsyncStatus.ERROR;
                     state.error = error;
                     state.hasEverRun = true;

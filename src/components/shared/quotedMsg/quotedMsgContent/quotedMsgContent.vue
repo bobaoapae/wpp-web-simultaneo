@@ -3,15 +3,17 @@
         <MsgSymbol :msg="msg"/>
 
         <div class="box-content">
-            <span :inner-html.prop="caption" class="content" v-if="msg.caption"></span>
-            <span :inner-html.prop="body" class="content" v-else-if="msg.body && msg.isChat"></span>
+            <span v-html="caption" class="content" v-if="msg.caption"></span>
+            <span v-html="body" class="content" v-else-if="msg.body && msg.isChat"></span>
             <MsgType :msg="msg" v-else/>
         </div>
     </div>
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { useStore } from 'vuex';
+import { asyncComputed } from '@/AsyncComputed';
+import filters from '@/filters';
 import MsgSymbol from './msgSymbol/MsgSymbol.vue';
 import MsgType from './msgType/MsgType.vue';
 
@@ -24,60 +26,42 @@ export default {
             required: true
         }
     },
-    asyncComputed: {
-        caption: {
-            async get () {
-                let caption = this.$options.filters.emojify(this.$options.filters.formatMsg(this.msg.caption));
-                if (this.msg.mentionedJidList && this.msg.mentionedJidList.length > 0) {
-                    let promises = [];
-                    let results = {};
-                    for (let x = 0; x < this.msg.mentionedJidList.length; x++) {
-                        promises.push(this.findChatFromId({ id: this.msg.mentionedJidList[x] }).then(value => {
-                            results[this.msg.mentionedJidList[x]] = value;
-                        }));
-                    }
-                    await Promise.all(promises);
-                    for (let x = 0; x < this.msg.mentionedJidList.length; x++) {
-                        let chat = results[this.msg.mentionedJidList[x]];
-                        let contact = await chat.contact();
-                        let name = contact.formattedName || contact.verifiedName || contact.pushname;
-                        caption = caption.replace('@' + this.msg.mentionedJidList[x].split('@')[0], `<span class='mention-symbol'>@</span><span class='btn-link' dir="ltr">${name}</span>`);
-                    }
+    setup (props) {
+        const store = useStore();
+
+        const getMentionedJid = async (text) => {
+            let caption = filters.emojify(filters.formatMsg(text));
+            if (props.msg.mentionedJidList && props.msg.mentionedJidList.length > 0) {
+                let promises = [];
+                let results = {};
+                for (let x = 0; x < props.msg.mentionedJidList.length; x++) {
+                    promises.push(store.dispatch('findChatFromId', { id: props.msg.mentionedJidList[x] }).then(value => {
+                        results[props.msg.mentionedJidList[x]] = value;
+                    }));
                 }
-                return caption;
-            },
-            default () {
-                return this.msg.caption;
-            }
-        },
-        body: {
-            async get () {
-                let body = this.$options.filters.emojify(this.$options.filters.formatMsg(this.msg.body));
-                if (this.msg.mentionedJidList && this.msg.mentionedJidList.length > 0) {
-                    let promises = [];
-                    let results = {};
-                    for (let x = 0; x < this.msg.mentionedJidList.length; x++) {
-                        promises.push(this.findChatFromId({ id: this.msg.mentionedJidList[x] }).then(value => {
-                            results[this.msg.mentionedJidList[x]] = value;
-                        }));
-                    }
-                    await Promise.all(promises);
-                    for (let x = 0; x < this.msg.mentionedJidList.length; x++) {
-                        let chat = results[this.msg.mentionedJidList[x]];
-                        let contact = await chat.contact();
-                        let name = contact.formattedName || contact.verifiedName || contact.pushname;
-                        body = body.replace('@' + this.msg.mentionedJidList[x].split('@')[0], `<span class='mention-symbol'>@</span><span class='btn-link' dir="ltr">${name}</span>`);
-                    }
+                await Promise.all(promises);
+                for (let x = 0; x < props.msg.mentionedJidList.length; x++) {
+                    let chat = results[props.msg.mentionedJidList[x]];
+                    let contact = await chat.contact();
+                    let name = contact.formattedName || contact.verifiedName || contact.pushname;
+                    caption = caption.replace('@' + props.msg.mentionedJidList[x].split('@')[0], `<span class='mention-symbol'>@</span><span class='btn-link' dir="ltr">${name}</span>`);
                 }
-                return body;
-            },
-            default () {
-                return this.msg.body;
             }
-        }
-    },
-    methods: {
-        ...mapActions(['findChatFromId'])
+            return caption;
+        };
+
+        const caption = asyncComputed(() => {
+            return getMentionedJid(props.msg.caption);
+        }, { default: props.msg.caption, lazy: true });
+
+        const body = asyncComputed(() => {
+            return getMentionedJid(props.msg.body);
+        }, { default: props.msg.body, lazy: true });
+
+        return {
+            caption,
+            body
+        };
     }
 };
 </script>

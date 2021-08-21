@@ -15,7 +15,8 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { useStore } from 'vuex';
+import { asyncComputed } from '@/AsyncComputed';
 import Picture from '@/components/shared/picture/Picture.vue';
 
 export default {
@@ -33,28 +34,22 @@ export default {
             required: true
         }
     },
-    asyncComputed: {
-        formattedName: {
-            async get () {
-                let result = await this.findFormattedNameFromId({ id: this.id });
-                return result;
-            },
-            default () {
-                return this.id.split('@')[0];
-            }
-        },
-        pushName: {
-            async get () {
-                let result = await this.findContactFromId({ id: this.id });
-                return result.pushname;
-            },
-            default () {
-                return false;
-            }
-        }
-    },
-    methods: {
-        ...mapActions(['findFormattedNameFromId', 'findContactFromId'])
+    setup (props) {
+
+        const store = useStore();
+
+        const formattedName = asyncComputed(() => {
+            return store.dispatch('findFormattedNameFromId', { id: props.id });
+        });
+        const pushName = asyncComputed(async () => {
+            let contact = await store.dispatch('findContactFromId', { id: props.id });
+            return contact.pushname;
+        });
+
+        return {
+            formattedName,
+            pushName
+        };
     }
 };
 </script>

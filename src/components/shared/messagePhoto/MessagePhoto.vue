@@ -20,7 +20,7 @@
         </div>
 
         <div @dblclick.prevent.stop class="box-caption" v-if="msg.caption">
-            <span :inner-html.prop="caption"></span>
+            <span v-html="caption"></span>
         </div>
 
         <MessageTime :class="{'no-caption' : !haveCaption, 'custom-time' : !haveCaption}" :msg="msg"/>

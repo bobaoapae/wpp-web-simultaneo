@@ -61,8 +61,9 @@
 
 <script>
 import { defineAsyncComponent } from 'vue';
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapState, useStore } from 'vuex';
 import api from '@/api';
+import { asyncComputed } from '@/AsyncComputed';
 
 const LoadingSpinner = defineAsyncComponent(() => import('@/components/shared/loadingSpinner/LoadingSpinner.vue'));
 const Picture = defineAsyncComponent(() => import('@/components/shared/picture/Picture.vue'));
@@ -82,6 +83,32 @@ export default {
             }
         });*/
     },
+    setup () {
+        const store = useStore();
+
+        const currentOperator = asyncComputed(async () => {
+            let result = await api.get(`/api/users/${store.state.activeChat.customProperties.currentOperator}`);
+            return result.data.nome;
+        }, { lazy: true });
+
+        const customProperties = asyncComputed(async () => {
+            let result = await store.dispatch('getChatProperties', { chatId: store.state.activeChat.id });
+            for await (let property of result) {
+                await store.dispatch('changeCustomPropertyChat', property);
+            }
+            return !!result;
+        }, { lazy: true });
+
+        const participants = asyncComputed(() => {
+            return store.state.activeChat.getParticipants();
+        }, { lazy: true });
+
+        return {
+            currentOperator,
+            customProperties,
+            participants
+        };
+    },
     computed: {
         ...mapState(['activeChat']),
 
@@ -91,32 +118,6 @@ export default {
 
         createdTime () {
             return this.timeConverterCreated(this.activeChat.id.split('@')[0].split('-')[1]);
-        }
-    },
-    asyncComputed: {
-        currentOperator: {
-            async get () {
-                let result = await api.get(`/api/users/${this.activeChat.customProperties.currentOperator}`);
-                return result.data.nome;
-            }
-        },
-        customProperties: {
-            async get () {
-                let result = await this.getChatProperties({ chatId: this.activeChat.id });
-                for await (let property of result) {
-                    await this.changeCustomPropertyChat(property);
-                }
-                return !!result;
-            },
-            default () {
-                return [];
-            }
-        },
-        participants: {
-            async get () {
-                let result = await this.activeChat.getParticipants();
-                return result;
-            }
         }
     },
     methods: {
