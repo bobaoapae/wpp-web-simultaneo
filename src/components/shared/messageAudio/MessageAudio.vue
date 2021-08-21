@@ -1,13 +1,17 @@
 <template>
-    <div class="message-audio" :class="{'played' : msg.ack === 4}" v-b-visible.once="onVisible">
+    <div class="message-audio" :class="{'played' : msg.ack === 4}" v-observe-visibility="{
+         throttle: 300,
+         callback: onVisible,
+         once: true
+    }">
         <div class="audio-container">
             <div class="audio-picture">
-                <Picture :id="msg.senderObj.id" v-if="msg.isPtt"/>
+                <Picture :id="msg.author ? msg.author : msg.from" v-if="msg.isPtt"/>
                 <img src="@/assets/images/wpp-icon-audio.svg" v-else/>
             </div>
             <div class="audio-wrapper">
-                <span class="audio-time" v-if="!audioPlaying">{{ msg.duration | timeFormatted }}</span>
-                <span class="audio-time" v-else>{{ audioTime | timeFormatted }}</span>
+                <span class="audio-time" v-if="!audioPlaying">{{ filters.timeFormatted(msg.duration) }}</span>
+                <span class="audio-time" v-else>{{ filters.timeFormatted(audioTime) }}</span>
                 <div class="audio-controls">
                     <div class="box-spinner" v-if="srcLoading && !srcAudio">
                         <svg
@@ -47,9 +51,11 @@
 </template>
 
 <script>
+import filters from '@/filters';
+
 import { mapActions } from 'vuex';
-import MessageTime from '../messageTime/MessageTime';
-import Picture from '../picture/Picture';
+import MessageTime from '../messageTime/MessageTime.vue';
+import Picture from '../picture/Picture.vue';
 
 export default {
     name: 'MessageAudio',
@@ -65,6 +71,7 @@ export default {
     },
     data () {
         return {
+            filters,
             srcAudio: '',
             srcLoading: false,
             srcError: false,
@@ -88,6 +95,7 @@ export default {
                 this.srcAudio = e.base64.replace('vorbis', 'ogg');
                 this.srcError = false;
             }).catch(e => {
+                console.error(e);
                 this.srcError = true;
             }).finally(() => {
                 this.srcLoading = false;
@@ -108,12 +116,12 @@ export default {
             this.$refs.audio.currentTime = timeTarget;
         },
 
-        handlePlayAudio (evt) {
+        handlePlayAudio () {
             this.handleMarkPlayed();
             this.audioPlaying = true;
         },
 
-        handlePauseAudio (evt) {
+        handlePauseAudio () {
             this.audioPlaying = false;
         },
 

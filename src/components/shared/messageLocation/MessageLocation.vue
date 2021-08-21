@@ -1,32 +1,32 @@
 <template>
     <div class="location">
-        <a :href="link" target="_blank" v-b-visible="handleVisible">
-            <MglMap
+        <a :href="link" target="_blank" v-observe-visibility="{
+         throttle: 300,
+         callback: handleVisible,
+         once: true
+    }">
+            <!--<MapboxVue
                 v-if="visible"
-                :accessToken="mapboxAccessToken"
+                :access-token="mapboxAccessToken"
+                :map-options="{
+                                style: mapStyle,
+                                center: [msg.lng, msg.lat],
+                                zoom: 14,
+                                interactive: false
+                              }"
                 :attributionControl="false"
-                :center="[msg.lng, msg.lat]"
-                :interactive="false"
-                :mapStyle.sync="mapStyle"
-                :zoom="14"
-            >
-                <MglMarker :coordinates="[msg.lng, msg.lat]" color="red"/>
-            </MglMap>
+                :nav-control="{ show: false }"
+                @map-load="loaded"
+            />-->
         </a>
         <MessageTime :class="{'no-caption' : !msg.hasCaption, 'custom-time' : !msg.hasCaption}" :msg="msg"/>
     </div>
 </template>
 
 <script>
-import { MglMap, MglMarker } from 'vue-mapbox';
-import MessageTime from '../messageTime/MessageTime';
+import Mapbox from 'mapbox-gl';
 
 export default {
-    components: {
-        MglMap,
-        MglMarker,
-        MessageTime
-    },
     data () {
         return {
             mapboxAccessToken: 'pk.eyJ1IjoiYm9iYW9hcGFlIiwiYSI6ImNrNnR6ZG56djA0bHozbG4yZDMxMW42YjMifQ.iR0-urBMWuzYfqW2-St0gA',
@@ -46,6 +46,11 @@ export default {
         }
     },
     methods: {
+        loaded (map) {
+            new Mapbox.Marker({ color: 'red' })
+                .setLngLat([this.msg.lng, this.msg.lat])
+                .addTo(map);
+        },
         handleVisible (visible) {
             this.visible = visible;
         }
@@ -54,6 +59,10 @@ export default {
 </script>
 
 <style scoped>
+#map {
+    width: 100%;
+    height: 100%;
+}
 .location {
     width: 270px;
     height: 203px;

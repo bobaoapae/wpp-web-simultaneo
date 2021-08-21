@@ -17,13 +17,15 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
-import ChatInfo from '@/components/chat/sideRight/chatInfo/ChatInfo';
+import { defineAsyncComponent } from 'vue';
+import { mapActions, mapState } from 'vuex';
 import SideLeft from '@/components/chat/sideLeft/SideLeft.vue';
 import SideRight from '@/components/chat/sideRight/SideRight.vue';
-import ModalMedia from './ModalMedia';
-import ModalDeleteMsg from './ModalDeleteMsg';
-import ModalSelectChats from './ModalSelectChats';
+
+const ChatInfo = defineAsyncComponent(() => import('@/components/chat/sideRight/chatInfo/ChatInfo.vue'));
+const ModalMedia = defineAsyncComponent(() => import('./ModalMedia.vue'));
+const ModalDeleteMsg = defineAsyncComponent(() => import('./ModalDeleteMsg.vue'));
+const ModalSelectChats = defineAsyncComponent(() => import('./ModalSelectChats.vue'));
 
 export default {
     name: 'Chat',

@@ -2,7 +2,7 @@
     <div class="contact-container">
         <div class="contact">
             <Picture :id="vCardChatId"/>
-            <div :inner-html.prop="msg.vCard.fn[0].value | emojify" class="contact-name"></div>
+            <div v-html="filters.emojify(msg.vCard.fn[0].value)" class="contact-name"></div>
             <MessageTime :msg="msg"/>
         </div>
         <hr/>
@@ -13,8 +13,10 @@
 </template>
 
 <script>
-import Picture from '../picture/Picture';
-import MessageTime from '../messageTime/MessageTime';
+import filters from '@/filters';
+
+import Picture from '../picture/Picture.vue';
+import MessageTime from '../messageTime/MessageTime.vue';
 import { mapActions, mapMutations } from 'vuex';
 
 export default {
@@ -39,6 +41,11 @@ export default {
             return '';
         }
     },
+    data () {
+        return {
+            filters
+        };
+    },
     methods: {
         ...mapMutations(['SET_ACTIVE_CHAT']),
         ...mapActions(['findChatFromId']),
@@ -47,8 +54,6 @@ export default {
             this.findChatFromId({ id: this.vCardChatId }).then(chat => {
                 this.SET_ACTIVE_CHAT(chat);
             });
-
-            this.$root.$emit('showNewChat', false);
         }
     }
 };

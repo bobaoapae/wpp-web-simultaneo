@@ -14,7 +14,6 @@
             <div class="chats">
                 <transition name="slide-fade">
                     <div id="chat-forward">
-                        <InputSearch/>
                         <ListContact @chatClick="handleChatClick"/>
                     </div>
                 </transition>
@@ -24,28 +23,27 @@
 </template>
 
 <script>
-import { mapState, mapMutations } from 'vuex';
-import InputSearch from '../components/chat/sideLeft/newChat/inputSearch/InputSearch';
-import ListContact from '../components/chat/sideLeft/newChat/listContact/ListContact';
+import { mapMutations, mapState } from 'vuex';
+import ListContact from '@/components/chat/sideLeft/newChat/listContact/ListContact.vue';
 
 export default {
     name: 'ModalSelectChats',
     components: {
-        InputSearch,
         ListContact
     },
     computed: {
         ...mapState(['selectChats', 'selectMsgs', 'activeChat'])
     },
     mounted () {
-        this.$root.$on('keyDown', (evt) => {
+        //TODO close on esc
+        /*this.$root.$on('keyDown', (evt) => {
             if (this.selectChats.show) {
                 evt.preventDefault();
                 if (evt.key === 'Escape') {
                     this.closeModal();
                 }
             }
-        });
+        });*/
     },
     methods: {
         ...mapMutations(['TOGGLE_SELECT_CHAT', 'SET_SELECT_CHATS']),

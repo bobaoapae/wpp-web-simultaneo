@@ -1,6 +1,11 @@
 <template>
-    <div class="presence-chat" v-b-visible="handleVisible">
-        <span class="last-time" v-if="showLastTime && chat.isOffline && chat.hasLastTimeAvailable">{{this.lastTimeAvailable}}</span>
+    <div class="presence-chat" v-observe-visibility="{
+         throttle: 300,
+         callback: handleVisible,
+         once: true
+    }">
+        <span class="last-time"
+              v-if="showLastTime && chat.isOffline && chat.hasLastTimeAvailable">{{ this.lastTimeAvailable }}</span>
         <span class="online" v-else-if="showOnline && chat.isOnline">online</span>
         <span class="writing" v-else-if="chat.isComposing">escrevendo...</span>
         <span class="recording" v-else-if="chat.isRecording">gravando áudio...</span>
@@ -64,7 +69,7 @@ export default {
             mes++;
 
             let completeDate = `
-                    ${date >= 10 ? date : '0' + date}/${mes >= 10 ? mes : '0' + mes}/${year}
+                    ${date === 10 ? date : '0' + date}/${mes >= 10 ? mes : '0' + mes}/${year}
                 `;
 
             if (min < 10) {
@@ -99,7 +104,3 @@ export default {
     }
 };
 </script>
-
-<style scoped>
-
-</style>

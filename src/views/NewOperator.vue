@@ -7,19 +7,20 @@
                 <form @submit.prevent="handleSubmit" id="form-login">
                     <p class="title">Novo Operador</p>
 
-                    <input id="name" placeholder="Nome" required type="text" v-model="form.name" />
+                    <input id="name" placeholder="Nome" required type="text" v-model="form.name"/>
 
-                    <input id="login" placeholder="Login" required type="text" v-model="form.login" minlength="5" maxlength="40" />
+                    <input id="login" placeholder="Login" required type="text" v-model="form.login" minlength="4"
+                           maxlength="40"/>
 
-                    <input id="password" placeholder="Senha" required type="password" v-model="form.password" />
-
-                    <span class="error" v-if="error.active">
-                        {{error.msg}}
-                    </span>
+                    <input id="password" placeholder="Senha" required type="password" v-model="form.password"/>
 
                     <button :disabled="btn.loading" type="submit">
-                        {{btn.label}}
+                        {{ btn.label }}
                     </button>
+
+                    <div class="text-center">
+                        <router-link class="text-center" to="/">Voltar</router-link>
+                    </div>
 
                     <hr/>
                 </form>
@@ -51,7 +52,7 @@ export default {
         };
     },
     methods: {
-        handleSubmit () {
+        async handleSubmit () {
             this.btn.label = 'CRIANDO...';
             this.btn.loading = true;
 
@@ -61,25 +62,30 @@ export default {
                 'senha': this.form.password
             };
 
-            api.post('/api/operators', data)
-                .then((r) => {
-                    this.btn.label = 'ENVIAR';
-                    this.btn.loading = false;
-                    alert('Operador Criado com Sucesso!');
-                    this.$router.push('/');
-                })
-                .catch(r => {
-                    let data = r.response.data;
-                    this.btn.label = 'ENVIAR';
-                    this.btn.loading = false;
-                    this.error.active = true;
-                    let error = data.error;
-                    if (error.includes('duplicate key')) {
-                        this.error.msg = 'Este usuário já está em uso';
-                    } else {
-                        this.error.msg = error;
-                    }
+            try {
+                let result = await api.post('/api/operators', data);
+                this.btn.label = 'ENVIAR';
+                this.btn.loading = false;
+                await this.$swal({
+                    title: `Operador ${result.data.nome} criado com sucesso`,
+                    html: `Utilize o login <strong>${result.data.login}</strong> e senha <strong>${this.form.password}</strong> para entrar no sistema`,
+                    icon: 'success',
+                    heightAuto: false
                 });
+                await this.$router.push('/');
+            } catch (e) {
+                let data = e.response.data;
+                this.btn.label = 'ENVIAR';
+                this.btn.loading = false;
+                this.error.active = true;
+                let error = data.error;
+                if (error instanceof String && error.includes('duplicate key')) {
+                    this.error.msg = 'Este usuário já está em uso';
+                } else {
+                    this.error.msg = JSON.stringify(error);
+                }
+                this.$swal({ title: 'Erro', text: this.error.msg, icon: 'error', heightAuto: false });
+            }
         }
     }
 };
@@ -125,7 +131,7 @@ export default {
     background: #fff;
     border-radius: 10px;
     box-shadow: 0 17px 50px 0 rgba(0, 0, 0, 0.19),
-        0 12px 15px 0 rgba(0, 0, 0, 0.24);
+    0 12px 15px 0 rgba(0, 0, 0, 0.24);
 }
 
 .content-header {
@@ -189,7 +195,7 @@ hr {
 .separator span.line {
     height: 1px;
     flex-grow: 1;
-    background: rgba(0,0,0,.1);
+    background: rgba(0, 0, 0, .1);
 }
 
 .new-account-link {

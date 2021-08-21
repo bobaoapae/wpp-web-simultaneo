@@ -7,11 +7,13 @@
                 <form @submit.prevent="handleLogin" id="form-login">
                     <p>Login</p>
 
-                    <input id="user" placeholder="Login" required type="text" v-model="form.user"/>
+                    <input id="user" autocomplete="username" placeholder="Login" required type="text"
+                           v-model="form.user"/>
 
                     <input
                         :type="showPass ? 'text' : 'password'"
                         id="password"
+                        autocomplete="current-password"
                         placeholder="Senha"
                         required
                         v-model="form.pass"

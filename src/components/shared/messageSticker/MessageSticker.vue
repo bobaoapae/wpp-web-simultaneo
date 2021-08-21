@@ -1,5 +1,9 @@
 <template>
-    <div class="sticker-container" ref="stickerContainer" v-b-visible.once="onVisible">
+    <div class="sticker-container" ref="stickerContainer" v-observe-visibility="{
+         throttle: 300,
+         callback: onVisible,
+         once: true
+    }">
         <div class="box-sticker">
             <img :src="this.sticker" alt="sticker" class="sticker" v-if="this.sticker"/>
             <LoadingMedia v-else/>
@@ -10,9 +14,9 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 import MessageTime from '@/components/shared/messageTime/MessageTime.vue';
-import LoadingMedia from '../loadingMedia/LoadingMedia';
+import LoadingMedia from '../loadingMedia/LoadingMedia.vue';
 
 export default {
     name: 'MessageSticker',

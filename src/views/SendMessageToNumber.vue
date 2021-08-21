@@ -7,7 +7,7 @@
                 <form @submit.prevent="handleSubmit" id="form-login" v-if="!error.active && !success">
                     <p class="title">Informe o número do contato</p>
 
-                    <vue-tel-input
+                    <VueTelInput
                         v-model="inputNumber"
                         v-bind="bindProps"
                         @validate="onValidate"/>
@@ -42,9 +42,11 @@
 
 import { mapActions, mapMutations } from 'vuex';
 import router from '@/router';
+import VueTelInput from 'vue-tel-input';
 
 export default {
     name: 'SendMessageToNumber',
+    components: { VueTelInput },
     data () {
         return {
             success: false,
@@ -81,7 +83,6 @@ export default {
             this.btn.label = 'PROCESSANDO';
             this.findChatFromNumber({ number }).then(chat => {
                 this.SET_ACTIVE_CHAT(chat);
-                this.$root.$emit('showNewChat', false);
                 router.push({ name: 'wpp' });
             }).catch(() => {
                 this.error.active = true;

@@ -108,8 +108,8 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
-import LoadginSpinner from '../components/shared/loadingSpinner/LoadingSpinner';
+import { mapActions, mapState } from 'vuex';
+import LoadginSpinner from '../components/shared/loadingSpinner/LoadingSpinner.vue';
 
 export default {
     name: 'QrCode',

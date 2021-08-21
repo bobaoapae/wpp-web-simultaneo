@@ -1,33 +1,34 @@
-import Vue from 'vue';
-import VueRouter from 'vue-router';
-import Login from '@/views/Login';
-import Wpp from '@/views/Wpp';
-import ForgotPassword from '@/views/ForgotPassword';
-import NewOperator from '@/views/NewOperator';
-import ChangePassword from '@/views/ChangePassword';
-import ChangeNumber from '@/views/ChangeNumber';
-import SendMessageToNumber from '@/views/SendMessageToNumber';
-import ConfirmChangeNumber from '@/views/ConfirmChangeNumber';
-import NotFound from '@/views/NotFound';
+import { createRouter, createWebHistory } from 'vue-router';
 import store from '@/store';
 
-Vue.use(VueRouter);
+const NotFound = () => import('@/views/NotFound.vue');
+const Login = () => import('@/views/Login.vue');
+const Wpp = () => import('@/views/Wpp.vue');
+const ForgotPassword = () => import('@/views/ForgotPassword.vue');
+const NewOperator = () => import('@/views/NewOperator.vue');
+const ManageOperators = () => import('@/views/ManageOperators.vue');
+const ChangePassword = () => import('@/views/ChangePassword.vue');
+const ChangeNumber = () => import('@/views/ChangeNumber.vue');
+const SendMessageToNumber = () => import('@/views/SendMessageToNumber.vue');
+const ConfirmChangeNumber = () => import('@/views/ConfirmChangeNumber.vue');
 
 const routes = [
     {
         path: '/',
         name: 'wpp',
         component: Wpp,
-        beforeEnter: (to, from, next) => {
+        beforeEnter: async (to, from, next) => {
             if (sessionStorage.TOKEN) {
-                store.dispatch('closeWs');
-                store.dispatch('fetchUser').then(value => {
+                await store.dispatch('closeWs');
+                await store.dispatch('fetchUser').then(() => {
                     next();
                 }).catch(reason => {
+                    console.error(reason);
                     router.push('/login');
                 });
             } else {
-                router.push('/login');
+                next();
+                await router.push('/login');
             }
         }
     },
@@ -45,6 +46,11 @@ const routes = [
         path: '/newoperator',
         name: 'new-operator',
         component: NewOperator
+    },
+    {
+        path: '/manageoperators',
+        name: 'manage-operators',
+        component: ManageOperators
     },
     {
         path: '/changepassword',
@@ -67,16 +73,15 @@ const routes = [
         component: SendMessageToNumber
     },
     {
-        path: '*',
+        path: '/:catchAll(.*)',
         name: 'not-found',
         component: NotFound
     }
 ];
 
-const router = new VueRouter({
-    mode: 'history',
-    base: process.env.BASE_URL,
-    routes
+const router = createRouter({
+    history: createWebHistory(),
+    routes: routes
 });
 
 export default router;

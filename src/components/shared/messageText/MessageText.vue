@@ -12,10 +12,11 @@
 </template>
 
 <script>
-import MessageTime from '../messageTime/MessageTime';
-import Thumbnail from '../thumbnail/Thumbnail';
+import filters from '@/filters';
+import MessageTime from '../messageTime/MessageTime.vue';
+import Thumbnail from '../thumbnail/Thumbnail.vue';
 import { mapActions } from 'vuex';
-import Vue from 'vue';
+import { defineComponent, shallowRef } from 'vue';
 
 export default {
     name: 'MessageText',
@@ -25,7 +26,8 @@ export default {
     },
     data () {
         return {
-            componentMsg: null
+            componentMsg: null,
+            filters
         };
     },
     props: {
@@ -35,27 +37,29 @@ export default {
         }
     },
     async mounted () {
-        let body = this.$options.filters.emojify(this.$options.filters.formatMsg(this.msg.body));
+        let body = this.filters.emojify(this.filters.formatMsg(this.msg.body));
         if (this.msg.mentionedJidList && this.msg.mentionedJidList.length > 0) {
             let promises = [];
             let results = {};
             for (let x = 0; x < this.msg.mentionedJidList.length; x++) {
-                promises.push(this.findChatFromId({ id: this.msg.mentionedJidList[x] }).then(value => {
-                    results[this.msg.mentionedJidList[x]] = value;
+                promises.push(this.findContactFromId({ id: this.msg.mentionedJidList[x] }).then(contact => {
+                    results[this.msg.mentionedJidList[x]] = contact;
                 }));
             }
             await Promise.all(promises);
             for (let x = 0; x < this.msg.mentionedJidList.length; x++) {
-                let chat = results[this.msg.mentionedJidList[x]];
-                let name = chat.contact.formattedName || chat.contact.verifiedName || chat.contact.pushname;
-                body = body.replace('@' + this.msg.mentionedJidList[x].split('@')[0], `<span class='mention-symbol'>@</span><span class='btn-link' dir="ltr">${name}</span>`);
+                let contact = results[this.msg.mentionedJidList[x]];
+                let name = contact.formattedName || contact.verifiedName || contact.pushname;
+                body = body.replace('@' + this.msg.mentionedJidList[x].split('@')[0], `<span class='mention-symbol'>@</span><span class='btn-link' dir="ltr" @click="clickMention('${this.msg.mentionedJidList[x]}')">${name}</span>`);
             }
         }
 
-        this.componentMsg = Vue.component('componentMsg', {
-            template: `<div>${body}</div>`,
+        this.componentMsg = shallowRef(defineComponent({
+            name: 'componentMsg',
+            template: `
+                <div>${body}</div>`,
             methods: {
-                ...mapActions(['getGroupInviteInfo']),
+                ...mapActions(['getGroupInviteInfo', 'findChatFromId']),
 
                 groupInviteLinkClick (link) {
                     this.getGroupInviteInfo({ link }).then(inviteLinkInfo => {
@@ -67,12 +71,17 @@ export default {
                     this.getGroupInviteInfo({ link }).then(inviteLinkInfo => {
                         console.log(inviteLinkInfo);
                     });
+                },
+
+                async clickMention (id) {
+                    let chat = await this.findChatFromId({ id: id });
+                    console.log(chat);
                 }
             }
-        });
+        }));
     },
     methods: {
-        ...mapActions(['findChatFromId'])
+        ...mapActions(['findContactFromId'])
     }
 };
 </script>
@@ -97,7 +106,7 @@ export default {
     font-size: 14.2px;
 }
 
-.message-body >>> .mention-symbol {
+.message-body ::v-deep(.mention-symbol) {
     color: rgba(0, 0, 0, 0.25)
 }
 </style>

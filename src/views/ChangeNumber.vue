@@ -7,10 +7,10 @@
                 <form @submit.prevent="handleSubmit" id="form-login" v-if="!error.active && !success">
                     <p class="title">Mudar meu número</p>
 
-                    <vue-tel-input
+                    <VueTelInput
                         :placeholder="'Informe um número com WhatsApp'"
                         v-model="inputTelefone"
-                    @input="onInput"/>
+                        @input="onInput"/>
                   <div>
                       <span id="disabled-wrapper">
                         <button class="mt-3" type="submit" :disabled="btn.loading || !dadosTelefone.isValid">
@@ -45,9 +45,11 @@
 
 <script>
 import api from '@/api';
+import VueTelInput from 'vue-tel-input';
 
 export default {
     name: 'ChangePassword',
+    components: { VueTelInput },
     data () {
         return {
             success: false,
@@ -72,7 +74,7 @@ export default {
             this.btn.loading = true;
             this.btn.label = 'PROCESSANDO';
             api.put('/api/users/alterarNumero', f)
-                .then((r) => {
+                .then(() => {
                     this.success = true;
                 })
                 .catch(reason => {

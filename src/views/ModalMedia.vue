@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import { mapState, mapMutations, mapActions } from 'vuex';
+import { mapActions, mapMutations, mapState } from 'vuex';
 
 export default {
     name: 'ModalMedia',
@@ -34,14 +34,15 @@ export default {
         ...mapState(['modal'])
     },
     mounted () {
-        this.$root.$on('keyDown', (evt) => {
+        //TODO close on esc
+        /*this.$root.$on('keyDown', (evt) => {
             if (this.modal.show) {
                 evt.preventDefault();
                 if (evt.key === 'Escape') {
                     this.closeModal();
                 }
             }
-        });
+        });*/
     },
     methods: {
         ...mapMutations(['SET_MODAL']),

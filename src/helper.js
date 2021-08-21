@@ -1,6 +1,6 @@
-import emojiRegex from 'emoji-regex';
+import emojiRegex from 'emoji-regex/RGI_Emoji';
 import data from 'emoji-mart-vue-fast/data/apple.json';
-import { EmojiIndex } from 'emoji-mart-vue-fast';
+import { EmojiIndex } from 'emoji-mart-vue-fast/src';
 import { escape, unescape } from 'html-escaper';
 
 const emojiIndex = new EmojiIndex(data);
@@ -73,7 +73,7 @@ export const msg = {
             }
 
             if (url.includes('chat.whatsapp')) {
-                return `<a href="#" @click="groupInviteLinkClick('${url}')">${unescape(url)}</a><hr/><button class="btn btn-block" style="color: #0056b3;flex-grow: 1;overflow: hidden;font-size: 14px;line-height: 20px;text-overflow: ellipsis;white-space: nowrap;" @click="groupViewInfo('${url}')">Ver Grupo</button></br>`;
+                return `<a href="#" @click="groupInviteLinkClick('${url}')">${unescape(url)}</a><hr/><button class="btn btn-block" style="color: #0056b3;flex-grow: 1;overflow: hidden;font-size: 14px;line-height: 20px;text-overflow: ellipsis;white-space: nowrap;" @click="groupViewInfo('${url}')">Ver Grupo</button><br>`;
             }
 
             return `<a href="${href}" target="_blank">${unescape(url)}</a></br>`;
@@ -107,7 +107,7 @@ export const msg = {
 
     formatStyle (msg) {
         let regex1 = new RegExp(/(?:^|[\s\W_])\*(\S|\S[^\n]*?\S)\*(?=$|[[\s\W_])/g);
-        msg = msg.replace(regex1, function (match, p1, p2, p3, offset, string) {
+        msg = msg.replace(regex1, function (match, p1) {
             if (match.charAt(0) === '*') {
                 return `<strong>${p1}</strong>`;
             }
@@ -116,7 +116,7 @@ export const msg = {
 
         regex1 = new RegExp(/```([\s\S]*?\S[\s\S]*?)```/g);
 
-        msg = msg.replace(regex1, function (match, p1, p2, p3, offset, string) {
+        msg = msg.replace(regex1, function (match, p1) {
             if (match.charAt(0) === '`') {
                 return `<pre>${p1}</pre>`;
             }
@@ -125,7 +125,7 @@ export const msg = {
 
         regex1 = new RegExp(/(?:^|[\s\W_])_(\S|\S[^\n]*?\S)_(?=$|[[\s\W_])/g);
 
-        msg = msg.replace(regex1, function (match, p1, p2, p3, offset, string) {
+        msg = msg.replace(regex1, function (match, p1) {
             if (match.charAt(0) === '_') {
                 return `<i>${p1}</i>`;
             }
@@ -134,7 +134,7 @@ export const msg = {
 
         regex1 = new RegExp(/(?:^|[\s\W_])~(\S|\S[^\n]*?\S)~(?=$|[[\s\W_])/g);
 
-        msg = msg.replace(regex1, function (match, p1, p2, p3, offset, string) {
+        msg = msg.replace(regex1, function (match, p1) {
             if (match.charAt(0) === '~') {
                 return `<del>${p1}</del>`;
             }

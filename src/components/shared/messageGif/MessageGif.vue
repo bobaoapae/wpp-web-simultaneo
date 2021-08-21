@@ -1,5 +1,9 @@
 <template>
-    <div class="message-gif" v-b-visible.once="onVisible">
+    <div class="message-gif" v-observe-visibility="{
+         throttle: 300,
+         callback: onVisible,
+         once: true
+    }">
         <div class="gif-container">
             <div class="box-preview blur" v-if="!srcVideo">
                 <img :src=" 'data:image/jpeg;base64,'+ msg.body" alt="body">
@@ -53,7 +57,8 @@ export default {
                     await Promise.all(promises);
                     for (let x = 0; x < this.msg.mentionedJidList.length; x++) {
                         let chat = results[this.msg.mentionedJidList[x]];
-                        let name = chat.contact.formattedName || chat.contact.verifiedName || chat.contact.pushname;
+                        let contact = await chat.contact();
+                        let name = contact.formattedName || contact.verifiedName || contact.pushname;
                         caption = caption.replace('@' + this.msg.mentionedJidList[x].split('@')[0], `<span class='mention-symbol'>@</span><span class='btn-link' dir="ltr">${name}</span>`);
                     }
                 }
@@ -134,7 +139,7 @@ video {
     bottom: 3px;
 }
 
-.box-caption >>> .mention-symbol {
+.box-caption ::v-deep(.mention-symbol) {
     color: rgba(0, 0, 0, 0.25)
 }
 </style>

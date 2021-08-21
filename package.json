@@ -1,75 +1,70 @@
 {
-  "name": "wpp-web-vue",
+  "name": "wpp-clone",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "serve": "vite",
+    "build": "vite build"
   },
   "dependencies": {
-    "@ianwalter/vuex-reset": "^4.3.4",
-    "awesome-phonenumber": "^2.50.0",
+    "awesome-phonenumber": "^2.56.2",
     "axios": "^0.21.1",
-    "bootstrap": "^4.6.0",
-    "bootstrap-vue": "^2.21.2",
-    "bottleneck": "^2.19.5",
-    "core-js": "^3.12.1",
+    "bootstrap": "^5.1.0",
+    "bootstrap-vue-3": "^0.0.1-alpha.4",
+    "core-js": "^3.16.1",
     "emoji-mart-vue-fast": "^10.0.1",
     "emoji-regex": "^9.2.2",
     "fast-sort": "^3.0.2",
-    "flatted": "^3.1.1",
-    "hacktimer": "^1.1.3",
     "html-escaper": "^3.0.3",
-    "mapbox-gl": "^2.2.0",
-    "opus-media-recorder": "^0.8.0",
+    "mapbox-gl": "^2.4.0",
+    "mapbox-gl-vue": "^2.0.4",
+    "opus-recorder": "^8.0.4",
+    "pako": "^1.0.11",
     "random-color": "^1.0.1",
     "throttled-queue": "^1.0.7",
-    "uniqid": "^5.3.0",
+    "uuid": "^8.3.2",
     "vcard-parser": "^1.0.0",
-    "vue": "^2.6.12",
-    "vue-async-computed": "^3.9.0",
-    "vue-debounce": "^2.6.0",
-    "vue-mapbox": "^0.4.1",
-    "vue-router": "^3.5.1",
-    "vue-scrollto": "^2.20.0",
-    "vue-tel-input": "^5.3.0",
-    "vue-template-compiler": "^2.6.12",
-    "vue-virtual-scroller": "github:bobaoapae/vue-virtual-scroller#1.0.11",
+    "vue": "^3.2.1",
+    "vue-class-component": "^8.0.0-0",
+    "vue-router": "^4.0.11",
+    "vue-sweetalert2": "^5.0.2",
+    "vue-tel-input": "^5.5.0",
+    "vue-virtual-scroller": "^2.0.0-alpha.1",
     "vue-visibility-change": "^1.2.1",
-    "vuex": "^3.6.2",
-    "wasm-loader": "^1.3.0",
-    "worker-loader": "^2.0.0"
+    "vue3-async-computed": "^3.0.0",
+    "vuex": "^4.0.2",
+    "wasm-loader": "^1.3.0"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "^4.5.13",
-    "@vue/cli-plugin-eslint": "^4.5.13",
-    "@vue/cli-plugin-router": "^4.5.13",
-    "@vue/cli-plugin-vuex": "^4.5.13",
-    "@vue/cli-service": "^4.5.13",
-    "@vue/eslint-config-standard": "^4.0.0",
+    "@typescript-eslint/eslint-plugin": "^4.29.1",
+    "@typescript-eslint/parser": "^4.29.1",
+    "@vitejs/plugin-vue": "^1.4.0",
+    "@vue/compiler-sfc": "^3.2.1",
+    "@vue/eslint-config-typescript": "^7.0.0",
     "babel-eslint": "^10.1.0",
-    "eslint": "^5.16.0",
-    "eslint-plugin-vue": "^5.0.0",
-    "lint-staged": "^9.4.3",
-    "vue-template-compiler": "^2.6.11"
+    "eslint": "^6.8.0",
+    "eslint-plugin-vue": "^7.16.0",
+    "typescript": "~4.1.5",
+    "vite": "^2.4.4"
   },
-  "postcss": {
-    "plugins": {
-      "autoprefixer": {}
-    }
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/vue3-essential",
+      "eslint:recommended",
+      "@vue/typescript"
+    ],
+    "parserOptions": {
+      "parser": "@typescript-eslint/parser"
+    },
+    "rules": {}
   },
   "browserslist": [
     "> 1%",
-    "last 2 versions"
-  ],
-  "gitHooks": {
-    "pre-commit": "lint-staged"
-  },
-  "lint-staged": {
-    "*.{js,vue}": [
-      "vue-cli-service lint",
-      "git add"
-    ]
-  }
+    "last 2 versions",
+    "not dead"
+  ]
 }

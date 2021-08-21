@@ -1,5 +1,7 @@
 <template>
-    <div :style="{borderColor: color}" class="quoted-msg" v-scroll-to="{
+    <!--
+    TODO: scroll-to
+    v-scroll-to="{
      el: `#${encodedQuotedMsgId}`,
      container: '.messages-list',
      duration: 500,
@@ -10,9 +12,11 @@
      onDone: onDone,
      x: false,
      y: true
- }">
+ }"
+    -->
+    <div :style="{borderColor: color}" class="quoted-msg" v-if="senderObj">
         <div class="box-content">
-            <Author :color="color" :senderObj="quotedMsg.senderObj"/>
+            <Author :color="color" :senderObj="senderObj"/>
             <QuotedMsgContent :msg="quotedMsg"/>
         </div>
 
@@ -24,10 +28,11 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
-import Author from './author/Author';
-import QuotedMsgContent from './quotedMsgContent/quotedMsgContent';
-import QuotedMedia from './quotedMedia/QuotedMedia';
+import { mapActions, useStore } from 'vuex';
+import { asyncComputed } from '@/AsyncComputed';
+import Author from './author/Author.vue';
+import QuotedMsgContent from './quotedMsgContent/quotedMsgContent.vue';
+import QuotedMedia from './quotedMedia/QuotedMedia.vue';
 import Picture from '@/components/shared/picture/Picture.vue';
 
 export default {
@@ -39,18 +44,29 @@ export default {
             type: Object
         }
     },
-    computed: {
-        ...mapState(['self', 'activeChat']),
+    setup (props) {
+        const store = useStore();
 
-        color () {
-            if (this.activeChat.isGroup && this.quotedMsg.senderObj.id !== this.self.id) {
-                return this.activeChat.getColor(this.quotedMsg.senderObj.id);
-            } else if (this.quotedMsg.senderObj.id !== this.self.id) {
+        const senderObj = asyncComputed(async () => {
+            return props.quotedMsg.senderObj();
+        }, { default: false, lazy: true });
+
+        const color = asyncComputed(async () => {
+            let senderObj = await props.quotedMsg.senderObj();
+            if (store.state.activeChat.isGroup && senderObj.id !== store.state.self.id) {
+                return store.state.activeChat.getColor(senderObj.id);
+            } else if (senderObj.id !== store.state.self.id) {
                 return '#74cff8';
             }
             return '#35cd96';
-        },
+        });
 
+        return {
+            senderObj,
+            color
+        };
+    },
+    computed: {
         encodedQuotedMsgId () {
             return this.quotedMsg.id._serialized.replace(/[^\w\s]/gi, '').replace(/[_]/gi, '');
         },
@@ -67,11 +83,12 @@ export default {
     methods: {
         ...mapActions(['updateMsg']),
 
-        onDone (element) {
-            this.quotedMsg.blink = true;
+        onDone () {
+            //TODO: blink quotedMsg
+            //this.quotedMsg.blink = true;
             this.updateMsg(this.quotedMsg);
             setTimeout(() => {
-                this.quotedMsg.blink = false;
+                //this.quotedMsg.blink = false;
                 this.updateMsg(this.quotedMsg);
             }, 1500);
         }

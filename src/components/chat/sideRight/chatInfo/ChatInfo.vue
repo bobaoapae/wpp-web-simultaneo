@@ -5,51 +5,110 @@
             <span>Dados do {{activeChat.isChat ? 'Contato' :'Grupo'}}</span>
         </div>
         <div class="box-wrapper">
-            <div class="chat-profile">
+            <div class="box-content chat-profile">
                 <div class="box-img">
                     <Picture :full="true" :group="activeChat.isGroup" :id="activeChat.id" :key="activeChat.id"/>
                 </div>
                 <div class="chat-desc">
-                    <span class="chat-title">{{activeChat.formattedTitle}}</span>
+                    <span class="chat-title">{{ activeChat.formattedTitle }}</span>
                     <div class="chat-sub-title">
                         <PresenceChat :chat="activeChat"
                                       :key="activeChat.id" v-if="activeChat.isChat"/>
                         <div v-else>
-                            <span>Criado em {{createdTime}}</span>
+                            <span>Criado em {{ createdTime }}</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        <div class="box-wrapper" v-if="activeChat.customProperties && activeChat.customProperties.currentOperator"
+             :key="activeChat.id">
+            <div class="box-content box-current-user">
+                <span class="box-title">Operator Atribuido</span>
+                <span class="value">{{ currentOperator }}</span>
+            </div>
+        </div>
         <div class="box-wrapper">
-            <div class="box-chat-custom-properties">
-                <span class="title">Anotações</span>
-                <ul v-if="activeChat.customProperties">
-                    <li :key="value.key" v-for="(value, name) in activeChat.customProperties">
-                        <div class="col-12 chat-custom-properties" v-if="name !== 'initialized'">
-                            <span class="col-5 p-0 mr-2" type="text">{{name}}:</span>
-                            <span class="col-5 p-0" type="text">{{value}}</span>
-                            <button @click="deleteProperty(name)" class="col-2 p-0"></button>
+            <div class="box-content custom-properties">
+                <span class="box-title">Anotações</span>
+                <template v-if="customProperties">
+                    <div :key="value.key" v-for="(value, name) in activeChat.customProperties">
+                        <div class="custom-property"
+                             v-if="name !== 'currentOperator' && name !== 'lastUserSendMessage'">
+                            <span class="col-5 p-0 mr-2" type="text">{{ name }}:</span>
+                            <span class="col-5 p-0" type="text">{{ value }}</span>
+                            <span @click="deleteProperty(name)" id="delete-property"><img
+                                src="@/assets/images/wpp-icon-close-answer.svg"></span>
                         </div>
-                    </li>
-                </ul>
+                        <hr>
+                    </div>
+                </template>
                 <div class="loading-properties" v-else>
-                    <LoadginSpinner/>
+                    <LoadingSpinner/>
                 </div>
+                <b-button class="btn btn-success" @click="addProperty">Adicionar Nova Anotação</b-button>
+            </div>
+        </div>
+        <div class="box-wrapper" v-if="activeChat.isGroup && participants">
+            <div class="box-content group-participants">
+                <span class="box-title">{{ participants.length }} Participantes</span>
+                <ParticipantInfo :key="participant.id" :id="participant.id" :isAdmin="participant.isAdmin"
+                                 v-for="participant in participants"/>
             </div>
         </div>
     </div>
 </template>
 
 <script>
-import { mapState } from 'vuex';
-import LoadginSpinner from '@/components/shared/loadingSpinner/LoadingSpinner';
-import Picture from '@/components/shared/picture/Picture.vue';
-import PresenceChat from '@/components/shared/presenceChat/PresenceChat';
+import { defineAsyncComponent } from 'vue';
+import { mapActions, mapState, useStore } from 'vuex';
+import api from '@/api';
+import { asyncComputed } from '@/AsyncComputed';
+
+const LoadingSpinner = defineAsyncComponent(() => import('@/components/shared/loadingSpinner/LoadingSpinner.vue'));
+const Picture = defineAsyncComponent(() => import('@/components/shared/picture/Picture.vue'));
+const PresenceChat = defineAsyncComponent(() => import('@/components/shared/presenceChat/PresenceChat.vue'));
+const ParticipantInfo = defineAsyncComponent(() => import('@/components/chat/sideRight/chatInfo/ParticipantInfo.vue'));
 
 export default {
     name: 'ChatInfo',
-    components: { Picture, LoadginSpinner, PresenceChat },
+    components: { ParticipantInfo, Picture, LoadingSpinner, PresenceChat },
+    mounted () {
+        //TODO close with esc
+        /*this.$root.$on('keyDown', (evt) => {
+            if (this.activeChat && this.activeChat.openChatInfo) {
+                if (evt.key === 'Escape') {
+                    this.handleClose();
+                }
+            }
+        });*/
+    },
+    setup () {
+        const store = useStore();
+
+        const currentOperator = asyncComputed(async () => {
+            let result = await api.get(`/api/users/${store.state.activeChat.customProperties.currentOperator}`);
+            return result.data.nome;
+        }, { lazy: true });
+
+        const customProperties = asyncComputed(async () => {
+            let result = await store.dispatch('getChatProperties', { chatId: store.state.activeChat.id });
+            for await (let property of result) {
+                await store.dispatch('changeCustomPropertyChat', property);
+            }
+            return !!result;
+        }, { lazy: true });
+
+        const participants = asyncComputed(() => {
+            return store.state.activeChat.getParticipants();
+        }, { lazy: true });
+
+        return {
+            currentOperator,
+            customProperties,
+            participants
+        };
+    },
     computed: {
         ...mapState(['activeChat']),
 
@@ -61,16 +120,8 @@ export default {
             return this.timeConverterCreated(this.activeChat.id.split('@')[0].split('-')[1]);
         }
     },
-    mounted () {
-        this.$root.$on('keyDown', (evt) => {
-            if (this.activeChat && this.activeChat.openChatInfo) {
-                if (evt.key === 'Escape') {
-                    this.handleClose();
-                }
-            }
-        });
-    },
     methods: {
+        ...mapActions(['addAnnotation', 'getChatProperties', 'changeCustomPropertyChat', 'deleteChatProperty', 'findFormattedNameFromId']),
         timeConverterPresence (unixTimeStamp) {
             let a = new Date(unixTimeStamp * 1000);
             let year = a.getFullYear();
@@ -139,6 +190,48 @@ export default {
 
         handleClose () {
             this.activeChat.openChatInfo = false;
+        },
+
+        async addProperty () {
+            let result = await this.$swal({
+                title: 'Adicionar Nova Anotação',
+                html:
+                    `
+                    <div class="box-create-annotation" style="display: flex;flex-direction: column">
+                        <label for="swal-input1">Nome</label><input id="swal-input1" class="swal2-input">
+                        <label for="swal-input2">Conteudo</label><textarea id="swal-input2" class="swal2-input" style="height: 20vh"></textarea>
+                    </div>`,
+                preConfirm: () => {
+                    return {
+                        name: document.getElementById('swal-input1').value,
+                        value: document.getElementById('swal-input2').value
+                    };
+                },
+                showCancelButton: true,
+                confirmButtonText: 'Adicionar',
+                cancelButtonText: 'Cancelar',
+                icon: 'info',
+                focusConfirm: false,
+                heightAuto: false
+            });
+            if (result.value) {
+                await this.addAnnotation({ chat: this.activeChat, name: result.value.name, value: result.value.value });
+            }
+        },
+
+        async deleteProperty (propertyName) {
+            let result = await this.$swal({
+                title: `Deseja excluir a anotação ${propertyName} ?`,
+                showCancelButton: true,
+                confirmButtonText: 'Sim',
+                cancelButtonText: 'Não',
+                icon: 'question',
+                focusConfirm: false,
+                heightAuto: false
+            });
+            if (result.value) {
+                await this.deleteChatProperty({ chatId: this.activeChat.id, name: propertyName });
+            }
         }
     }
 };
@@ -166,19 +259,20 @@ export default {
 }
 
 .box-wrapper {
-    padding-top: 5px;
-    padding-left: 30px;
-    padding-right: 30px;
-    padding-bottom: 20px;
+    padding: 5px 30px 20px;
     background-color: white;
     margin-bottom: 10px;
     animation: animation 1s cubic-bezier(.1, .82, .25, 1);
     box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+    display: flex;
+    justify-content: center;
 }
 
-.chat-profile {
-    height: 40%;
+.box-content {
     background: white;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
 }
 
 .chat-info {
@@ -187,7 +281,21 @@ export default {
     color: #4a4a4a;
     text-rendering: optimizeLegibility;
     font-feature-settings: "kern";
+}
 
+.box-img {
+    padding-top: 15px;
+    height: 212px;
+    width: 212px;
+    margin: auto;
+}
+
+.box-img ::v-deep(img) {
+    display: block;
+    margin: 0 auto;
+    height: 100%;
+    width: 100%;
+    border-radius: 50%;
 }
 
 .chat-title {
@@ -201,21 +309,30 @@ export default {
     color: rgba(0, 0, 0, .45);
 }
 
-.box-chat-custom-properties ul {
+.custom-properties ul {
     margin: 0;
     padding: 0;
 }
 
-.box-chat-custom-properties li {
+.custom-properties li {
     list-style: none;
 }
 
-.chat-custom-properties input {
+.custom-properties input {
     border-style: none;
 }
 
-.chat-custom-properties {
-    padding: 0;
+.custom-property {
+    display: flex;
+}
+
+.delete-property {
+    color: red;
+}
+
+hr {
+    width: 100%;
+    text-align: center;
     margin: 0;
 }
 
@@ -225,25 +342,10 @@ export default {
     margin: auto;
 }
 
-.title {
+.box-title {
     color: #009688;
     font-size: 14px;
     line-height: normal;
-}
-
-.box-img {
-    padding-top: 15px;
-    height: 212px;
-    width: 212px;
-    margin: auto;
-}
-
-.box-img >>> img {
-    display: block;
-    margin: 0 auto;
-    height: 100%;
-    width: 100%;
-    border-radius: 50%;
 }
 
 .close-info {

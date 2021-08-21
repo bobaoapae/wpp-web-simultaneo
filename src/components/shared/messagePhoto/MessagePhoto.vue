@@ -1,5 +1,9 @@
 <template>
-    <div class="message-photo" v-b-visible.once="onVisible">
+    <div class="message-photo" v-observe-visibility="{
+         throttle: 300,
+         callback: onVisible,
+         once: true
+    }">
         <div class="photo-container">
             <div class="box-image">
                 <img
@@ -16,7 +20,7 @@
         </div>
 
         <div @dblclick.prevent.stop class="box-caption" v-if="msg.caption">
-            <span :inner-html.prop="caption"></span>
+            <span v-html="caption"></span>
         </div>
 
         <MessageTime :class="{'no-caption' : !haveCaption, 'custom-time' : !haveCaption}" :msg="msg"/>
@@ -24,8 +28,8 @@
 </template>
 
 <script>
-import MessageTime from '../messageTime/MessageTime';
-import LoadingMedia from '../loadingMedia/LoadingMedia';
+import MessageTime from '../messageTime/MessageTime.vue';
+import LoadingMedia from '../loadingMedia/LoadingMedia.vue';
 import { mapActions, mapMutations } from 'vuex';
 
 export default {
@@ -68,7 +72,8 @@ export default {
                     await Promise.all(promises);
                     for (let x = 0; x < this.msg.mentionedJidList.length; x++) {
                         let chat = results[this.msg.mentionedJidList[x]];
-                        let name = chat.contact.formattedName || chat.contact.verifiedName || chat.contact.pushname;
+                        let contact = await chat.contact();
+                        let name = contact.formattedName || contact.verifiedName || contact.pushname;
                         caption = caption.replace('@' + this.msg.mentionedJidList[x].split('@')[0], `<span class='mention-symbol'>@</span><span class='btn-link' dir="ltr">${name}</span>`);
                     }
                 }
@@ -164,7 +169,7 @@ img {
     bottom: 6px;
 }
 
-.box-caption >>> .mention-symbol {
+.box-caption ::v-deep(.mention-symbol) {
     color: rgba(0, 0, 0, 0.25);
 }
 </style>

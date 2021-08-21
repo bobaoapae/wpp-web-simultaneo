@@ -1,5 +1,6 @@
 <template>
-    <div class="chat-row" v-b-hover="handleHoverChat" @contextmenu.prevent="handleContextMenu">
+    <div class="chat-row" @contextmenu.prevent="handleContextMenu" @mouseover="handleHover(true)"
+         @mouseout="handleHover(false)">
         <Picture :group="chat.isGroup" :id="chat.id"/>
 
         <div class="box-info-chat" @click="handleClick">
@@ -15,7 +16,8 @@
                               :showOnline="false"
                               v-if="chat.isChat"
                               :key="chat.id"/>
-                <LastMsg :chat="chat" v-if="!chat.isChat || (!chat.isComposing && !chat.isRecording)"/>
+                <LastMsg :chat="chat" v-if="chat.lastMsg && (!chat.isChat || (!chat.isComposing && !chat.isRecording))"
+                         :key="chat.lastMsg.id._serialized"/>
                 <Icons :chat="chat"/>
                 <div v-if="!processing" :class="{'chat-menu-open' : showMenuIcon || menuOpen}">
                     <div
@@ -67,7 +69,7 @@ import NameChat from '../nameChat/NameChat.vue';
 import Picture from '@/components/shared/picture/Picture.vue';
 import PresenceChat from '@/components/shared/presenceChat/PresenceChat.vue';
 import { mapMutations, mapState } from 'vuex';
-import LoadingSpinner from '../../../../shared/loadingSpinner/LoadingSpinner';
+import LoadingSpinner from '../../../../shared/loadingSpinner/LoadingSpinner.vue';
 
 export default {
     name: 'ChatRow',
@@ -110,7 +112,7 @@ export default {
             this.$refs.dropdown.show();
         },
 
-        handleHoverChat (flag) {
+        handleHover (flag) {
             this.showMenuIcon = flag;
         },
 
@@ -174,14 +176,14 @@ export default {
     width: 100%;
 }
 
-.chat-row >>> .picture {
+.chat-row ::v-deep(.picture) {
     padding: 0 13px 0 15px;
     height: 73px;
     display: flex;
     align-items: center;
 }
 
-.chat-row >>> .picture img {
+.chat-row ::v-deep(.picture) img {
     height: 49px;
     width: 49px;
     border-radius: 50%;
@@ -203,7 +205,7 @@ export default {
     filter: brightness(0.7);
 }
 
-.chat-menu >>> .dropdown-menu {
+.chat-menu ::v-deep(.dropdown-menu) {
     position: absolute;
     z-index: 1;
 }
@@ -222,7 +224,7 @@ export default {
     margin: 5px;
 }
 
-.processing >>> svg {
+.processing ::v-deep(.vg) {
     height: 15px;
     width: 15px;
 }

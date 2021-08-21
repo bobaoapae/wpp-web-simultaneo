@@ -1,9 +1,9 @@
 <template>
     <div ref="container">
         <div class="input-msg" v-show="!showSelectMsgs">
-            <b-collapse id="collapse-emoji" v-model="chat.emojiVisible" @show="handleEmojiOpening"
+            <b-collapse id="collapse-emoji" v-model="activeChat.emojiVisible" @show="handleEmojiOpening"
                         @shown="handleEmojiOpened" @hide="handleEmojiClosing" @hidden="handleEmojiClosed">
-                <picker
+                <Picker
                     :color="'#009688'"
                     :data="emojiIndex"
                     :emojiSize="32"
@@ -34,7 +34,7 @@
 
             <b-collapse id="collapse-answer-msg" v-model="answerVisible">
                 <div class="box-answer">
-                    <QuotedMsg :quotedMsg="chat.quotedMsg" class="flex-grow-1" v-if="answerVisible"/>
+                    <QuotedMsg :quotedMsg="activeChat.quotedMsg" class="flex-grow-1" v-if="answerVisible"/>
 
                     <div @click="handleClickCloseAnswer" class="close-answer">
                         <img src="@/assets/images/wpp-icon-close-answer.svg">
@@ -53,13 +53,12 @@
 
             <div id="input-message">
                 <div class="box-icon-emoji">
-                    <b-img
-                        @mousedown.prevent
+                    <img
                         alt="Button emoji"
                         class="btn-emoji-open"
                         role="button"
                         src="@/assets/images/wpp-icon-emoji.svg"
-                        v-b-toggle.collapse-emoji
+                        v-b-toggle:collapse-emoji
                     />
                 </div>
 
@@ -87,7 +86,7 @@
                 <div class="box-icon-send">
                     <div>
                         <img @click="handleSendMessage" src="@/assets/images/wpp-icon-send.svg"
-                             v-if="chat.message"/>
+                             v-if="activeChat.message"/>
                         <img @click="startRecording" src="@/assets/images/wpp-icon-mic.svg" v-else-if="!recording"/>
                     </div>
 
@@ -113,18 +112,16 @@
 </template>
 
 <script>
-import { Picker } from 'emoji-mart-vue-fast';
+import { defineAsyncComponent } from 'vue';
 import { mapActions, mapMutations, mapState } from 'vuex';
 import { msg } from '@/helper.js';
+import filters from '@/filters';
 import { rageSave } from '@/rangeSelectionSaveRestore.js';
-import QuotedMsg from '../../../../shared/quotedMsg/QuotedMsg';
-import OpusMediaRecorder from 'opus-media-recorder';
-import Worker from 'worker-loader!opus-media-recorder/encoderWorker.js';
+import Recorder from 'opus-recorder';
+import encoderPath from 'opus-recorder/dist/encoderWorker.min.js?url';
+import { Picker } from 'emoji-mart-vue-fast/src';
 
-const OggOpusWasm = import('opus-media-recorder/OggOpusEncoder.wasm');
-const WebMOpusWasm = import('opus-media-recorder/WebMOpusEncoder.wasm');
-
-window.MediaRecorder = OpusMediaRecorder;
+const QuotedMsg = defineAsyncComponent(() => import('@/components/shared/quotedMsg/QuotedMsg.vue'));
 
 export default {
     name: 'InputMessage',
@@ -132,37 +129,35 @@ export default {
         QuotedMsg,
         Picker
     },
-    props: {
-        chat: {
-            type: Object,
-            required: true
-        }
-    },
     data () {
         return {
             preventOverrideRestore: false,
             emojiIndex: msg.emojiIndex(),
             answerVisible: false,
             quickRepliesVisible: false,
-            recorder: {},
-            gumStream: {},
+            recorder: null,
             recording: false,
             ignoreRecording: false,
             time: 0,
             interval: null,
             bindToOperator: true,
-            filteredQuickReplies: []
+            filteredQuickReplies: [],
+            canBindToOperator: false,
+            emojiVisible: false,
+            filters
         };
     },
+    emits: ['startOpenEmoji', 'finishOpenEmoji', 'startCloseEmoji', 'finishCloseEmoji'],
     mounted () {
-        this.$root.$on('keyDown', (evt) => {
+        //TODO fix focus
+        /*this.$root.$on('keyDown', (evt) => {
             if (!evt.ctrlKey && evt.target.placeholder !== 'Buscar emoji') {
                 this.$refs.input.focus();
             }
         });
         this.$root.$on('focusInput', () => {
             this.$refs.input.focus();
-        });
+        });*/
         this.$refs.input.focus();
     },
     watch: {
@@ -174,18 +169,22 @@ export default {
                 this.answerVisible = false;
             }
         },
-        'chat': function (val) {
+        'chat': function () {
+            this.checkCurrentOperator();
             this.bindToOperator = true;
             this.preventOverrideRestore = true;
-            this.$refs.input.innerHTML = this.chat.htmlInput;
+            this.$refs.input.innerHTML = this.activeChat.htmlInput;
             this.$refs.input.focus();
             this.preventOverrideRestore = false;
             this.savePosition();
+        },
+        'chat.customProperties': function (val) {
+            this.canBindToOperator = !val.currentOperator || val.currentOperator !== this.user.uuid;
         }
 
     },
     computed: {
-        ...mapState(['quickReplys', 'user', 'selectMsgs']),
+        ...mapState(['quickReplies', 'user', 'selectMsgs', 'activeChat']),
 
         timeConverter () {
             let a = new Date(this.time * 1000);
@@ -203,10 +202,6 @@ export default {
 
             time = min + ':' + sec;
             return time;
-        },
-
-        canBindToOperator () {
-            return false;
         },
 
         showSelectMsgs () {
@@ -227,43 +222,28 @@ export default {
         }
     },
     methods: {
-        ...mapActions(['uploadFile']),
+        ...mapActions(['uploadFile', 'getCurrentOperator', 'changeCustomPropertyChat', 'setCurrentOperator']),
         ...mapMutations(['SET_SELECT_MSGS', 'SET_SELECT_CHATS']),
 
-        toggleRecording () {
+        async toggleRecording () {
             this.recording = !this.recording;
 
-            if (this.recorder && this.recorder.state === 'recording') {
+            if (this.recorder) {
                 this.recorder.stop();
-                this.gumStream.getAudioTracks().forEach(value => value.stop());
-                clearInterval(this.interval);
+                this.recorder = null;
                 this.time = 0;
+                clearInterval(this.interval);
             } else {
-                navigator.mediaDevices.getUserMedia({
-                    audio: true
-                })
-                    .then(async (stream) => {
-                        this.interval = setInterval(() => {
-                            this.time++;
-                        }, 1000);
-
-                        this.gumStream = stream;
-                        const options = { mimeType: 'audio/ogg' };
-                        const ogg = await OggOpusWasm;
-                        const webm = await WebMOpusWasm;
-                        const workerOptions = {
-                            encoderWorkerFactory: _ => new Worker(),
-                            OggOpusEncoderWasmPath: ogg.default,
-                            WebMOpusEncoderWasmPath: webm.default
-                        };
-                        this.recorder = new MediaRecorder(stream, options, workerOptions);
-                        this.recorder.ondataavailable = (e) => {
-                            if (!this.ignoreRecording) {
-                                this.handleSendPtt(e.data);
-                            }
-                        };
-                        this.recorder.start();
-                    });
+                this.recorder = new Recorder({ encoderPath });
+                this.recorder.ondataavailable = (e) => {
+                    if (!this.ignoreRecording) {
+                        this.handleSendPtt(e);
+                    }
+                };
+                this.interval = setInterval(() => {
+                    this.time++;
+                }, 1000);
+                this.recorder.start();
             }
         },
 
@@ -282,40 +262,39 @@ export default {
         },
 
         handleSendPtt (data) {
-            let currentChat = this.chat;
-            this.uploadFile(new File([data], new Date().getTime() + '.ptt', { type: data.type })).then(tag => {
-                let msg = {
-                    fileUUID: tag
-                };
-
-                currentChat.buildAndSendMessage(msg);
+            let currentChat = this.activeChat;
+            this.uploadFile(new File([data], new Date().getTime() + '.ptt', { type: 'audio/ogg' })).then(tag => {
+                currentChat.buildAndSendMessage({ file: { uuid: tag, forceDocument: false } });
             });
         },
 
         handleSendMessage () {
-            this.chat.buildAndSendMessage();
+            if (this.user.isOperator && this.canBindToOperator && this.bindToOperator) {
+                this.setCurrentOperator({ chat: this.activeChat });
+            }
+            this.activeChat.buildAndSendMessage();
             this.$refs.input.innerHTML = '';
         },
 
-        onInput (evt) {
+        onInput () {
             this.savePosition();
-            this.chat.htmlInput = this.$refs.input.innerHTML;
-            this.chat.message = this.formatar(this.$refs.input);
-            this.quickRepliesVisible = this.chat.message.charAt(0) === '/' && this.quickReplys && this.quickReplys.length > 0;
+            this.activeChat.htmlInput = this.$refs.input.innerHTML;
+            this.activeChat.message = this.formatar(this.$refs.input);
+            this.quickRepliesVisible = this.activeChat.message.charAt(0) === '/' && this.quickReplies && this.quickReplies.length > 0;
             if (this.quickRepliesVisible) {
                 this.filteredQuickReplies = this.getQuickRepliesToShow();
             }
         },
 
         getQuickRepliesToShow () {
-            return this.quickReplys.filter(quickReply => {
-                return ('/' + quickReply.shortcut).toLowerCase().includes(this.chat.message.toLowerCase());
+            return this.quickReplies.filter(quickReply => {
+                return ('/' + quickReply.shortcut).toLowerCase().includes(this.activeChat.message.toLowerCase());
             });
         },
 
         handleClickCloseAnswer () {
             this.answerVisible = false;
-            this.chat.quotedMsg = undefined;
+            this.answerVisible.quotedMsg = null;
         },
 
         onPaste (evt) {
@@ -326,10 +305,10 @@ export default {
                 files.push(items[i].getAsFile());
             }
             if (files.length > 0) {
-                let currentChat = this.chat;
+                let currentChat = this.activeChat;
                 files.forEach(async file => {
                     let tag = await this.uploadFile(file);
-                    await currentChat.buildAndSendMessage({ fileUUID: tag });
+                    await currentChat.buildAndSendMessage({ file: { uuid: tag, forceDocument: false } });
                 });
             } else {
                 const textMsg = this.$options.filters.emojify(evt.clipboardData.getData('text'));
@@ -338,34 +317,34 @@ export default {
         },
 
         restorePosition () {
-            if (this.chat.restoreInput) {
-                rageSave.restoreSelection(this.chat.restoreInput);
-                this.chat.restoreInput = null;
+            if (this.activeChat.restoreInput) {
+                rageSave.restoreSelection(this.activeChat.restoreInput);
+                this.activeChat.restoreInput = null;
             }
         },
 
         savePosition () {
             if (!this.preventOverrideRestore) {
-                if (this.chat.restoreInput) {
-                    rageSave.removeMarkers(this.chat.restoreInput);
+                if (this.activeChat.restoreInput) {
+                    rageSave.removeMarkers(this.activeChat.restoreInput);
                 }
                 if (this.$refs.input.textContent.length > 0) {
-                    this.chat.restoreInput = rageSave.saveSelection();
+                    this.activeChat.restoreInput = rageSave.saveSelection();
                 }
-                this.chat.htmlInput = this.$refs.input.innerHTML;
+                this.activeChat.htmlInput = this.$refs.input.innerHTML;
             }
         },
 
         addEmoji (emoji) {
             this.$refs.input.focus();
             emoji = emoji.native;
-            document.execCommand('insertHTML', false, this.$options.filters.emojify(emoji));
+            document.execCommand('insertHTML', false, this.filters.emojify(emoji));
         },
 
         handleEnterPress () {
             if (this.quickRepliesVisible && this.filteredQuickReplies.length === 1) {
                 this.handleClickQuickReply(this.filteredQuickReplies[0]);
-            } else if (this.chat.message !== '') {
+            } else if (this.activeChat.message !== '') {
                 this.handleSendMessage();
             }
         },
@@ -373,24 +352,24 @@ export default {
         handleClickQuickReply (quickReply) {
             this.$refs.input.focus();
             this.$refs.input.innerHTML = '';
-            this.chat.message = '';
+            this.activeChat.message = '';
             document.execCommand('insertHTML', false, quickReply.message);
         },
 
         handleEmojiOpening () {
-            this.$root.$emit('startOpenEmoji');
+            this.$emit('startOpenEmoji');
         },
 
         handleEmojiOpened () {
-            this.$root.$emit('finishOpenEmoji');
+            this.$emit('finishOpenEmoji');
         },
 
         handleEmojiClosing () {
-            this.$root.$emit('startCloseEmoji');
+            this.$emit('startCloseEmoji');
         },
 
         handleEmojiClosed () {
-            this.$root.$emit('finishCloseEmoji');
+            this.$emit('finishCloseEmoji');
         },
 
         handleClickCloseSelectMsgs () {
@@ -414,7 +393,14 @@ export default {
                 }
             });
 
-            return this.$options.filters.capitalize(msg);
+            return this.filters.capitalize(msg);
+        },
+
+        async checkCurrentOperator () {
+            let currentOperatorProperty = await this.getCurrentOperator({ chatId: this.activeChat.id });
+            if (currentOperatorProperty) {
+                await this.changeCustomPropertyChat(currentOperatorProperty);
+            }
         }
     }
 };
@@ -598,7 +584,8 @@ export default {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.input-msg >>> .emoji-mart-category-label h3{
+
+.input-msg ::v-deep(.emoji-mart-category-label) h3 {
     background-color: transparent;
 }
 </style>

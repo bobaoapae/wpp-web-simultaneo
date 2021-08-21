@@ -1,8 +1,8 @@
 <template>
     <div class="col-4 col-md-4 col-lg-4 col-xs-3 p-0" id="side-left">
-        <NewChat/>
+        <NewChat v-if="showNewChat"/>
 
-        <div id="list-chat">
+        <div id="list-chat" v-else>
             <LeftHeader/>
 
             <ChatList/>
@@ -11,9 +11,12 @@
 </template>
 
 <script>
+import { defineAsyncComponent } from 'vue';
+import { mapState } from 'vuex';
 import LeftHeader from './leftHeader/LeftHeader.vue';
 import ChatList from './chatList/ChatList.vue';
-import NewChat from './newChat/NewChat.vue';
+
+const NewChat = defineAsyncComponent(() => import('./newChat/NewChat.vue'));
 
 export default {
     name: 'SideLeft',
@@ -21,6 +24,9 @@ export default {
         NewChat,
         LeftHeader,
         ChatList
+    },
+    computed: {
+        ...mapState(['showNewChat'])
     }
 };
 </script>

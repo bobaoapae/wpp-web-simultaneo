@@ -7,14 +7,16 @@
                 <div class="text-center" v-if="loading">
                     <p class="title">Buscando informações...</p>
                     <div class="loading-info m-auto">
-                        <LoadginSpinner/>
+                        <LoadingSpinner/>
                     </div>
                 </div>
                 <form @submit.prevent="handleSubmit" id="form-login" v-else-if="!error.active && !success">
                     <p class="title">Olá {{changeNumberData.usuario.nome}}.</p>
 
                     <p class="text-center text-wrap text-break">
-                        Deseja confirmar a alteração do seu número atual <span class="text-success">{{changeNumberData.usuario.telefone | telefone}}</span> para o número <span class="text-warning">{{changeNumberData.novoNumero | telefone}}?</span>
+                        Deseja confirmar a alteração do seu número atual <span
+                        class="text-success">{{ telefone(changeNumberData.usuario.telefone) }}</span> para o número
+                        <span class="text-warning">{{ telefone(changeNumberData.novoNumero) }}?</span>
                     </p>
 
                     <button type="submit" :disabled="btn.loading">
@@ -43,12 +45,12 @@
 
 <script>
 import api from '@/api';
-import LoadginSpinner from '@/components/shared/loadingSpinner/LoadingSpinner';
+import LoadingSpinner from '@/components/shared/loadingSpinner/LoadingSpinner.vue';
 import PhoneAwesome from 'awesome-phonenumber';
 
 export default {
     name: 'ChangeNumber',
-    components: { LoadginSpinner },
+    components: { LoadingSpinner },
     created () {
         api.get(`/api/auth/changeNumber/${this.$route.query.token}`).then(value => {
             Object.assign(this.changeNumberData, value.data);
@@ -80,7 +82,7 @@ export default {
         handleSubmit () {
             this.btn.loading = true;
             this.btn.label = 'PROCESSANDO...';
-            api.put(`/api/auth/changeNumber/${this.changeNumberData.uuid}`).then(value => {
+            api.put(`/api/auth/changeNumber/${this.changeNumberData.uuid}`).then(() => {
                 this.success = true;
             }).catch(reason => {
                 if (reason.response && reason.response.data) {
@@ -90,9 +92,8 @@ export default {
             }).then(() => {
                 this.btn.loading = false;
             });
-        }
-    },
-    filters: {
+        },
+
         telefone (value) {
             let number = new PhoneAwesome(value, 'BR');
             return number.getNumber('international');

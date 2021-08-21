@@ -29,9 +29,11 @@
                     <img src="@/assets/images/wpp-icon-kebab-menu.svg"/>
                 </template>
                 <b-dropdown-item to="/sendmessagetonumber">Enviar Mensagem Para Número</b-dropdown-item>
-                <b-dropdown-item to="/changenumber" v-if="user.canCreateOperator">Alterar Número</b-dropdown-item>
+                <!--<b-dropdown-item to="/changenumber" v-if="user.canCreateOperator">Alterar Número</b-dropdown-item>-->
                 <b-dropdown-item to="/changepassword">Alterar Senha</b-dropdown-item>
                 <b-dropdown-item to="/newoperator" v-if="user.canCreateOperator">Novo Operador</b-dropdown-item>
+                <b-dropdown-item to="/manageoperators" v-if="user.canCreateOperator">Gerenciar Operadores
+                </b-dropdown-item>
                 <b-dropdown-form class="text-nowrap" v-if="user.canCreateOperator">
                     <b-form-checkbox name="check-button" switch v-model="user.configuracao.enviarNomeOperadores">
                         Enviar Nome Operadores
@@ -48,7 +50,7 @@
 </template>
 
 <script>
-import { mapState, mapMutations } from 'vuex';
+import { mapMutations, mapState } from 'vuex';
 import api from '@/api';
 
 export default {
@@ -76,10 +78,10 @@ export default {
         }
     },
     methods: {
-        ...mapMutations(['SET_CURRENT_USER']),
+        ...mapMutations(['SET_CURRENT_USER', 'SET_SHOW_NEW_CHAT']),
 
         handleClick () {
-            this.$root.$emit('showNewChat', true);
+            this.SET_SHOW_NEW_CHAT(true);
         }
     }
 };

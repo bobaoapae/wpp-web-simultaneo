@@ -17,7 +17,7 @@ import { mapState } from 'vuex';
 import Loading from '@/views/Loading.vue';
 import QrCode from '@/views/QrCode.vue';
 import Chat from '@/views/Chat.vue';
-import LoginFailed from '@/views/LoginFailed';
+import LoginFailed from '@/views/LoginFailed.vue';
 
 export default {
     name: 'Wpp',

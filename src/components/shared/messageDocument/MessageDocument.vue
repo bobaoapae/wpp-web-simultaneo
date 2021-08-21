@@ -57,7 +57,7 @@
 </template>
 
 <script>
-import MessageTime from '../messageTime/MessageTime';
+import MessageTime from '../messageTime/MessageTime.vue';
 import { mapActions } from 'vuex';
 
 export default {
@@ -127,6 +127,7 @@ export default {
 
                     document.body.removeChild(element);
                 }).catch(reason => {
+                    console.error(reason);
                     alert('Falha ao baixar o arquivo, atualize a pagina e tente novamente.');
                 }).finally(() => {
                     this.generatingLink = false;

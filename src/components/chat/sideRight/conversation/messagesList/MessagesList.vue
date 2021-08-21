@@ -2,23 +2,25 @@
     <div class="messages-list" @scroll="handleMessageListChange" @mousewheel="handleMessageListChange"
          @touchmove="handleMessageListChange"
          ref="messageList">
-        <LoadingEarlyMsg v-show="chat.loadingEarly"/>
+        <LoadingEarlyMsg v-show="activeChat.loadingEarly"/>
         <div :id="encodedMsgId(item)" :key="encodedMsgId(item)" @dblclick.left.prevent="handleDoubleClick(item)"
              v-for="(item, index) in msgs" v-for-callback="{key: index, array: msgs, callback: handleLoadMsgFinish}">
             <MessageDateFormatted :formattedDate="item.fomattedDate"
-                                  v-if="!msgs[index-1] || msgs[index-1].fomattedDate !== item.fomattedDate"/>
+                                  v-if="!msgs[index+1] || msgs[index+1].fomattedDate !== item.fomattedDate"/>
             <MessageInfo :msg="item" v-if="isNotification(item.type)"/>
-            <MessageContainer :msg="item" :previousMsg="msgs[index-1]" v-else/>
+            <MessageContainer :msg="item" :previousMsg="msgs[index+1]" v-else/>
         </div>
     </div>
 </template>
 
 <script>
-import MessageContainer from '@/components/shared/messageContainer/MessageContainer.vue';
-import MessageInfo from '@/components/shared/messageInfo/MessageInfo.vue';
-import MessageDateFormatted from '@/components/shared/messageDateFormatted/MessageDateFormatted.vue';
-import LoadingEarlyMsg from '@/components/shared/loadingEarlyMsg/LoadingEarlyMsg';
+import { defineAsyncComponent } from 'vue';
 import { mapState } from 'vuex';
+
+const MessageContainer = defineAsyncComponent(() => import('@/components/shared/messageContainer/MessageContainer.vue'));
+const MessageInfo = defineAsyncComponent(() => import('@/components/shared/messageInfo/MessageInfo.vue'));
+const MessageDateFormatted = defineAsyncComponent(() => import('@/components/shared/messageDateFormatted/MessageDateFormatted.vue'));
+const LoadingEarlyMsg = defineAsyncComponent(() => import('@/components/shared/loadingEarlyMsg/LoadingEarlyMsg.vue'));
 
 export default {
     name: 'MessagesList',
@@ -28,60 +30,17 @@ export default {
         MessageDateFormatted,
         LoadingEarlyMsg
     },
-    props: {
-        chat: {
-            type: Object,
-            required: true
-        }
-    },
     mounted () {
-        this.$root.$on('startOpenEmoji', () => {
-            if (this.isInBottom()) {
-                this.isBottomWhenOpening = true;
-                this.intervalBottom = setInterval(() => {
-                    this.scrollToBottom();
-                }, 10);
-            } else {
-                this.isBottomWhenOpening = false;
-            }
-        });
-        this.$root.$on('finishOpenEmoji', () => {
-            if (this.isBottomWhenOpening) {
-                this.scrollToBottom();
-            }
-            clearInterval(this.intervalBottom);
-        });
-        this.$root.$on('startCloseEmoji', () => {
-            if (this.isInBottom()) {
-                this.isBottomWhenClosing = true;
-                this.intervalBottom = setInterval(this.scrollToBottom, 10);
-            } else {
-                this.isBottomWhenClosing = false;
-            }
-        });
-        this.$root.$on('finishCloseEmoji', () => {
-            if (this.isBottomWhenClosing) {
-                this.scrollToBottom();
-            }
-            clearInterval(this.intervalBottom);
-        });
-        this.clientHeight = this.$el.clientHeight;
-        this.scrollTop = this.$el.scrollTop;
-        this.scrollHeight = this.$el.scrollHeight;
         if (!this.resizeObserver) {
             this.resizeObserver = new ResizeObserver(() => {
-                let isInBotton = this.scrollHeight - this.scrollTop <= this.clientHeight + 15;
-                this.clientHeight = this.$el.clientHeight;
-                this.scrollTop = this.$el.scrollTop;
-                this.scrollHeight = this.$el.scrollHeight;
-                if (isInBotton) {
+                if (this.isInBottom()) {
                     this.scrollToBottom();
                 }
             }).observe(this.$refs.messageList);
         }
         this.$nextTick(() => {
             this.scrollToBottom();
-            if (!this.chat.noEarlierMsgs && this.chat.msgsParted.length <= 10) {
+            if (!this.activeChat.noEarlierMsgs && this.activeChat.msgsParted.length <= 10) {
                 this.handleLoadEarly().then((val) => {
                     if (val) {
                         this.scrollToBottom();
@@ -93,19 +52,14 @@ export default {
     data () {
         return {
             msgsLoaded: false,
-            resizeObeserver: null,
-            clientHeight: -1,
-            scrollTop: -1,
-            scrollHeight: -1,
-            calc: -1,
-            isBottomWhenOpening: false,
-            isBottomWhenClosing: false
+            resizeObserver: null
         };
     },
     computed: {
-        ...mapState(['visible', 'idle']),
+        ...mapState(['visible', 'idle', 'activeChat']),
         msgs () {
-            return this.chat.msgsParted;
+            let msgs = this.activeChat.msgsParted;
+            return msgs.reverse();
         },
 
         active () {
@@ -113,12 +67,12 @@ export default {
         }
     },
     watch: {
-        'chat.id': function () {
-            this.chat.__x_msgsIndex = 1;
+        'activeChat.id': function () {
+            this.activeChat.__x_msgsIndex = 1;
             this.$nextTick(() => {
                 this.scrollToBottom();
             });
-            if (!this.chat.noEarlierMsgs && this.chat.msgsParted.length <= 10) {
+            if (!this.activeChat.noEarlierMsgs && this.activeChat.msgsParted.length <= 10) {
                 this.handleLoadEarly().then((val) => {
                     if (val) {
                         this.scrollToBottom();
@@ -126,14 +80,14 @@ export default {
                 });
             }
         },
-        'chat.lastMsg.id._serialized': function (val) {
-            if (val && !this.chat.loadingEarly && this.visible && (this.chat.lastMsg.id.fromMe || this.isInBottom())) {
+        'activeChat.lastMsg.id._serialized': function (val) {
+            if (val && !this.activeChat.loadingEarly && this.visible && (this.activeChat.lastMsg.id.fromMe || this.isInBottom())) {
                 this.scrollToBottom();
             }
         },
         'active': function (val) {
             if (val && this.isInBottom()) {
-                this.chat.seeChat();
+                this.activeChat.seeChat();
             }
         },
         'msgs': function () {
@@ -156,14 +110,8 @@ export default {
 
         handleDoubleClick (msg) {
             if (!this.isNotification(msg)) {
-                this.chat.quotedMsg = msg;
+                this.activeChat.quotedMsg = msg;
             }
-        },
-
-        scrollToBottom () {
-            this.$nextTick(() => {
-                this.$el.scrollTop = this.$el.scrollHeight - this.$el.clientHeight;
-            });
         },
 
         handleMessageListChange (e) {
@@ -171,25 +119,28 @@ export default {
                 scrollHeight: this.$el.scrollHeight,
                 scrollTop: this.$el.scrollTop,
                 clientHeight: this.$el.clientHeight,
-                calc: this.$el.scrollHeight - (this.$el.scrollHeight - this.$el.scrollTop)
             };
             this.scrollHeight = props.scrollHeight;
             this.scrollTop = props.scrollTop;
             this.clientHeight = props.clientHeight;
-            if (e && this.chat.loadingEarly) {
+            if (e && this.activeChat.loadingEarly) {
                 e.preventDefault();
-            } else if (!this.chat.loadingEarly && !this.chat.noEarlierMsgs && ((props.scrollHeight > 1050 && props.calc <= 1050) || props.scrollTop === 0)) {
+            } else if (!this.activeChat.loadingEarly && !this.activeChat.noEarlierMsgs && props.scrollHeight + props.scrollTop <= props.clientHeight + 300) {
                 this.handleLoadEarly();
-            } else if (this.active && this.isInBottom() && this.chat.isUnread) {
-                this.chat.seeChat();
+            } else if (this.active && this.isInBottom() && this.activeChat.isUnread) {
+                this.activeChat.seeChat();
             }
         },
 
         async handleLoadEarly () {
-            if (!this.chat.loadingEarly) {
-                this.chat.loadingEarly = true;
-                await this.chat.loadEarly();
-                this.chat.loadingEarly = false;
+            if (!this.activeChat.loadingEarly) {
+                this.activeChat.loadingEarly = true;
+                try {
+                    await this.activeChat.loadEarly();
+                } catch (e) {
+                    console.error('LoadEarly Error::', e);
+                }
+                this.activeChat.loadingEarly = false;
                 return true;
             }
             return Promise.resolve(false);
@@ -202,12 +153,15 @@ export default {
             }
         },
 
-        isInBottom () {
-            return this.$el.scrollHeight - this.$el.scrollTop <= this.$el.clientHeight + 15;
+        scrollToBottom () {
+            console.log('scrollToBottom');
+            this.$nextTick(() => {
+                this.$el.scrollTop = 0;
+            });
         },
 
-        handleKeyDown (evt) {
-            this.$emit('keyDown', evt);
+        isInBottom () {
+            return this.$el.scrollTop <= 15;
         }
     },
     directives: {
@@ -244,5 +198,7 @@ export default {
     background-image: url("../../../../../assets/images/bg-chat.png");
     overflow: scroll;
     overflow-x: hidden;
+    display: flex;
+    flex-direction: column-reverse;
 }
 </style>

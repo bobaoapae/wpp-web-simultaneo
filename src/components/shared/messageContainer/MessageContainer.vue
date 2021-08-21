@@ -7,7 +7,8 @@
                     <div class="select-msg-check"></div>
                 </div>
             </div>
-            <div :class="showTail ? 'tail' : ''" class="message-body" v-b-hover="handleHover">
+            <div :class="showTail ? 'tail' : ''" class="message-body" @mouseover="handleHover(true)"
+                 @mouseout="handleHover(false)">
                 <div class="tail-container" v-if="showTail"></div>
                 <div
                     class="msg-menu"
@@ -40,15 +41,15 @@
                 <!-- Identificador de mensagens no grupo -->
                 <div class="identify-msg-group pb-0 pt-2 pl-2 pr-2"
                      v-if="activeChat.isGroup && !msg.id.fromMe && showTail">
-                    <div :style="{color: activeChat.getColor(msg.senderObj.id)}" @click="handleClick" class="btn-link"
-                         v-if="msg.senderObj.name">
-                        {{msg.senderObj.name | emojify}}
+                    <div :style="{color: colorMsgGroup}" @click="handleClick" class="btn-link"
+                         v-if="name">
+                        {{ filters.emojify(name) }}
                     </div>
 
                     <div class="d-flex justify-content-between" v-else>
-                    <span :style="{color: activeChat.getColor(msg.senderObj.id)}" @click="handleClick"
-                          class="btn-link number">{{msg.senderObj.formattedName | emojify}}</span>
-                        <span class="name">~{{msg.senderObj.pushname}}</span>
+                    <span :style="{color: colorMsgGroup}" @click="handleClick"
+                          class="btn-link number">{{ filters.emojify(formattedName) }}</span>
+                        <span class="name">~{{pushName}}</span>
                     </div>
                 </div>
 
@@ -73,19 +74,24 @@
 </template>
 
 <script>
-import { mapActions, mapMutations, mapState } from 'vuex';
-import MessageText from '@/components/shared/messageText/MessageText.vue';
-import MessagePhoto from '@/components/shared/messagePhoto/MessagePhoto.vue';
-import MessageSticker from '@/components/shared/messageSticker/MessageSticker.vue';
-import MessageVideo from '@/components/shared/messageVideo/MessageVideo.vue';
-import MessageGif from '@/components/shared/messageGif/MessageGif.vue';
-import MessageDocument from '@/components/shared/messageDocument/MessageDocument';
-import ForwardedIndicator from '@/components/shared/forwardedIndicator/ForwardedIndicator';
-import MessageAudio from '@/components/shared/messageAudio/MessageAudio';
-import QuotedMsg from '../quotedMsg/QuotedMsg';
-import MessageRevoked from '../messageRevoked/MessageRevoked';
-import MessageLocation from '../messageLocation/MessageLocation';
-import MessageContact from '../messageContact/MessageContact';
+import { defineAsyncComponent, ref } from 'vue';
+import { mapActions, mapMutations, mapState, useStore } from 'vuex';
+import filters from '@/filters';
+import { asyncComputed } from '@/AsyncComputed.ts';
+import randomColor from 'random-color';
+
+const MessageText = defineAsyncComponent(() => import('@/components/shared/messageText/MessageText.vue'));
+const MessagePhoto = defineAsyncComponent(() => import('@/components/shared/messagePhoto/MessagePhoto.vue'));
+const MessageSticker = defineAsyncComponent(() => import('@/components/shared/messageSticker/MessageSticker.vue'));
+const MessageVideo = defineAsyncComponent(() => import('@/components/shared/messageVideo/MessageVideo.vue'));
+const MessageGif = defineAsyncComponent(() => import('@/components/shared/messageGif/MessageGif.vue'));
+const MessageDocument = defineAsyncComponent(() => import('@/components/shared/messageDocument/MessageDocument.vue'));
+const ForwardedIndicator = defineAsyncComponent(() => import('@/components/shared/forwardedIndicator/ForwardedIndicator.vue'));
+const MessageAudio = defineAsyncComponent(() => import('@/components/shared/messageAudio/MessageAudio.vue'));
+const QuotedMsg = defineAsyncComponent(() => import('../quotedMsg/QuotedMsg.vue'));
+const MessageRevoked = defineAsyncComponent(() => import('../messageRevoked/MessageRevoked.vue'));
+const MessageLocation = defineAsyncComponent(() => import('../messageLocation/MessageLocation.vue'));
+const MessageContact = defineAsyncComponent(() => import('../messageContact/MessageContact.vue'));
 
 export default {
     name: 'MessageContainer',
@@ -103,28 +109,77 @@ export default {
         MessageContact,
         MessageGif
     },
-    data () {
-        return {
-            showMenuIcon: false,
-            menuAberto: false
-        };
+    props: {
+        msg: {
+            type: Object,
+            required: true
+        },
+        previousMsg: {
+            type: Object,
+            required: false
+        }
     },
     mounted () {
-        this.$root.$on('keyDown', (evt) => {
+        //TODO remove selected msg on esc press
+        /*this.$root.$on('keyDown', (evt) => {
             if (this.showSelectMsgs) {
                 evt.preventDefault();
                 if (evt.key === 'Escape') {
                     this.SET_SELECT_MSGS({ show: false });
                 }
             }
-        });
+        });*/
+    },
+    setup (props) {
+        const store = useStore();
+
+        const colorMsgGroup = asyncComputed(async () => {
+            if (store.state.activeChat.isGroup) {
+                let senderObj = await props.msg.senderObj();
+                return store.state.activeChat.getColor(senderObj.id);
+            }
+            return false;
+        }, { default: randomColor().hexString(), lazy: true });
+
+        const name = asyncComputed(async () => {
+            let senderObj = await props.msg.senderObj();
+            return senderObj.name;
+        }, { default: '', lazy: true });
+
+        const pushName = asyncComputed(async () => {
+            let senderObj = await props.msg.senderObj();
+            return senderObj.pushname;
+        }, { default: '', lazy: true });
+
+        const formattedName = asyncComputed(async () => {
+            let senderObj = await props.msg.senderObj();
+            return senderObj.formattedName;
+        }, { default: '', lazy: true });
+
+        const showTail = asyncComputed(async () => {
+            let senderObj = await props.msg.senderObj();
+            let previousMsgSenderObj = props.previousMsg ? await props.previousMsg.senderObj() : false;
+            return !props.previousMsg || !senderObj || !previousMsgSenderObj || (props.previousMsg.isSticker && !props.msg.isSticker) || senderObj.id !== previousMsgSenderObj.id || props.msg.hasQuotedMsg || props.msg.isSticker || props.msg.fomattedDate !== props.previousMsg.fomattedDate;
+        }, { default: false, lazy: true });
+
+        return {
+            colorMsgGroup,
+            name,
+            pushName,
+            formattedName,
+            showTail,
+            filters,
+            showMenuIcon: ref(false),
+            menuAberto: ref(false)
+        };
     },
     watch: {
         'activeChat.quotedMsg': function (val) {
             if (val === this.msg) {
-                this.msg.blink = true;
+                //TODO: blink msg
+                //this.msg.blink = true;
                 setTimeout(() => {
-                    this.msg.blink = false;
+                    //this.msg.blink = false;
                 }, 1500);
             }
         },
@@ -140,22 +195,8 @@ export default {
             }
         }
     },
-    props: {
-        msg: {
-            type: Object,
-            required: true
-        },
-        previousMsg: {
-            type: Object,
-            required: false
-        }
-    },
     computed: {
         ...mapState(['activeChat', 'user', 'selectMsgs']),
-
-        showTail () {
-            return !this.previousMsg || !this.msg.senderObj || !this.previousMsg.senderObj || (this.previousMsg.isSticker && !this.msg.isSticker) || this.msg.senderObj.id !== this.previousMsg.senderObj.id || this.msg.hasQuotedMsg || this.msg.isSticker || this.msg.fomattedDate !== this.previousMsg.fomattedDate;
-        },
 
         showSelectMsgs () {
             return this.selectMsgs && this.selectMsgs.show;
@@ -166,31 +207,31 @@ export default {
         }
     },
     methods: {
-        ...mapMutations(['SET_ACTIVE_CHAT', 'SET_SELECT_MSGS', 'TOGGLE_SELECT_MSG']),
+        ...mapMutations(['SET_ACTIVE_CHAT', 'SET_SELECT_MSGS', 'TOGGLE_SELECT_MSG', 'TOGGLE_MODAL_DELETE_MSG']),
         ...mapActions(['findChatFromId', 'downloadMedia']),
 
         handleHover (isHover) {
             this.showMenuIcon = isHover;
         },
 
-        handleShowMenu (evt) {
+        handleShowMenu () {
             this.menuAberto = true;
         },
 
-        handleHideMenu (evt) {
+        handleHideMenu () {
             this.menuAberto = false;
         },
 
-        handleClickAnswer (evt) {
+        handleClickAnswer () {
             this.activeChat.quotedMsg = this.msg;
         },
 
-        handleClickForward (evt) {
+        handleClickForward () {
             this.SET_SELECT_MSGS({ show: true });
         },
 
         handleClickDelete () {
-            this.$root.$emit('showModalDeleteMsg', this.msg);
+            this.TOGGLE_MODAL_DELETE_MSG({ show: true, msg: this.msg });
         },
 
         handleClick () {
@@ -198,7 +239,6 @@ export default {
                 this.SET_ACTIVE_CHAT(chat);
             });
 
-            this.$root.$emit('showNewChat', false);
         },
 
         handleClickMessageContainer () {
@@ -220,6 +260,7 @@ export default {
 
                 document.body.removeChild(element);
             }).catch(reason => {
+                console.error(reason);
                 alert('Falha ao baixar o arquivo, atualize a pagina e tente novamente.');
             });
         }
@@ -338,7 +379,7 @@ export default {
     right: -12px;
 }
 
-.message-out.blink .message-body, .message-out.blink >>> .time {
+.message-out.blink .message-body, .message-out.blink ::v-deep(.time) {
     animation-name: blink-out;
     animation-duration: 1500ms;
     animation-timing-function: ease-in-out;
@@ -346,7 +387,7 @@ export default {
     animation-play-state: running;
 }
 
-.message-in.blink .message-body, .message-in.blink .identify-msg-group, .message-in.blink >>> .time {
+.message-in.blink .message-body, .message-in.blink .identify-msg-group, .message-in.blink ::v-deep(.time) {
     animation-name: blink-in;
     animation-duration: 1500ms;
     animation-timing-function: ease-in-out;

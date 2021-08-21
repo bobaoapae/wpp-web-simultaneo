@@ -4,11 +4,13 @@
         class="flex-grow-1"
         id="name-chat"
     >
-        <span :inner-html.prop="name | emojify"></span>
+        <span v-html="filters.emojify(name)"></span>
     </div>
 </template>
 
 <script>
+import filters from '@/filters';
+
 export default {
     name: 'NameChat',
     props: {
@@ -27,6 +29,11 @@ export default {
             }
             return '+' + this.chat.id.replace('@c.us', '');
         }
+    },
+    data () {
+        return {
+            filters
+        };
     }
 };
 </script>

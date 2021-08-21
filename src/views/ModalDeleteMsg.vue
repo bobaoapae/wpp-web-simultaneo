@@ -1,10 +1,10 @@
 <template>
-    <div class="modal-del-msg" v-if="show">
+    <div class="modal-del-msg" v-if="isShow">
         <div class="box-modal">
             <div>
                 <div class="title">Apagar mensagem?</div>
                 <div class="footer">
-                    <div class="cancelar" @click="show = false">
+                    <div class="cancelar" @click="handleCancel">
                         Cancelar
                     </div>
 
@@ -22,21 +22,28 @@
 </template>
 
 <script>
+import { mapMutations, mapState } from 'vuex';
+
 export default {
     name: 'ModalDeleteMsg',
-    data () {
-        return {
-            show: false,
-            msg: {}
-        };
-    },
-    mounted () {
-        this.$root.$on('showModalDeleteMsg', data => {
-            this.show = true;
-            this.msg = data;
-        });
+    computed: {
+        ...mapState(['modalDeleteMsg']),
+
+        isShow () {
+            return this.modalDeleteMsg.show;
+        },
+
+        msg () {
+            return this.modalDeleteMsg.msg;
+        }
     },
     methods: {
+        ...mapMutations(['TOGGLE_MODAL_DELETE_MSG']),
+
+        handleCancel () {
+            this.TOGGLE_MODAL_DELETE_MSG({ show: false });
+        },
+
         handleClick (fromAll) {
             if (fromAll) {
                 this.msg.revoke();

@@ -68,7 +68,7 @@ export default {
             this.btn.loading = true;
             this.btn.label = 'PROCESSANDO';
             api.post('/api/users/mudarSenha', f)
-                .then((r) => {
+                .then(() => {
                     this.success = true;
                 })
                 .catch(reason => {

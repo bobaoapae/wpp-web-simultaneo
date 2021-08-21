@@ -1,18 +1,19 @@
 <template>
     <div :class="{unread : chat.isUnread}" class="last-msg flex-grow-1 d-flex align-items-center">
-        <template v-if="chat.lastMsg">
-            <MessageIconStatus :ack="chat.lastMsg.ack" class="icon-status" v-if="chat.lastMsg.id.fromMe"/>
+        <template v-if="lastMsg">
+            <MessageIconStatus :ack="lastMsg.ack" class="icon-status" v-if="lastMsg.id.fromMe"/>
 
-            <span :inner-html.prop="`${chat.lastMsg.senderObj.formattedName}: ` | emojify"
-                  v-if="chat.isGroup && chat.lastMsg && chat.lastMsg.senderObj && !chat.lastMsg.id.fromMe"></span>
+            <span v-html="`${formattedName}: `"
+                  v-if="chat.isGroup && !lastMsg.id.fromMe"></span>
 
-            <MessageBody :lastMsg="chat.lastMsg"/>
+            <MessageBody :lastMsg="lastMsg"/>
         </template>
     </div>
 </template>
 
 <script>
-
+import filters from '@/filters';
+import { asyncComputed } from '@/AsyncComputed';
 import MessageBody from './messageBody/MessageBody.vue';
 import MessageIconStatus from '@/components/shared/messageIconStatus/MessageIconStatus.vue';
 
@@ -28,13 +29,28 @@ export default {
             required: true
         }
     },
-    data () {
-        return {};
-    },
-    created () {
+    setup (props) {
+        const formattedName = asyncComputed(async () => {
+            let senderObj = await props.chat.lastMsg.senderObj();
+            let name = senderObj.formattedName || senderObj.verifiedName || senderObj.pushname;
+            return filters.emojify(name);
+        }, { default: '', lazy: true });
 
+        return {
+            formattedName
+        };
     },
-    watch: {}
+    computed: {
+        lastMsg () {
+            return this.chat.lastMsg;
+        }
+    },
+    methods: {
+        async loadFormattedName () {
+            let senderObj = await this.chat.lastMsg.senderObj();
+            this.formattedNameLastMsg = filters.emojify(senderObj.formattedName);
+        }
+    }
 };
 </script>
 

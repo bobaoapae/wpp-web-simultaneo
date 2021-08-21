@@ -1,65 +1,70 @@
-import Vue from 'vue';
-import Vuex from 'vuex';
-import uniqueid from 'uniqid';
+import { reactive } from 'vue';
+import { createStore } from 'vuex';
+import { v4 as uuid } from 'uuid';
 import visibility from 'vue-visibility-change';
-import VuexReset from '@ianwalter/vuex-reset';
 import vCardParse from 'vcard-parser';
 import api from '@/api';
 import randomColor from 'random-color';
-import WebSocketWorker from 'worker-loader!@/webSocketWorker';
+import WebSocketWorker from '@/ws-worker/worker.js?worker';
 import throttledQueue from 'throttled-queue';
+import pako from 'pako';
 
-Vue.use(Vuex);
-
-const store = new Vuex.Store({
-    plugins: [VuexReset()],
-    state: {
-        user: {},
-        token: '',
-        isLogged: false,
-        isQrCodeLogged: false,
-        isLoadingChat: true,
-        imgQrCode: '',
-        QrCodeStatus: '',
-        self: {},
-        contacts: [],
-        findChats: {},
-        findChatsByNumber: {},
-        chats: [],
-        quickReplys: [],
-        pictures: {},
-        medias: {},
-        timeOutChats: -1,
-        activeChat: null,
-        selectMsgs: { show: false, msgs: [] },
-        selectChats: { show: false, chats: [] },
-        poolContext: [],
-        modal: {
-            type: '',
-            media: '',
-            show: false,
-            id: ''
-        },
-        wsEvents: {},
-        promisesWsEvents: {},
-        intervalPong: -1,
-        timeoutPresence: -1,
-        timeoutIdle: -1,
-        audio: null,
-        visible: true,
-        idle: false,
-        wsWorker: null,
-        driverState: ''
+const store = createStore({
+    state () {
+        return {
+            user: {},
+            token: '',
+            isLogged: false,
+            isQrCodeLogged: false,
+            isLoadingChat: true,
+            imgQrCode: '',
+            QrCodeStatus: '',
+            self: {},
+            contacts: [],
+            findChats: {},
+            findChatsByNumber: {},
+            findContacts: {},
+            findContactsByNumber: {},
+            chats: [],
+            myChats: [],
+            quickReplies: [],
+            pictures: {},
+            medias: {},
+            timeOutChats: -1,
+            activeChat: null,
+            selectMsgs: { show: false, msgs: [] },
+            selectChats: { show: false, chats: [] },
+            poolContext: [],
+            modal: {
+                type: '',
+                media: '',
+                show: false,
+                id: ''
+            },
+            modalDeleteMsg: {
+                show: false,
+                msg: null
+            },
+            showNewChat: false,
+            wsEvents: {},
+            promisesWsEvents: {},
+            intervalPong: -1,
+            timeoutPresence: -1,
+            timeoutIdle: -1,
+            audio: null,
+            visible: true,
+            idle: false,
+            wsWorker: null,
+            driverState: ''
+        };
     },
     mutations: {
-        reset: (state) => {
-        },
-
         RESET_WPP (state) {
             state.self = {};
             state.contacts = [];
             state.chats = [];
-            state.quickReplys = [];
+            state.myChats = [];
+            state.quickReplies = [];
             state.pictures = {};
             state.medias = {};
             state.activeChat = null;
@@ -170,20 +175,33 @@ const store = new Vuex.Store({
             }
         },
 
+        TOGGLE_MODAL_DELETE_MSG (state, payload) {
+            state.modalDeleteMsg.show = payload.show;
+            state.modalDeleteMsg.msg = payload.msg;
+        },
+
+        SET_SHOW_NEW_CHAT (state, payload) {
+            state.showNewChat = payload;
+        },
+
         SET_SELF (state, payload) {
             Object.assign(state.self, payload);
         },
 
         SET_CONTACTS (state, payload) {
-            Vue.set(state, 'contacts', [...payload]);
+            state.contacts = payload;
         },
 
-        SET_QUICK_REPLYS (state, payload) {
-            Vue.set(state, 'quickReplys', [...payload]);
+        SET_QUICK_REPLIES (state, payload) {
+            state.quickReplies = payload;
         },
 
         SET_CHATS (state, payload) {
-            Vue.set(state, 'chats', [...payload]);
+            state.chats = payload;
+        },
+
+        SET_MY_CHATS (state, payload) {
+            state.myChats = payload;
         },
 
         SET_MODAL (state, payload) {
@@ -214,6 +232,10 @@ const store = new Vuex.Store({
             state.chats.push(payload);
         },
 
+        ADD_NEW_CONTACT (state, payload) {
+            state.contacts.push(payload);
+        },
+
         REMOVE_CHAT (state, payload) {
             state.chats = state.chats.filter(e => e.id !== payload.id);
             if (state.activeChat && state.activeChat.id === payload.id) {
@@ -221,7 +243,7 @@ const store = new Vuex.Store({
             }
         },
 
-        ADD_NEW_LISTENNER (state, payload) {
+        ADD_NEW_LISTENER (state, payload) {
             state.wsEvents[payload.tag] = {
                 resolve: (e) => {
                     payload.resolve(e);
@@ -246,7 +268,8 @@ const store = new Vuex.Store({
                             let frames = wsEvent.frames.sort((a, b) => a.frameId - b.frameId);
                             let response = '';
                             for (let x = 0; x < frames.length; x++) {
-                                response += frames[x].response;
+                                let data = frames[x].response;
+                                response += data;
                             }
                             try {
                                 response = JSON.parse(response);
@@ -259,6 +282,7 @@ const store = new Vuex.Store({
                         wsEvent.resolve(webSocketResponse.response);
                     }
                 } else {
+                    console.error(webSocketResponse);
                     wsEvent.reject(webSocketResponse);
                 }
             }
@@ -337,6 +361,13 @@ const store = new Vuex.Store({
             payload.promise.finally(() => {
                 delete state.findChatsByNumber[payload.id];
             });
+        },
+
+        ADD_FIND_CONTACT (state, payload) {
+            state.findContacts[payload.id] = payload;
+            payload.promise.finally(() => {
+                delete state.findContacts[payload.id];
+            });
         }
     },
 
@@ -344,7 +375,7 @@ const store = new Vuex.Store({
         setNewEvent (context) {
             context.commit('RESET_WPP');
             context.commit('SET_TOKEN', sessionStorage.TOKEN);
-            context.commit('SET_WS_WORKER', new WebSocketWorker());
+            context.commit('SET_WS_WORKER', WebSocketWorker());
             const wsWorker = context.state.wsWorker;
 
             wsWorker.postMessage({ cmd: 'ws-init', data: `${localStorage.baseURL.replace('http', 'ws')}/api/ws` });
@@ -358,6 +389,7 @@ const store = new Vuex.Store({
                             event: 'token',
                             payload: sessionStorage.TOKEN
                         }).catch(reason => {
+                            console.error(reason);
                             sessionStorage.removeItem('TOKEN');
                             sessionStorage.removeItem('USER');
                             window.location.reload();
@@ -377,7 +409,11 @@ const store = new Vuex.Store({
                         break;
                     }
                     case 'ws-message': {
-                        let payload = data.data;
+                        let compressData = atob(data.data);
+                        compressData = compressData.split('').map(function (e) {
+                            return e.charCodeAt(0);
+                        });
+                        let payload = new TextDecoder('utf-8').decode(pako.inflate(new Uint8Array(compressData)));
                         let eventOrTag = data.cmd;
                         switch (eventOrTag) {
                             case 'need-qrcode': {
@@ -386,55 +422,52 @@ const store = new Vuex.Store({
                                 break;
                             }
 
-                            case 'update-estado': {
+                            case 'update-state': {
                                 context.commit('SET_DRIVER_STATE', payload);
                                 if (payload === 'QR_CODE_SCANNED') {
                                     context.commit('SET_QR_CODE_LOGGED', true);
-                                } else if (payload === 'LOADING_STORE') {
+                                } else if (payload === 'WAITING_SYNC' || payload === 'LOADING_STORE') {
                                     context.commit('SET_IS_LOADING_CHAT', true);
                                     context.commit('SET_QR_CODE_LOGGED', true);
                                 } else if (payload === 'LOGGED') {
                                     context.commit('SET_QR_CODE_LOGGED', true);
+
+                                    let selfInfo = await context.dispatch('getSelfInfo');
+                                    context.commit('RESET_WPP');
+                                    context.commit('SET_SELF', selfInfo.self);
+
+                                    let init = performance.now();
+                                    context.dispatch('getAllChats').then(async chats => {
+                                        console.log('chats::', chats);
+                                        await context.dispatch('handleSetChats', chats);
+                                        await context.dispatch('sortChatsByTime');
+                                        console.log('time get all chats::', performance.now() - init);
+                                        for await (let func of context.state.poolContext) {
+                                            func();
+                                        }
+                                        context.state.poolContext = [];
+                                        await context.dispatch('initPong');
+                                        await context.dispatch('initPresenceTimeout');
+                                        await context.dispatch('appActive');
+                                        context.commit('SET_IS_LOADING_CHAT', false);
+                                    });
+
+                                    context.dispatch('getAllContacts').then(contacts => {
+                                        console.log('contacts::', contacts);
+                                        context.commit('SET_CONTACTS', contacts);
+                                    });
+
+                                    if (selfInfo.isBusiness) {
+                                        context.dispatch('getAllQuickReplies').then(quickReplies => {
+                                            context.commit('SET_QUICK_REPLIES', quickReplies);
+                                        });
+                                    }
                                 } else if (payload === 'WAITING_QR_CODE_SCAN' || payload === 'LOADING' || payload === 'WAITING_LOAD') {
                                     context.commit('SET_QR_CODE_LOGGED', false);
                                     context.commit('SET_IS_LOADING_CHAT', true);
                                     if (payload === 'WAITING_LOAD' || payload === 'LOADING') {
                                         context.commit('SET_IMG_QRCODE', '');
                                     }
-                                }
-
-                                break;
-                            }
-
-                            case 'init': {
-                                const r = JSON.parse(payload);
-                                context.commit('RESET_WPP');
-                                context.commit('SET_SELF', r.self);
-
-                                let init = performance.now();
-                                context.dispatch('getAllChats').then(async chats => {
-                                    console.log('chats::', chats);
-                                    console.log('time get all chats::', performance.now() - init);
-                                    await context.dispatch('handleSetChats', chats);
-                                    await context.dispatch('sortChatsByTime');
-                                    for await (let func of context.state.poolContext) {
-                                        func();
-                                    }
-                                    context.state.poolContext = [];
-                                    await context.dispatch('initPong');
-                                    await context.dispatch('initPresenceTimeout');
-                                    await context.dispatch('appActive');
-                                    context.commit('SET_IS_LOADING_CHAT', false);
-                                });
-
-                                context.dispatch('getAllContacts').then(contacts => {
-                                    context.commit('SET_CONTACTS', contacts);
-                                });
-
-                                if (r.isBussiness) {
-                                    context.dispatch('getAllQuickReplys').then(quickReplys => {
-                                        context.commit('SET_QUICK_REPLYS', quickReplys);
-                                    });
                                 }
 
                                 break;
@@ -492,7 +525,13 @@ const store = new Vuex.Store({
                                 const r = JSON.parse(payload);
 
                                 let funcao = async () => {
-                                    await context.dispatch('removeMsgFromChat', r);
+                                    if (Array.isArray(r)) {
+                                        for (const msg of r) {
+                                            await context.dispatch('removeMsgFromChat', msg);
+                                        }
+                                    } else {
+                                        await context.dispatch('removeMsgFromChat', r);
+                                    }
                                 };
 
                                 if (context.state.isLoadingChat) {
@@ -508,7 +547,13 @@ const store = new Vuex.Store({
                                 const r = JSON.parse(payload);
 
                                 let funcao = async () => {
-                                    await context.dispatch('addNewMsgInChat', r);
+                                    if (Array.isArray(r)) {
+                                        for (const msg of r) {
+                                            await context.dispatch('addNewMsgInChat', msg);
+                                        }
+                                    } else {
+                                        await context.dispatch('addNewMsgInChat', r);
+                                    }
                                 };
 
                                 if (context.state.isLoadingChat) {
@@ -524,7 +569,45 @@ const store = new Vuex.Store({
                                 const r = JSON.parse(payload);
 
                                 let funcao = async () => {
-                                    await context.dispatch('updateMsg', r);
+                                    if (Array.isArray(r)) {
+                                        for (const msg of r) {
+                                            await context.dispatch('updateMsg', msg);
+                                        }
+                                    } else {
+                                        await context.dispatch('updateMsg', r);
+                                    }
+                                };
+
+                                if (context.state.isLoadingChat) {
+                                    context.state.poolContext.push(funcao);
+                                } else {
+                                    await funcao();
+                                }
+
+                                break;
+                            }
+
+                            case 'change-property-chat': {
+                                const r = JSON.parse(payload);
+
+                                let funcao = async () => {
+                                    await context.dispatch('changeCustomPropertyChat', r);
+                                };
+
+                                if (context.state.isLoadingChat) {
+                                    context.state.poolContext.push(funcao);
+                                } else {
+                                    await funcao();
+                                }
+
+                                break;
+                            }
+
+                            case 'remove-property-chat': {
+                                const r = JSON.parse(payload);
+
+                                let funcao = async () => {
+                                    await context.dispatch('removeCustomPropertyChat', r);
                                 };
 
                                 if (context.state.isLoadingChat) {
@@ -549,13 +632,13 @@ const store = new Vuex.Store({
         sendWsMessage (context, payload) {
             return new Promise((resolve, reject) => {
                 let payLoadSend = {
-                    tag: uniqueid(),
+                    tag: uuid(),
                     webSocketRequestPayLoad: payload
                 };
                 if (typeof (payLoadSend.webSocketRequestPayLoad.payload) === 'object') {
                     payLoadSend.webSocketRequestPayLoad.payload = JSON.stringify(payLoadSend.webSocketRequestPayLoad.payload);
                 }
-                context.commit('ADD_NEW_LISTENNER', { tag: payLoadSend.tag, resolve: resolve, reject: reject });
+                context.commit('ADD_NEW_LISTENER', { tag: payLoadSend.tag, resolve: resolve, reject: reject });
                 setTimeout(() => reject(new Error('Timeout::' + payload.event)), 60000);
                 context.state.wsWorker.postMessage({
                     cmd: 'ws-send',
@@ -575,9 +658,9 @@ const store = new Vuex.Store({
 
         findFormattedNameFromId (context, payload) {
             return new Promise((resolve, reject) => {
-                context.dispatch('findChatFromId', payload).then(el => {
-                    if (el && el.contact && el.contact.formattedName) {
-                        resolve(el.contact.formattedName);
+                context.dispatch('findContactFromId', payload).then(el => {
+                    if (el && el.formattedName) {
+                        resolve(el.formattedName);
                     } else {
                         resolve('+' + (payload.id.split('@')[0]));
                     }
@@ -593,7 +676,6 @@ const store = new Vuex.Store({
                 let findChat = context.state.findChats[payload.id];
                 if (!chat) {
                     if (!findChat) {
-                        // eslint-disable-next-line promise/param-names
                         findChat = new Promise((resolve1, reject1) => {
                             context.dispatch('sendWsMessage', { event: 'findChat', payload: payload.id }).then(chat => {
                                 context.dispatch('newChat', chat).then((chat) => {
@@ -603,6 +685,7 @@ const store = new Vuex.Store({
                         });
                         context.commit('ADD_FIND_CHAT', { id: payload.id, promise: findChat });
                     } else {
+                        console.log('findChat cache::', findChat);
                         findChat = findChat.promise;
                     }
                     findChat.then(value => resolve(value)).catch(reason => reject(reason));
@@ -618,7 +701,6 @@ const store = new Vuex.Store({
                 let findChat = context.state.findChatsByNumber[payload.number];
                 if (!chat) {
                     if (!findChat) {
-                        // eslint-disable-next-line promise/param-names
                         findChat = new Promise((resolve1, reject1) => {
                             context.dispatch('sendWsMessage', { event: 'findChatByNumber', payload: payload.number }).then(chat => {
                                 context.dispatch('newChat', chat).then((chat) => {
@@ -637,28 +719,54 @@ const store = new Vuex.Store({
             });
         },
 
-        getAllChats (context, payload) {
-            return context.dispatch('sendWsMessage', { event: 'getAllChats' });
-        },
-
-        getAllContacts (context, payload) {
-            return context.dispatch('sendWsMessage', { event: 'getAllContacts' });
-        },
-
-        getAllQuickReplys (context, payload) {
-            return context.dispatch('sendWsMessage', { event: 'getAllQuickReplys' });
-        },
-
-        addCustomProperty (context, payload) {
-            return context.dispatch('sendWsMessage', {
-                event: 'addCustomProperty', payload: payload
+        findContactFromId (context, payload) {
+            return new Promise((resolve, reject) => {
+                const contact = context.state.contacts.find(contact => contact.id === payload.id);
+                let findContact = context.state.findContacts[payload.id];
+                if (!contact) {
+                    if (!findContact) {
+                        findContact = new Promise((resolve1, reject1) => {
+                            context.dispatch('sendWsMessage', { event: 'findContact', payload: payload.id }).then(chat => {
+                                context.dispatch('newContact', chat).then((contact) => {
+                                    resolve1(contact);
+                                });
+                            }).catch(reason => reject1(reason));
+                        });
+                        context.commit('ADD_FIND_CONTACT', { id: payload.id, promise: findContact });
+                    } else {
+                        findContact = findContact.promise;
+                    }
+                    findContact.then(value => resolve(value)).catch(reason => reject(reason));
+                } else {
+                    resolve(contact);
+                }
             });
         },
 
-        logout (context, payload) {
+        getSelfInfo (context) {
+            return context.dispatch('sendWsMessage', { event: 'getSelfInfo' });
+        },
+
+        getGroupParticipants (context, payload) {
+            return context.dispatch('sendWsMessage', { event: 'getGroupParticipants', payload: payload.chatId });
+        },
+
+        getAllChats (context) {
+            return context.dispatch('sendWsMessage', { event: 'getAllChats' });
+        },
+
+        getAllContacts (context) {
+            return context.dispatch('sendWsMessage', { event: 'getAllContacts' });
+        },
+
+        getAllQuickReplies (context) {
+            return context.dispatch('sendWsMessage', { event: 'getAllQuickReplies' });
+        },
+
+        logout (context) {
             return context.dispatch('sendWsMessage', {
                 event: 'logout'
-            }).then(value => {
+            }).then(() => {
                 localStorage.clear();
                 sessionStorage.clear();
                 window.location.refresh();
@@ -675,6 +783,96 @@ const store = new Vuex.Store({
             return api.get('/api/users/self').then(user => {
                 context.commit('SET_CURRENT_USER', user.data);
             });
+        },
+
+        getCurrentOperator (context, payload) {
+            return api.get(`/api/properties/chat/${payload.chatId}/currentOperator`).then(value => {
+                return value.data;
+            }).catch(reason => {
+                if (reason.response.status !== 404) {
+                    throw reason;
+                } else {
+                    return null;
+                }
+            });
+        },
+
+        async setCurrentOperator (context, payload) {
+            if (payload.chat.customProperties.currentOperator) {
+                let property = await context.dispatch('getCurrentOperator', { chatId: payload.chat.id });
+                property.value = context.state.user.uuid;
+                return context.dispatch('updateChatProperty', property);
+            }
+            const property = {
+                whatsAppId: payload.chat.id,
+                key: 'currentOperator',
+                value: context.state.user.uuid
+            };
+            return context.dispatch('addChatProperty', property);
+        },
+
+        async addAnnotation (context, payload) {
+            let property = await context.dispatch('getChatProperty', { chatId: payload.chat.id, name: payload.name });
+            if (property) {
+                property.value = payload.value;
+                return context.dispatch('updateChatProperty', property);
+            }
+            property = {
+                whatsAppId: payload.chat.id,
+                key: payload.name,
+                value: payload.value
+            };
+            return context.dispatch('addChatProperty', property);
+        },
+
+        updateChatProperty (context, payload) {
+            return api.put('/api/properties/chat', payload);
+        },
+
+        addChatProperty (context, payload) {
+            return api.post('/api/properties/chat', payload);
+        },
+
+        deleteChatProperty (context, payload) {
+            return api.delete(`/api/properties/chat/${payload.chatId}/${payload.name}`);
+        },
+
+        getChatProperty (context, payload) {
+            return api.get(`/api/properties/chat/${payload.chatId}/${payload.name}`).then(value => {
+                return value.data;
+            }).catch(reason => {
+                if (reason.response.status !== 404) {
+                    throw reason;
+                } else {
+                    return null;
+                }
+            });
+        },
+
+        getChatProperties (context, payload) {
+            return api.get(`/api/properties/chat/${payload.chatId}`).then(value => {
+                return value.data;
+            }).catch(reason => {
+                if (reason.response.status !== 404) {
+                    throw reason;
+                } else {
+                    return null;
+                }
+            });
+        },
+
+        getChatsWithProperty (context, payload) {
+            return api.get(`/api/properties/chat/filter/${payload.key}/${payload.value}`).then(value => {
+                return value.data;
+            });
+        },
+
+        async updateMyChats (context) {
+            let chatIds = await context.dispatch('getChatsWithProperty', { key: 'currentOperator', value: context.state.user.uuid });
+            let myChats = context.state.chats.filter(chat => {
+                return chatIds.includes(chat.id);
+            });
+            await context.commit('SET_MY_CHATS', myChats);
         },
 
         initPong (context) {
@@ -718,7 +916,7 @@ const store = new Vuex.Store({
         checkDelayToServer (context) {
             return new Promise((resolve, reject) => {
                 let time = new Date().getTime();
-                context.dispatch('sendWsMessage', { event: 'pong' }).then(result => {
+                context.dispatch('sendWsMessage', { event: 'pong' }).then(() => {
                     resolve(new Date().getTime() - time);
                 }).catch(reason => reject(reason));
             });
@@ -823,19 +1021,8 @@ const store = new Vuex.Store({
             });
         },
 
-        findCustomProperties (context, payload) {
-            return new Promise((resolve, reject) => {
-                context.dispatch('sendWsMessage', {
-                    event: 'findCustomProperty',
-                    payload: { id: payload.id, type: payload.type }
-                }).then(data => {
-                    resolve(data);
-                }).catch(reason => reject(reason));
-            });
-        },
-
         getGroupInviteInfo (context, payload) {
-            return context.dispatch('sendWsMessage', { event: 'getGroupInviteInfoHandler', payload: payload.link });
+            return context.dispatch('sendWsMessage', { event: 'getGroupInviteInfo', payload: payload.link });
         },
 
         /*
@@ -856,13 +1043,27 @@ const store = new Vuex.Store({
             return chat;
         },
 
-        async setChatProperties (context, el) {
-            if (!Array.isArray(el)) {
-                await setProperties(el);
+        async newContact (context, payload) {
+            let contact = context.state.contacts.find((element) => {
+                return element.id === payload.id;
+            });
+
+            if (!contact) {
+                contact = payload;
+                await context.commit('ADD_NEW_CONTACT', payload);
+            }
+
+            return contact;
+        },
+
+        async setChatProperties (context, payload) {
+            payload = reactive(payload);
+            if (!Array.isArray(payload)) {
+                await setProperties(payload);
             } else {
-                await Promise.all(el.map(el => {
-                    return setProperties(el);
-                }));
+                for await (let chat of payload) {
+                    await setProperties(chat);
+                }
             }
 
             async function setProperties (el) {
@@ -872,19 +1073,18 @@ const store = new Vuex.Store({
                 el.sendQueue = [];
                 el.htmlInput = '';
                 el.restoreInput = null;
-                if (!el.customProperties) {
-                    el.customProperties = {};
-                }
+                el.customProperties = {};
                 el.loadingEarly = false;
                 el.__x_msgsIndex = 1;
                 el.__x_poolAddMsgs = [];
-                el.__x_intervalPool = setInterval(() => {
+                el.__x_intervalPool = 0;
+                el.__x_intervalPoolCreate = () => setInterval(async () => {
                     let msgs = [];
                     while (el.__x_poolAddMsgs.length) {
                         msgs.push(el.__x_poolAddMsgs.pop());
                     }
                     if (msgs && msgs.length > 0) {
-                        context.dispatch('setMsgsProperties', msgs);
+                        await context.dispatch('setMsgsProperties', msgs);
                         el.msgs.push(...msgs);
                         el.msgs.sort(function (a, b) {
                             if (a.t > b.t) {
@@ -895,14 +1095,24 @@ const store = new Vuex.Store({
                             }
                             return 0;
                         });
-                        context.dispatch('sortChatsByTime');
+                        await context.dispatch('sortChatsByTime');
                         let newMsgIn = msgs.find(value => !value.id.fromMe && value.isNewMsg);
                         if (newMsgIn && el.muteExpiration === 0 && (el !== context.state.activeChat || !context.state.visible)) {
-                            context.dispatch('playNewMsgNotification');
+                            await context.dispatch('playNewMsgNotification');
                         }
                     }
                 }, 150);
+                el.contact = async function () {
+                    if (this.__x_contact) {
+                        return this.__x_contact;
+                    }
+                    this.__x_contact = await context.dispatch('findContactFromId', { id: el.id });
+                    return this.__x_contact;
+                };
                 el.addMsg = function (msg) {
+                    if (el.__x_intervalPool === 0) {
+                        el.__x_intervalPoolCreate();
+                    }
                     el.__x_poolAddMsgs.push(msg);
                 };
                 el.clearInputMessage = function () {
@@ -916,14 +1126,14 @@ const store = new Vuex.Store({
                     if (!payload) {
                         payload = {};
                     }
-                    if (!payload.message) {
-                        payload.message = el.message;
+                    if (this.message && !payload.text) {
+                        payload.text = this.message;
                     }
-                    if (el.quotedMsg) {
+                    if (this.quotedMsg) {
                         payload.quotedMsg = el.quotedMsg.id._serialized;
                     }
-                    el.clearInputMessage();
-                    return el.sendMessage(payload);
+                    this.clearInputMessage();
+                    return this.sendMessage(payload);
                 };
                 el.sendMessage = function (payload) {
                     Object.assign(payload, {
@@ -972,7 +1182,11 @@ const store = new Vuex.Store({
                     return context.dispatch('clearChat', { chatId: this.id, keepFavorites: keepFavorites === true });
                 };
                 el.subscribePresence = function () {
-                    return context.dispatch('subscribePresence', { chatId: this.id });
+                    if (!this.presenceSubscribed) {
+                        return context.dispatch('subscribePresence', { chatId: this.id }).then(() => {
+                            this.presenceSubscribed = true;
+                        });
+                    }
                 };
                 el.loadEarly = function () {
                     if (this.__x_msgsIndex * 50 < this.msgs.length) {
@@ -984,16 +1198,13 @@ const store = new Vuex.Store({
                     }
                     return new Promise((resolve, reject) => {
                         this.throttle(async () => {
-                            await context.dispatch('loadEarly', { chatId: this.id });
-                            setTimeout(resolve, 3000);
+                            try {
+                                await context.dispatch('loadEarly', { chatId: this.id });
+                                setTimeout(resolve, 3000);
+                            } catch (e) {
+                                reject(e);
+                            }
                         });
-                    });
-                };
-                el.addCustomProperty = function (value) {
-                    return context.dispatch('addCustomProperty', {
-                        id: this.id,
-                        type: 'CHAT',
-                        value: value
                     });
                 };
                 Object.defineProperty(el, 'lastMsg', {
@@ -1071,20 +1282,24 @@ const store = new Vuex.Store({
                         this.colors[id] = randomColor().hexString();
                         return this.colors[id];
                     };
+                    el.getParticipants = function () {
+                        return context.dispatch('getGroupParticipants', { chatId: this.id });
+                    };
                 }
             }
         },
 
-        setMsgsProperties (context, payload) {
+        async setMsgsProperties (context, payload) {
+            payload = reactive(payload);
             if (!Array.isArray(payload)) {
-                setProperties(payload);
+                await setProperties(payload);
             } else {
-                payload.forEach(msg => {
-                    setProperties(msg);
-                });
+                for await (let msg of payload) {
+                    await setProperties(msg);
+                }
             }
 
-            function setProperties (msg) {
+            async function setProperties (msg) {
                 Object.defineProperty(msg, 'isChat', {
                     get () {
                         return this.type === 'chat';
@@ -1201,14 +1416,18 @@ const store = new Vuex.Store({
                         return text;
                     }
                 });
+                msg.senderObj = async function () {
+                    if (this.__x_senderObj) {
+                        return this.__x_senderObj;
+                    }
+                    this.__x_senderObj = await context.dispatch('findContactFromId', { id: this.author ? this.author : this.from });
+                    return this.__x_senderObj;
+                };
                 if (msg.hasQuotedMsg) {
-                    setProperties(msg.quotedMsgObject);
+                    await setProperties(msg.quotedMsgObject);
                 }
                 if (msg.isVcard) {
                     msg.vCard = vCardParse.parse(msg.body);
-                }
-                if (!msg.customProperties) {
-                    msg.customProperties = {};
                 }
                 msg.delete = function () {
                     let payload = {
@@ -1295,7 +1514,7 @@ const store = new Vuex.Store({
             }, 50));
         },
 
-        playNewMsgNotification (context, payload) {
+        playNewMsgNotification (context) {
             if (!context.state.audio) {
                 context.commit('SET_AUDIO', new Audio(require('@/assets/audio/web_whatsapp.mp3')));
             }
@@ -1423,13 +1642,32 @@ const store = new Vuex.Store({
                     msg.ack = payload.ack;
                     msg.type = payload.type;
                     msg.id = payload.id;
+                    msg.canBeRevoke = payload.canBeRevoke;
                     if (payload.blink !== undefined) {
                         msg.blink = payload.blink;
                     }
-                    if (payload.customProperties) {
-                        Object.assign(msg.customProperties, payload.customProperties);
-                    }
                 }
+            }
+        },
+
+        async changeCustomPropertyChat (context, payload) {
+            let chatId = payload.whatsAppId;
+            let chat = await context.dispatch('findChatFromId', { id: chatId });
+            if (chat) {
+                chat.customProperties = Object.assign({}, chat.customProperties, {
+                    [payload.key]: payload.value
+                });
+                if (payload.key === 'currentOperator') {
+                    await context.dispatch('updateMyChats');
+                }
+            }
+        },
+
+        async removeCustomPropertyChat (context, payload) {
+            let chatId = payload.whatsAppId;
+            let chat = await context.dispatch('findChatFromId', { id: chatId });
+            if (chat) {
+                delete chat.customProperties[payload.key];
             }
         }
 
