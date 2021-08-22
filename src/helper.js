@@ -76,7 +76,7 @@ export const msg = {
                 return `<a href="#" @click="groupInviteLinkClick('${url}')">${unescape(url)}</a><hr/><button class="btn btn-block" style="color: #0056b3;flex-grow: 1;overflow: hidden;font-size: 14px;line-height: 20px;text-overflow: ellipsis;white-space: nowrap;" @click="groupViewInfo('${url}')">Ver Grupo</button><br>`;
             }
 
-            return `<a href="${href}" target="_blank">${unescape(url)}</a></br>`;
+            return `<a href="${href}" target="_blank">${unescape(url)}</a><br>`;
         });
     },
 

@@ -49,7 +49,7 @@
                     <div class="d-flex justify-content-between" v-else>
                     <span :style="{color: colorMsgGroup}" @click="handleClick"
                           class="btn-link number">{{ filters.emojify(formattedName) }}</span>
-                        <span class="name">~{{pushName}}</span>
+                        <span class="name">~{{ pushName }}</span>
                     </div>
                 </div>
 
@@ -58,16 +58,18 @@
 
                 <QuotedMsg :quotedMsg="msg.quotedMsgObject" v-if="msg.hasQuotedMsg"/>
 
-                <MessageText :msg="msg" v-if="msg.isChat"/>
-                <MessagePhoto :msg="msg" v-else-if="msg.isImage"/>
-                <MessageSticker :msg="msg" v-else-if="msg.isSticker"/>
-                <MessageGif :msg="msg" v-else-if="msg.isGif"/>
-                <MessageVideo :msg="msg" v-else-if="msg.isVideo"/>
-                <MessageDocument :msg="msg" v-else-if="msg.isDocument"/>
-                <MessageAudio :msg="msg" v-else-if="msg.isAudio || msg.isPtt"/>
-                <MessageRevoked :msg="msg" v-else-if="msg.isRevoked"/>
-                <MessageLocation :msg="msg" v-else-if="msg.isLocation"/>
-                <MessageContact :msg="msg" v-else-if="msg.isVcard"/>
+                <Suspense>
+                    <MessageText :msg="msg" v-if="msg.isChat"/>
+                    <MessagePhoto :msg="msg" v-else-if="msg.isImage"/>
+                    <MessageSticker :msg="msg" v-else-if="msg.isSticker"/>
+                    <MessageGif :msg="msg" v-else-if="msg.isGif"/>
+                    <MessageVideo :msg="msg" v-else-if="msg.isVideo"/>
+                    <MessageDocument :msg="msg" v-else-if="msg.isDocument"/>
+                    <MessageAudio :msg="msg" v-else-if="msg.isAudio || msg.isPtt"/>
+                    <MessageRevoked :msg="msg" v-else-if="msg.isRevoked"/>
+                    <MessageLocation :msg="msg" v-else-if="msg.isLocation"/>
+                    <MessageContact :msg="msg" v-else-if="msg.isVcard"/>
+                </Suspense>
             </div>
         </div>
     </div>
