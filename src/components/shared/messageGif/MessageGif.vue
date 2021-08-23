@@ -12,9 +12,7 @@
             <LoadingMedia v-if="!srcVideo"/>
         </div>
 
-        <div @dblclick.prevent.stop class="box-caption" v-if="msg.hasCaption">
-            <span v-html="caption"></span>
-        </div>
+        <MessageTextContent @dblclick.prevent.stop v-if="msg.hasCaption" :msg="msg"/>
 
         <MessageTime :class="{'no-caption' : !msg.hasCaption, 'custom-time' : !msg.hasCaption}" :msg="msg"/>
     </div>
@@ -24,10 +22,12 @@
 import { mapActions } from 'vuex';
 import LoadingMedia from '../loadingMedia/LoadingMedia.vue';
 import MessageTime from '../messageTime/MessageTime.vue';
+import MessageTextContent from '@/components/shared/messageTextContent/MessageTextContent.vue';
 
 export default {
     name: 'MessageGif',
     components: {
+        MessageTextContent,
         LoadingMedia,
         MessageTime
     },
@@ -42,35 +42,8 @@ export default {
             srcVideo: ''
         };
     },
-    asyncComputed: {
-        caption: {
-            async get () {
-                let caption = this.$options.filters.emojify(this.$options.filters.formatMsg(this.msg.caption));
-                if (this.msg.mentionedJidList && this.msg.mentionedJidList.length > 0) {
-                    let promises = [];
-                    let results = {};
-                    for (let x = 0; x < this.msg.mentionedJidList.length; x++) {
-                        promises.push(this.findChatFromId({ id: this.msg.mentionedJidList[x] }).then(value => {
-                            results[this.msg.mentionedJidList[x]] = value;
-                        }));
-                    }
-                    await Promise.all(promises);
-                    for (let x = 0; x < this.msg.mentionedJidList.length; x++) {
-                        let chat = results[this.msg.mentionedJidList[x]];
-                        let contact = await chat.contact();
-                        let name = contact.formattedName || contact.verifiedName || contact.pushname;
-                        caption = caption.replace('@' + this.msg.mentionedJidList[x].split('@')[0], `<span class='mention-symbol'>@</span><span class='btn-link' dir="ltr">${name}</span>`);
-                    }
-                }
-                return caption;
-            },
-            default () {
-                return this.msg.caption;
-            }
-        }
-    },
     methods: {
-        ...mapActions(['downloadMedia', 'findChatFromId']),
+        ...mapActions(['downloadMedia']),
         getVideo () {
             this.downloadMedia({ id: this.msg.id._serialized }).then(e => {
                 this.srcVideo = e.base64;
@@ -100,12 +73,6 @@ export default {
     align-items: center;
     justify-content: center;
     border-radius: 6px;
-}
-
-.box-caption {
-    max-width: 220px;
-    min-width: 220px;
-    user-select: text;
 }
 
 .box-preview {
