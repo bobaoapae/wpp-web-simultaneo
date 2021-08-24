@@ -8,7 +8,8 @@
             </div>
             <div class="info">
                 <span class="phrase">RedeSurftank.com.br</span>
-                <span class="pushName">~<span v-html="filters.emojify(pushName)"></span></span>
+                <span class="pushName"><span v-if="pushName">~<span
+                    v-html="filters.emojify(pushName)"></span></span></span>
             </div>
         </div>
     </div>
