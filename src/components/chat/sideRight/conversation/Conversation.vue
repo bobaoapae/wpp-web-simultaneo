@@ -4,7 +4,7 @@
 
         <MessagesList/>
 
-        <InputMessage/>
+        <InputMessage ref="inputMessage"/>
     </div>
 </template>
 
@@ -23,8 +23,8 @@ export default {
         ConversationHeader
     },
     methods: {
-        handleKeyDown () {
-            //TODO: focus input on keydown
+        handleKeyDown (evt) {
+            this.$refs.inputMessage.focusInput(evt);
         }
     }
 };

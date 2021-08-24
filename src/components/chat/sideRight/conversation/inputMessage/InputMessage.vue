@@ -1,8 +1,7 @@
 <template>
     <div ref="container">
         <div class="input-msg" v-show="!showSelectMsgs">
-            <b-collapse id="collapse-emoji" v-model="activeChat.emojiVisible" @show="handleEmojiOpening"
-                        @shown="handleEmojiOpened" @hide="handleEmojiClosing" @hidden="handleEmojiClosed">
+            <b-collapse id="collapse-emoji" v-model="activeChat.emojiVisible">
                 <Picker
                     :color="'#009688'"
                     :data="emojiIndex"
@@ -149,16 +148,7 @@ export default {
     },
     emits: ['startOpenEmoji', 'finishOpenEmoji', 'startCloseEmoji', 'finishCloseEmoji'],
     mounted () {
-        //TODO fix focus
-        /*this.$root.$on('keyDown', (evt) => {
-            if (!evt.ctrlKey && evt.target.placeholder !== 'Buscar emoji') {
-                this.$refs.input.focus();
-            }
-        });
-        this.$root.$on('focusInput', () => {
-            this.$refs.input.focus();
-        });*/
-        this.$refs.input.focus();
+        this.focusInput();
     },
     watch: {
         'chat.quotedMsg': function (val) {
@@ -224,6 +214,12 @@ export default {
     methods: {
         ...mapActions(['uploadFile', 'getCurrentOperator', 'changeCustomPropertyChat', 'setCurrentOperator']),
         ...mapMutations(['SET_SELECT_MSGS', 'SET_SELECT_CHATS']),
+
+        focusInput (evt) {
+            if (!evt || evt.target.placeholder !== 'Buscar emoji') {
+                this.$refs.input.focus();
+            }
+        },
 
         async toggleRecording () {
             this.recording = !this.recording;
@@ -336,7 +332,7 @@ export default {
         },
 
         addEmoji (emoji) {
-            this.$refs.input.focus();
+            this.focusInput();
             emoji = emoji.native;
             document.execCommand('insertHTML', false, this.filters.emojify(emoji));
         },
@@ -350,26 +346,10 @@ export default {
         },
 
         handleClickQuickReply (quickReply) {
-            this.$refs.input.focus();
+            this.focusInput();
             this.$refs.input.innerHTML = '';
             this.activeChat.message = '';
             document.execCommand('insertHTML', false, quickReply.message);
-        },
-
-        handleEmojiOpening () {
-            this.$emit('startOpenEmoji');
-        },
-
-        handleEmojiOpened () {
-            this.$emit('finishOpenEmoji');
-        },
-
-        handleEmojiClosing () {
-            this.$emit('startCloseEmoji');
-        },
-
-        handleEmojiClosed () {
-            this.$emit('finishCloseEmoji');
         },
 
         handleClickCloseSelectMsgs () {

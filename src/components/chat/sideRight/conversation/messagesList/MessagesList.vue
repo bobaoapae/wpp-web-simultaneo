@@ -116,9 +116,9 @@ export default {
 
         handleMessageListChange (e) {
             let props = {
-                scrollHeight: this.$el.scrollHeight,
-                scrollTop: this.$el.scrollTop,
-                clientHeight: this.$el.clientHeight,
+                scrollHeight: this.$refs.messageList.scrollHeight,
+                scrollTop: this.$refs.messageList.scrollTop,
+                clientHeight: this.$refs.messageList.clientHeight,
             };
             this.scrollHeight = props.scrollHeight;
             this.scrollTop = props.scrollTop;
@@ -154,14 +154,13 @@ export default {
         },
 
         scrollToBottom () {
-            console.log('scrollToBottom');
             this.$nextTick(() => {
-                this.$el.scrollTop = 0;
+                this.$refs.messageList.scrollTop = 1;
             });
         },
 
         isInBottom () {
-            return this.$el.scrollTop <= 15;
+            return this.$refs.messageList.scrollTop >= -50;
         }
     },
     directives: {
