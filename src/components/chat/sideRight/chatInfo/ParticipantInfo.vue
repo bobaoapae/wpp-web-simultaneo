@@ -8,13 +8,14 @@
             </div>
             <div class="info">
                 <span class="phrase">RedeSurftank.com.br</span>
-                <span class="pushName">~{{ pushName }}</span>
+                <span class="pushName">~<span v-html="filters.emojify(pushName)"></span></span>
             </div>
         </div>
     </div>
 </template>
 
 <script>
+import filters from '@/filters';
 import { useStore } from 'vuex';
 import { asyncComputed } from '@/AsyncComputed';
 import Picture from '@/components/shared/picture/Picture.vue';
@@ -48,7 +49,8 @@ export default {
 
         return {
             formattedName,
-            pushName
+            pushName,
+            filters
         };
     }
 };
