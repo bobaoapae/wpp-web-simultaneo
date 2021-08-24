@@ -1,20 +1,5 @@
 <template>
-    <!--
-    TODO: scroll-to
-    v-scroll-to="{
-     el: `#${encodedQuotedMsgId}`,
-     container: '.messages-list',
-     duration: 500,
-     easing: 'linear',
-     offset: -200,
-     force: true,
-     cancelable: true,
-     onDone: onDone,
-     x: false,
-     y: true
- }"
-    -->
-    <div :style="{borderColor: color}" class="quoted-msg" v-if="senderObj">
+    <div :style="{borderColor: color}" class="quoted-msg" v-if="senderObj" @click="handleClick">
         <div class="box-content">
             <Author :color="color" :senderObj="senderObj"/>
             <QuotedMsgContent :msg="quotedMsg"/>
@@ -44,6 +29,7 @@ export default {
             type: Object
         }
     },
+    emits: ['blink'],
     setup (props) {
         const store = useStore();
 
@@ -81,16 +67,23 @@ export default {
         }
     },
     methods: {
-        ...mapActions(['updateMsg']),
+        ...mapActions(['blinkMsg']),
 
-        onDone () {
-            //TODO: blink quotedMsg
-            //this.quotedMsg.blink = true;
-            this.updateMsg(this.quotedMsg);
+        handleClick () {
+
+            const config = {
+                scrollTo: document.getElementById(this.encodedQuotedMsgId),
+                duration: 500,
+                offset: -100,
+                container: document.getElementsByClassName('messages-list')[0],
+                updateHistory: false
+            };
+
             setTimeout(() => {
-                //this.quotedMsg.blink = false;
-                this.updateMsg(this.quotedMsg);
-            }, 1500);
+                this.blinkMsg(this.quotedMsg);
+            }, 500);
+
+            this.$smoothScroll(config);
         }
     }
 };

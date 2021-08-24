@@ -9,6 +9,7 @@ import VueSweetalert2 from 'vue-sweetalert2';
 // @ts-ignore
 import BootstrapVue from 'bootstrap-vue-3';
 import ObserveVisibility from './observe-visibility'
+import VueSmoothScroll from 'vue3-smooth-scroll'
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
@@ -23,6 +24,7 @@ app.use(VueVirtualScroller)
 app.use(VueSweetalert2);
 app.use(BootstrapVue);
 app.use(ObserveVisibility);
+app.use(VueSmoothScroll);
 app.provide('appInstance', app);
 
 app.mount('#app')

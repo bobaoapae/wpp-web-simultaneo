@@ -172,20 +172,10 @@ export default {
             showTail,
             filters,
             showMenuIcon: ref(false),
-            menuAberto: ref(false)
+            menuAberto: ref(false),
         };
     },
     watch: {
-        'activeChat.quotedMsg': function (val) {
-            if (val === this.msg) {
-                //TODO: blink msg
-                //this.msg.blink = true;
-                setTimeout(() => {
-                    //this.msg.blink = false;
-                }, 1500);
-            }
-        },
-
         'activeChat': function () {
             this.SET_SELECT_MSGS({ show: false });
         },

@@ -1588,12 +1588,16 @@ const store = createStore({
             return context.dispatch('sendWsMessage', { event: 'markPlayed', payload: payload.msgId });
         },
 
-        addNewMsgInChat (context, payload) {
+        findChatFromMsg (context, payload) {
             let idSearch = payload.id.fromMe ? payload.to : payload.from;
 
-            const chat = context.state.chats.find((element) => {
+            return context.state.chats.find((element) => {
                 return element.id === idSearch;
             });
+        },
+
+        async addNewMsgInChat (context, payload) {
+            let chat = await context.dispatch('findChatFromMsg', payload);
 
             if (chat) {
                 const msg = chat.msgs.find((element) => {
@@ -1606,47 +1610,43 @@ const store = createStore({
             }
         },
 
-        removeMsgFromChat (context, payload) {
-            const chat = context.state.chats.find((element) => {
-                if (payload.id.fromMe) {
-                    return element.id === payload.to;
-                }
-                return element.id === payload.from;
-            });
+        async removeMsgFromChat (context, payload) {
+            let chat = await context.dispatch('findChatFromMsg', payload);
 
             if (chat) {
                 chat.msgs = chat.msgs.filter(e => e.id.id !== payload.id.id);
-                context.dispatch('sortChatsByTime');
+                await context.dispatch('sortChatsByTime');
             }
         },
 
-        updateMsg (context, payload) {
-            let chatId;
-
-            if (payload.id.fromMe) {
-                chatId = payload.to;
-            } else {
-                chatId = payload.from;
-            }
-
-            const chat = context.state.chats.find((element) => {
-                return element.id === chatId;
-            });
+        async findOriginalMsg (context, payload) {
+            let chat = await context.dispatch('findChatFromMsg', payload);
 
             if (chat) {
-                const msg = chat.msgs.find((element) => {
+                return chat.msgs.find((element) => {
                     return element.id.id === payload.id.id || element.id.id === payload.oldId.id;
                 });
+            }
+        },
 
-                if (msg) {
-                    msg.ack = payload.ack;
-                    msg.type = payload.type;
-                    msg.id = payload.id;
-                    msg.canBeRevoke = payload.canBeRevoke;
-                    if (payload.blink !== undefined) {
-                        msg.blink = payload.blink;
-                    }
-                }
+        async updateMsg (context, payload) {
+            let msg = await context.dispatch('findOriginalMsg', payload);
+
+            if (msg) {
+                msg.ack = payload.ack;
+                msg.type = payload.type;
+                msg.id = payload.id;
+                msg.canBeRevoke = payload.canBeRevoke;
+            }
+        },
+
+        async blinkMsg (context, payload) {
+            let msg = await context.dispatch('findOriginalMsg', payload);
+            if (msg) {
+                msg.blink = true;
+                setTimeout(() => {
+                    msg.blink = false;
+                }, 1500);
             }
         },
 
