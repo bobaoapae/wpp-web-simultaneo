@@ -100,7 +100,8 @@ export default {
         }, { default: props.lastMsg.body, lazy: true });
 
         return {
-            msgBody
+            msgBody,
+            filters
         };
     },
     computed: {

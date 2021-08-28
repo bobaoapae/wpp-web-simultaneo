@@ -1,6 +1,6 @@
 <template>
-    <div :class="{unread : isUnread}" id="timeMsg">
-        {{time}}
+    <div :class="{unread : isUnread}" class="timeMsg">
+        {{ time }}
     </div>
 </template>
 
@@ -68,7 +68,7 @@ export default {
 </script>
 
 <style scoped>
-#timeMsg {
+.timeMsg {
     font-size: 12px;
     color: rgba(0, 0, 0, 0.4);
 }

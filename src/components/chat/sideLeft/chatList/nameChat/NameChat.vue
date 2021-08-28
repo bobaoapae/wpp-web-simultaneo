@@ -1,9 +1,7 @@
 <template>
     <div
         :class="{unread : isUnread}"
-        class="flex-grow-1"
-        id="name-chat"
-    >
+        class="flex-grow-1 name-chat">
         <span v-html="filters.emojify(name)"></span>
     </div>
 </template>
@@ -39,7 +37,7 @@ export default {
 </script>
 
 <style scoped>
-#name-chat {
+.name-chat {
     font-size: 17px;
     color: #000000;
 
