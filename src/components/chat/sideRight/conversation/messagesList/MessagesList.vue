@@ -1,14 +1,17 @@
 <template>
-    <div class="messages-list" @scroll="handleMessageListChange" @mousewheel="handleMessageListChange"
-         @touchmove="handleMessageListChange"
-         ref="messageList">
-        <LoadingEarlyMsg v-show="activeChat.loadingEarly"/>
-        <div :id="encodedMsgId(item)" :key="encodedMsgId(item)" @dblclick.left.prevent="handleDoubleClick(item)"
-             v-for="(item, index) in msgs" v-for-callback="{key: index, array: msgs, callback: handleLoadMsgFinish}">
-            <MessageDateFormatted :formattedDate="item.fomattedDate"
-                                  v-if="!msgs[index+1] || msgs[index+1].fomattedDate !== item.fomattedDate"/>
-            <MessageInfo :msg="item" v-if="isNotification(item.type)"/>
-            <MessageContainer :msg="item" :previousMsg="msgs[index+1]" v-else/>
+    <div class="messages-list-box">
+        <LoadingEarlyMsg v-if="activeChat.loadingEarly"/>
+        <div class="messages-list" @scroll="handleMessageListChange" @mousewheel="handleMessageListChange"
+             @touchmove="handleMessageListChange"
+             ref="messageList">
+            <div :id="encodedMsgId(item)" :key="encodedMsgId(item)" @dblclick.left.prevent="handleDoubleClick(item)"
+                 v-for="(item, index) in msgs"
+                 v-for-callback="{key: index, array: msgs, callback: handleLoadMsgFinish}">
+                <MessageDateFormatted :formattedDate="item.fomattedDate"
+                                      v-if="!msgs[index+1] || msgs[index+1].fomattedDate !== item.fomattedDate"/>
+                <MessageInfo :msg="item" v-if="isNotification(item.type)"/>
+                <MessageContainer :msg="item" :previousMsg="msgs[index+1]" v-else/>
+            </div>
         </div>
     </div>
 </template>
@@ -190,14 +193,20 @@ export default {
 </script>
 
 <style scoped>
-.messages-list {
+.messages-list-box {
     user-select: none;
+    background-image: url("../../../../../assets/images/bg-chat.png");
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.messages-list {
     padding: 10px 0;
     flex: 1;
-    background-image: url("../../../../../assets/images/bg-chat.png");
-    overflow: scroll;
-    overflow-x: hidden;
     display: flex;
     flex-direction: column-reverse;
+    overflow: scroll;
+    overflow-x: hidden;
 }
 </style>

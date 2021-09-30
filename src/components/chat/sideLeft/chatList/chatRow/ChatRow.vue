@@ -1,6 +1,6 @@
 <template>
-    <div class="chat-row" @contextmenu.prevent="handleContextMenu" @mouseover="handleHover(true)"
-         @mouseout="handleHover(false)">
+    <div class="chat-row" @contextmenu.prevent="handleContextMenu" @mouseenter="handleHover(true)"
+         @mouseleave="handleHover(false)">
         <Picture :group="chat.isGroup" :id="chat.id"/>
 
         <div class="box-info-chat" @click="handleClick">
@@ -19,7 +19,7 @@
                 <LastMsg :chat="chat" v-if="chat.lastMsg && (!chat.isChat || (!chat.isComposing && !chat.isRecording))"
                          :key="chat.lastMsg.id._serialized"/>
                 <Icons :chat="chat"/>
-                <div v-if="!processing" :class="{'chat-menu-open' : showMenuIcon || menuOpen}">
+                <div v-if="!processing" :class="{'chat-menu-open' : showMenuIcon || menuOpen}" @click.stop>
                     <div
                         class="chat-menu"
                         v-if="showMenuIcon || menuOpen">

@@ -15,6 +15,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 import 'sweetalert2/dist/sweetalert2.min.css';
 import 'emoji-mart-vue-fast/css/emoji-mart.css';
+import 'bootstrap-vue-3/src/styles/styles.scss'
 
 const app = createApp(App);
 
