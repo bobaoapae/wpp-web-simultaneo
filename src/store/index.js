@@ -702,7 +702,10 @@ const store = createStore({
                 if (!chat) {
                     if (!findChat) {
                         findChat = new Promise((resolve1, reject1) => {
-                            context.dispatch('sendWsMessage', { event: 'findChatByNumber', payload: payload.number }).then(chat => {
+                            context.dispatch('sendWsMessage', {
+                                event: 'findChatByNumber',
+                                payload: payload.number
+                            }).then(chat => {
                                 context.dispatch('newChat', chat).then((chat) => {
                                     resolve1(chat);
                                 });
@@ -726,7 +729,10 @@ const store = createStore({
                 if (!contact) {
                     if (!findContact) {
                         findContact = new Promise((resolve1, reject1) => {
-                            context.dispatch('sendWsMessage', { event: 'findContact', payload: payload.id }).then(chat => {
+                            context.dispatch('sendWsMessage', {
+                                event: 'findContact',
+                                payload: payload.id
+                            }).then(chat => {
                                 context.dispatch('newContact', chat).then((contact) => {
                                     resolve1(contact);
                                 });
@@ -868,7 +874,10 @@ const store = createStore({
         },
 
         async updateMyChats (context) {
-            let chatIds = await context.dispatch('getChatsWithProperty', { key: 'currentOperator', value: context.state.user.uuid });
+            let chatIds = await context.dispatch('getChatsWithProperty', {
+                key: 'currentOperator',
+                value: context.state.user.uuid
+            });
             let myChats = context.state.chats.filter(chat => {
                 return chatIds.includes(chat.id);
             });
@@ -947,7 +956,10 @@ const store = createStore({
                         } else {
                             resolve('');
                         }
-                    }).catch(reason => reject(reason));
+                    }).catch(reason => {
+                        console.error(`Error on find picture for id: ${payload.id}`);
+                        reject(reason);
+                    });
                 }
             });
         },
@@ -1068,6 +1080,15 @@ const store = createStore({
 
             async function setProperties (el) {
                 await context.dispatch('setMsgsProperties', el.msgs);
+                el.msgs.sort(function (a, b) {
+                    if (a.t > b.t) {
+                        return 1;
+                    }
+                    if (a.t < b.t) {
+                        return -1;
+                    }
+                    return 0;
+                });
                 el.quotedMsg = undefined;
                 el.openChatInfo = false;
                 el.sendQueue = [];
@@ -1188,10 +1209,9 @@ const store = createStore({
                         });
                     }
                 };
-                el.loadEarly = function () {
-                    if (this.__x_msgsIndex * 50 < this.msgs.length) {
-                        this.__x_msgsIndex++;
-                        return Promise.resolve(this.msgsParted);
+                el.loadEarly = async function () {
+                    if (el.noEarlierMsgs) {
+                        return [];
                     }
                     if (!this.throttle) {
                         this.throttle = throttledQueue(1, 3000);
@@ -1199,8 +1219,8 @@ const store = createStore({
                     return new Promise((resolve, reject) => {
                         this.throttle(async () => {
                             try {
-                                await context.dispatch('loadEarly', { chatId: this.id });
-                                setTimeout(resolve, 3000);
+                                let result = await context.dispatch('loadEarly', { chatId: this.id });
+                                resolve(result);
                             } catch (e) {
                                 reject(e);
                             }
@@ -1222,15 +1242,6 @@ const store = createStore({
                             return array[0];
                         }
                         return undefined;
-                    }
-                });
-                Object.defineProperty(el, 'msgsParted', {
-                    get () {
-                        let msgs = [];
-                        for (let x = 0; x < this.__x_msgsIndex * 50 && x < this.msgs.length; x++) {
-                            msgs.push(this.msgs[this.msgs.length - 1 - x]);
-                        }
-                        return msgs.reverse();
                     }
                 });
                 Object.defineProperty(el, 'isChat', {
@@ -1472,6 +1483,7 @@ const store = createStore({
                 if (!payload.pin) {
                     payload.pin = 0;
                 }
+                console.log(payload);
                 Object.assign(chat, payload);
                 await context.dispatch('updateTitle');
                 if (sortChats) {

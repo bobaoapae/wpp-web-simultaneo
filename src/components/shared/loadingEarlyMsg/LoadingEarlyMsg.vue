@@ -39,8 +39,6 @@ export default {
     width: 44px;
     height: 44px;
     justify-content: center;
-    position: absolute;
-    left: 50%;
     z-index: 10;
 }
 

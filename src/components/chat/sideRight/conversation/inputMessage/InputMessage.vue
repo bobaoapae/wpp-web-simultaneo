@@ -1,6 +1,6 @@
 <template>
-    <div ref="container">
-        <div class="input-msg" v-show="!showSelectMsgs">
+    <div ref="container" class="input-msg-container">
+        <div class="input-msg-box" v-if="!showSelectMsgs">
             <b-collapse id="collapse-emoji" v-model="activeChat.emojiVisible">
                 <Picker
                     :color="'#009688'"
@@ -50,7 +50,7 @@
                 </div>
             </b-collapse>
 
-            <div id="input-message">
+            <div class="input-msg">
                 <div class="box-icon-emoji">
                     <img
                         alt="Button emoji"
@@ -97,11 +97,11 @@
                 </div>
             </div>
         </div>
-        <div v-show="showSelectMsgs" class="box-select-msgs">
+        <div v-else class="box-select-msgs">
             <button class="close-select-msgs" @click="handleClickCloseSelectMsgs">
                 <img src="@/assets/images/wpp-icon-close-modal.svg"/>
             </button>
-            <span class="qtd-msg-selected">{{qtdSelected}}</span>
+            <span class="qtd-msg-selected">{{ qtdSelected }}</span>
             <button class="forward-select-msgs" :disabled="!hasMessageSelected" title="Encaminhar Mensagens"
                     @click="handleClickForwardMsgs">
                 <img src="@/assets/images/wpp-icon-forwarded.svg"/>
@@ -388,6 +388,18 @@ export default {
 </script>
 
 <style scoped>
+.input-msg {
+    display: flex;
+    background: #efefef;
+    padding: 5px 10px;
+}
+
+.input-msg-box {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+}
+
 .recorder-time {
     margin-right: 40px;
     margin-left: 40px;
@@ -424,12 +436,6 @@ export default {
     position: absolute;
     color: #a0a0a0;
     visibility: visible;
-}
-
-#input-message {
-    display: flex;
-    background: #efefef;
-    padding: 5px 10px;
 }
 
 .box-icon-send {

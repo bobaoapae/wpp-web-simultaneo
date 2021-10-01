@@ -68,9 +68,7 @@ export default {
 
             mes++;
 
-            let completeDate = `
-                    ${date === 10 ? date : '0' + date}/${mes >= 10 ? mes : '0' + mes}/${year}
-                `;
+            let completeDate = `${date >= 10 ? date : '0' + date}/${mes >= 10 ? mes : '0' + mes}/${year}`;
 
             if (min < 10) {
                 min = '0' + min;

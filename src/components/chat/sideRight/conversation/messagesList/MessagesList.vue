@@ -1,8 +1,6 @@
 <template>
     <div class="messages-list-box">
-        <LoadingEarlyMsg v-if="activeChat.loadingEarly"/>
-        <div class="messages-list" @scroll="handleMessageListChange" @mousewheel="handleMessageListChange"
-             @touchmove="handleMessageListChange"
+        <div class="messages-list" @mousewheel="handleMessageListChange"
              ref="messageList">
             <div :id="encodedMsgId(item)" :key="encodedMsgId(item)" @dblclick.left.prevent="handleDoubleClick(item)"
                  v-for="(item, index) in msgs"
@@ -13,6 +11,7 @@
                 <MessageContainer :msg="item" :previousMsg="msgs[index+1]" v-else/>
             </div>
         </div>
+        <LoadingEarlyMsg v-if="activeChat.loadingEarly"/>
     </div>
 </template>
 
@@ -43,9 +42,9 @@ export default {
         }
         this.$nextTick(() => {
             this.scrollToBottom();
-            if (!this.activeChat.noEarlierMsgs && this.activeChat.msgsParted.length <= 10) {
+            if (this.activeChat.msgs.length <= 30) {
                 this.handleLoadEarly().then((val) => {
-                    if (val) {
+                    if (val && val.length > 0) {
                         this.scrollToBottom();
                     }
                 });
@@ -61,7 +60,7 @@ export default {
     computed: {
         ...mapState(['visible', 'idle', 'activeChat']),
         msgs () {
-            let msgs = this.activeChat.msgsParted;
+            let msgs = this.activeChat.msgs;
             return msgs.reverse();
         },
 
@@ -75,9 +74,9 @@ export default {
             this.$nextTick(() => {
                 this.scrollToBottom();
             });
-            if (!this.activeChat.noEarlierMsgs && this.activeChat.msgsParted.length <= 10) {
+            if (this.activeChat.msgs.length <= 30) {
                 this.handleLoadEarly().then((val) => {
-                    if (val) {
+                    if (val && val.length > 0) {
                         this.scrollToBottom();
                     }
                 });
@@ -128,7 +127,7 @@ export default {
             this.clientHeight = props.clientHeight;
             if (e && this.activeChat.loadingEarly) {
                 e.preventDefault();
-            } else if (!this.activeChat.loadingEarly && !this.activeChat.noEarlierMsgs && props.scrollHeight + props.scrollTop <= props.clientHeight + 300) {
+            } else if (!this.activeChat.loadingEarly && props.scrollHeight + props.scrollTop <= props.clientHeight + 300) {
                 this.handleLoadEarly();
             } else if (this.active && this.isInBottom() && this.activeChat.isUnread) {
                 this.activeChat.seeChat();
@@ -146,7 +145,7 @@ export default {
                 this.activeChat.loadingEarly = false;
                 return true;
             }
-            return Promise.resolve(false);
+            return false;
         },
 
         handleLoadMsgFinish () {
@@ -197,12 +196,11 @@ export default {
     user-select: none;
     background-image: url("../../../../../assets/images/bg-chat.png");
     overflow: hidden;
-    display: flex;
     flex-direction: column;
 }
 
 .messages-list {
-    padding: 10px 0;
+    padding: 0;
     flex: 1;
     display: flex;
     flex-direction: column-reverse;

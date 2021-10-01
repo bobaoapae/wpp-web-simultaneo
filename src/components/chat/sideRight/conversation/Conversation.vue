@@ -1,10 +1,10 @@
 <template>
-    <div tabindex="0" id="conversation" @keydown="handleKeyDown">
-        <ConversationHeader/>
+    <div tabindex="0" class="conversation" @keydown="handleKeyDown">
+        <ConversationHeader class="conversation-header"/>
 
-        <MessagesList/>
+        <MessagesList class="messages-list"/>
 
-        <InputMessage ref="inputMessage"/>
+        <InputMessage ref="inputMessage" class="input-message"/>
     </div>
 </template>
 
@@ -31,11 +31,28 @@ export default {
 </script>
 
 <style scoped>
-#conversation {
+.conversation {
     height: 100%;
     background: #fff;
     display: flex;
     flex-direction: column;
     outline: none;
+}
+
+.conversation-header {
+    display: flex;
+    flex-grow: 1;
+    height: 63px;
+    max-height: 63px;
+}
+
+.messages-list {
+    display: flex;
+    flex-grow: 200;
+}
+
+.input-message {
+    display: flex;
+    flex-grow: 1;
 }
 </style>

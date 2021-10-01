@@ -1,5 +1,5 @@
 <template>
-    <div id="conversation-header">
+    <div class="conversation-header">
         <div class="box-img">
             <Picture :group="activeChat.isGroup" :id="activeChat.id" :key="activeChat.id"/>
         </div>
@@ -76,52 +76,10 @@ export default {
                 return this.activeChat.formattedTitle;
             }
             return '+' + this.activeChat.id.replace('@c.us', '');
-        },
-
-        lastTimeAvailable () {
-            return this.timeConverter(this.activeChat.lastPresenceAvailableTime);
         }
     },
     methods: {
         ...mapActions(['uploadFile']),
-
-        timeConverter (unixTimeStamp) {
-            let a = new Date(unixTimeStamp * 1000);
-            let year = a.getFullYear();
-            let mes = a.getMonth();
-            let date = a.getDate();
-            let hour = a.getHours();
-            let min = a.getMinutes();
-            let time;
-
-            mes++;
-
-            let completeDate = `
-                    ${date >= 10 ? date : '0' + date}/${mes >= 10 ? mes : '0' + mes}/${year}
-                `;
-
-            if (min < 10) {
-                min = '0' + min;
-            }
-
-            if (hour < 10) {
-                hour = '0' + hour;
-            }
-
-            time = hour + ':' + min;
-
-            const hoje = new Date();
-            const hojeDia = hoje.getDate();
-            const hojeMes = hoje.getMonth() + 1;
-
-            const inicioFrase = 'visto por último ';
-            if (hojeDia === date && hojeMes === mes) {
-                return inicioFrase + 'hoje às ' + time;
-            } else if (hojeDia - date === 1 && hojeMes === mes) {
-                return inicioFrase + 'ontem às ' + time;
-            }
-            return inicioFrase + 'em ' + completeDate;
-        },
 
         onChange (event) {
             if (event.target.files && event.target.files.length > 0) {
@@ -178,12 +136,9 @@ label {
     padding: 0;
 }
 
-#conversation-header {
+.conversation-header {
     background: #eee;
-    display: flex;
     padding: 10px 16px;
-    height: 63px;
-    max-height: 63px;
     cursor: pointer;
     user-select: none;
 }
