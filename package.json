@@ -5,6 +5,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "cloud-build": "yarn install && yarn run build",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
@@ -52,7 +53,8 @@
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.0.0",
     "lint-staged": "^9.4.3",
-    "vue-template-compiler": "^2.6.11"
+    "vue-template-compiler": "^2.6.11",
+    "yarn": "^1.22.17"
   },
   "postcss": {
     "plugins": {
