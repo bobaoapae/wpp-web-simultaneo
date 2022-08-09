@@ -1062,6 +1062,14 @@ const store = new Vuex.Store({
                         return this.unreadCount > 0;
                     }
                 });
+                Object.defineProperty(el, 'formattedTitle', {
+                    get () {
+                        if (this.contact && this.contact.formattedName) {
+                            return this.contact.formattedName;
+                        }
+                        return '+' + this.id.replace('@c.us', '');
+                    }
+                });
                 if (el.isGroup) {
                     el.colors = {};
                     el.getColor = function (id) {
