@@ -878,31 +878,37 @@ const store = new Vuex.Store({
                 el.loadingEarly = false;
                 el.__x_msgsIndex = 1;
                 el.__x_poolAddMsgs = [];
-                el.__x_intervalPool = setInterval(() => {
-                    let msgs = [];
-                    while (el.__x_poolAddMsgs.length) {
-                        msgs.push(el.__x_poolAddMsgs.pop());
-                    }
-                    if (msgs && msgs.length > 0) {
-                        context.dispatch('setMsgsProperties', msgs);
-                        el.msgs.push(...msgs);
-                        el.msgs.sort(function (a, b) {
-                            if (a.t > b.t) {
-                                return 1;
-                            }
-                            if (a.t < b.t) {
-                                return -1;
-                            }
-                            return 0;
-                        });
-                        context.dispatch('sortChatsByTime');
-                        let newMsgIn = msgs.find(value => !value.id.fromMe && value.isNewMsg);
-                        if (newMsgIn && el.muteExpiration === 0 && (el !== context.state.activeChat || !context.state.visible)) {
-                            context.dispatch('playNewMsgNotification');
+                el.__x_intervalPool = 0;
+                el.__x_intervalPoolCreate = function () {
+                    el.__x_intervalPool = setInterval(() => {
+                        let msgs = [];
+                        while (el.__x_poolAddMsgs.length) {
+                            msgs.push(el.__x_poolAddMsgs.pop());
                         }
-                    }
-                }, 150);
+                        if (msgs && msgs.length > 0) {
+                            context.dispatch('setMsgsProperties', msgs);
+                            el.msgs.push(...msgs);
+                            el.msgs.sort(function (a, b) {
+                                if (a.t > b.t) {
+                                    return 1;
+                                }
+                                if (a.t < b.t) {
+                                    return -1;
+                                }
+                                return 0;
+                            });
+                            context.dispatch('sortChatsByTime');
+                            let newMsgIn = msgs.find(value => !value.id.fromMe && value.isNewMsg);
+                            if (newMsgIn && el.muteExpiration === 0 && (el !== context.state.activeChat || !context.state.visible)) {
+                                context.dispatch('playNewMsgNotification');
+                            }
+                        }
+                    }, 150);
+                };
                 el.addMsg = function (msg) {
+                    if (el.__x_intervalPool === 0) {
+                        el.__x_intervalPoolCreate();
+                    }
                     el.__x_poolAddMsgs.push(msg);
                 };
                 el.clearInputMessage = function () {
@@ -972,12 +978,19 @@ const store = new Vuex.Store({
                     return context.dispatch('clearChat', { chatId: this.id, keepFavorites: keepFavorites === true });
                 };
                 el.subscribePresence = function () {
-                    return context.dispatch('subscribePresence', { chatId: this.id });
+                    if (!this.presenceSubscribed) {
+                        return context.dispatch('subscribePresence', { chatId: this.id }).then(() => {
+                            this.presenceSubscribed = true;
+                        });
+                    }
                 };
                 el.loadEarly = function () {
                     if (this.__x_msgsIndex * 50 < this.msgs.length) {
                         this.__x_msgsIndex++;
                         return Promise.resolve(this.msgsParted);
+                    }
+                    if (el.noEarlierMsgs) {
+                        return [];
                     }
                     if (!this.throttle) {
                         this.throttle = throttledQueue(1, 3000);
