@@ -46,7 +46,9 @@
                 <div class="quick-replys" v-if="quickRepliesVisible">
                     <div :key="quickReply.id" @click="handleClickQuickReply(quickReply)" class="quick-reply"
                          v-for="quickReply in filteredQuickReplies">
-                        /<span class="quick-reply-name">{{quickReply.shortcut}}</span> <span class="quick-reply-msg">{{quickReply.message}}</span>
+                        /<span class="quick-reply-name">{{ quickReply.shortcut }}</span> <span class="quick-reply-msg">{{
+                            quickReply.message
+                        }}</span>
                     </div>
                 </div>
             </b-collapse>
@@ -93,7 +95,7 @@
 
                     <div v-if="recording">
                         <img @click="stopRecording" src="@/assets/images/wpp-icon-cancel-ptt-outline.svg"/>
-                        <span class="recorder-time">{{timeConverter}}</span>
+                        <span class="recorder-time">{{ timeConverter }}</span>
                         <img @click="sendPtt" src="@/assets/images/wpp-icon-send-ptt-outline.svg"/>
                     </div>
                 </div>
@@ -103,7 +105,7 @@
             <button class="close-select-msgs" @click="handleClickCloseSelectMsgs">
                 <img src="@/assets/images/wpp-icon-close-modal.svg"/>
             </button>
-            <span class="qtd-msg-selected">{{qtdSelected}}</span>
+            <span class="qtd-msg-selected">{{ qtdSelected }}</span>
             <button class="forward-select-msgs" :disabled="!hasMessageSelected" title="Encaminhar Mensagens"
                     @click="handleClickForwardMsgs">
                 <img src="@/assets/images/wpp-icon-forwarded.svg"/>
@@ -230,7 +232,7 @@ export default {
         ...mapActions(['uploadFile']),
         ...mapMutations(['SET_SELECT_MSGS', 'SET_SELECT_CHATS']),
 
-        toggleRecording () {
+        async toggleRecording () {
             this.recording = !this.recording;
 
             if (this.recorder && this.recorder.state === 'recording') {
@@ -239,31 +241,39 @@ export default {
                 clearInterval(this.interval);
                 this.time = 0;
             } else {
-                navigator.mediaDevices.getUserMedia({
-                    audio: true
-                })
-                    .then(async (stream) => {
-                        this.interval = setInterval(() => {
-                            this.time++;
-                        }, 1000);
+                let devices = await navigator.mediaDevices.enumerateDevices();
+                let defaultDevice = devices.find(value => value.deviceId === 'default' && value.kind === 'audioinput');
+                if (!defaultDevice) {
+                    defaultDevice = devices.find(value => value.kind === 'audioinput');
+                }
+                if (!defaultDevice) {
+                    console.error('Nenhum microfone encontrado');
+                }
+                let stream = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        deviceId: defaultDevice.deviceId
+                    }
+                });
+                this.interval = setInterval(() => {
+                    this.time++;
+                }, 1000);
 
-                        this.gumStream = stream;
-                        const options = { mimeType: 'audio/ogg' };
-                        const ogg = await OggOpusWasm;
-                        const webm = await WebMOpusWasm;
-                        const workerOptions = {
-                            encoderWorkerFactory: _ => new Worker(),
-                            OggOpusEncoderWasmPath: ogg.default,
-                            WebMOpusEncoderWasmPath: webm.default
-                        };
-                        this.recorder = new MediaRecorder(stream, options, workerOptions);
-                        this.recorder.ondataavailable = (e) => {
-                            if (!this.ignoreRecording) {
-                                this.handleSendPtt(e.data);
-                            }
-                        };
-                        this.recorder.start();
-                    });
+                this.gumStream = stream;
+                const options = { mimeType: 'audio/ogg' };
+                const ogg = await OggOpusWasm;
+                const webm = await WebMOpusWasm;
+                const workerOptions = {
+                    encoderWorkerFactory: _ => new Worker(),
+                    OggOpusEncoderWasmPath: ogg.default,
+                    WebMOpusEncoderWasmPath: webm.default
+                };
+                this.recorder = new MediaRecorder(stream, options, workerOptions);
+                this.recorder.ondataavailable = (e) => {
+                    if (!this.ignoreRecording) {
+                        this.handleSendPtt(e.data);
+                    }
+                };
+                this.recorder.start();
             }
         },
 
@@ -598,7 +608,8 @@ export default {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.input-msg >>> .emoji-mart-category-label h3{
+
+.input-msg >>> .emoji-mart-category-label h3 {
     background-color: transparent;
 }
 </style>
