@@ -1,4 +1,15 @@
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 module.exports = {
+    configureWebpack: {
+        plugins: [
+            new NodePolyfillPlugin()
+        ],
+        resolve: {
+            alias: {
+                'fs': require.resolve('path-browserify')
+            }
+        }
+    },
     chainWebpack: config => {
         config.module
             .rule('vue')
