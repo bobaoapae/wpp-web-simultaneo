@@ -677,6 +677,10 @@ const store = new Vuex.Store({
             });
         },
 
+        fetchAllOperators (context) {
+            return api.get('/api/operators').then(response => response.data);
+        },
+
         initPong (context) {
             context.commit('INTERVAL_PONG', setInterval(() => {
                 context.dispatch('checkDelayToServer');

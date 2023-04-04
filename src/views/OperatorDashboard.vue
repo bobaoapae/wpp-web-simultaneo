@@ -5,21 +5,17 @@
       <div id="table">
         <div>
           <div id="table-heading">
-            <div class="order-id">ID</div>
             <div>Operador</div>
-            <div>Função</div>
-            <div>Telefone</div>
+            <div>Login</div>
             <router-link class="new-btn" to="/newoperator" tag="button">
               +
             </router-link>
           </div>
         </div>
         <div id="table-rows">
-          <div class="table-row">
-            <div class="order-number">1</div>
-            <div>Adriana</div>
-            <div>Programador</div>
-            <div>+55 44 9 5124 4123</div>
+          <div class="table-row" v-for="operator in operatorsPaginated" :key="operator.uuid">
+            <div>{{ operator.nome }}</div>
+            <div>{{ operator.login }}</div>
             <button class="edit-btn">
               <img
                 src="@/assets/images/edit.png"
@@ -36,15 +32,15 @@
             </button>
           </div>
           <div class="controller-label">
-            <button class="list-btn">
+            <button class="list-btn" @click="previousPage">
               <img
                 src="@/assets/images/left.png"
                 alt="<"
                 class="icon-default"
               />
             </button>
-            <p>1/1</p>
-            <button class="list-btn">
+            <p>{{indexPage + 1}}/{{totalPage}}</p>
+            <button class="list-btn" @click="nextPage">
               <img
                 src="@/assets/images/right.png"
                 alt=">"
@@ -59,8 +55,51 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex';
+
 export default {
-    name: 'OperatorDashboard'
+    name: 'OperatorDashboard',
+    data () {
+        return {
+            operators: [],
+            indexPage: 0,
+            operatorsPerPage: 2
+        };
+    },
+
+    mounted () {
+        this.getOperators();
+    },
+
+    computed: {
+        operatorsPaginated () {
+            return this.operators.slice(this.operatorsPerPage * this.indexPage, this.operatorsPerPage * (this.indexPage + 1));
+        },
+        totalPage () {
+            return Math.ceil(this.operators.length / this.operatorsPerPage);
+        }
+    },
+
+    methods: {
+        ...mapActions(['fetchAllOperators']),
+        async getOperators () {
+            let operators = await this.fetchAllOperators();
+            this.operators = operators;
+            console.log(operators);
+        },
+
+        nextPage () {
+            if (this.indexPage < this.totalPage - 1) {
+                this.indexPage += 1;
+            }
+        },
+
+        previousPage () {
+            if (this.indexPage > 0) {
+                this.indexPage -= 1;
+            }
+        }
+    }
 };
 </script>
 
