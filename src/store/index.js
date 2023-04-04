@@ -555,7 +555,7 @@ const store = new Vuex.Store({
                 if (typeof (payLoadSend.webSocketRequestPayLoad.payload) === 'object') {
                     payLoadSend.webSocketRequestPayLoad.payload = JSON.stringify(payLoadSend.webSocketRequestPayLoad.payload);
                 }
-                context.commit('ADD_NEW_LISTENNER', { tag: payLoadSend.tag, resolve: resolve, reject: reject });
+                context.commit('ADD_NEW_LISTENNER', { tag: payLoadSend.tag, resolve, reject });
                 setTimeout(() => reject(new Error('Timeout::' + payload.event)), 60000);
                 context.state.wsWorker.postMessage({
                     cmd: 'ws-send',
@@ -651,7 +651,7 @@ const store = new Vuex.Store({
 
         addCustomProperty (context, payload) {
             return context.dispatch('sendWsMessage', {
-                event: 'addCustomProperty', payload: payload
+                event: 'addCustomProperty', payload
             });
         },
 
@@ -741,7 +741,7 @@ const store = new Vuex.Store({
                                         id: payload.id,
                                         picture: base64,
                                         t: new Date().getTime(),
-                                        type: type
+                                        type
                                     });
                                     resolve(base64);
                                 });
@@ -1006,7 +1006,7 @@ const store = new Vuex.Store({
                     return context.dispatch('addCustomProperty', {
                         id: this.id,
                         type: 'CHAT',
-                        value: value
+                        value
                     });
                 };
                 Object.defineProperty(el, 'lastMsg', {
@@ -1327,15 +1327,15 @@ const store = new Vuex.Store({
               MESSAGES
           */
         deleteMsg (context, payload) {
-            return context.dispatch('sendWsMessage', { event: 'deleteMessage', payload: payload });
+            return context.dispatch('sendWsMessage', { event: 'deleteMessage', payload });
         },
 
         sendMsg (context, payload) {
-            return context.dispatch('sendWsMessage', { event: 'sendMessage', payload: payload });
+            return context.dispatch('sendWsMessage', { event: 'sendMessage', payload });
         },
 
         forwardMsgs (context, payload) {
-            return context.dispatch('sendWsMessage', { event: 'forwardMessage', payload: payload });
+            return context.dispatch('sendWsMessage', { event: 'forwardMessage', payload });
         },
 
         seeChat (context, payload) {
@@ -1375,7 +1375,7 @@ const store = new Vuex.Store({
         },
 
         clearChat (context, payload) {
-            return context.dispatch('sendWsMessage', { event: 'clearChat', payload: payload });
+            return context.dispatch('sendWsMessage', { event: 'clearChat', payload });
         },
 
         subscribePresence (context, payload) {

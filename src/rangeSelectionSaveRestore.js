@@ -180,8 +180,8 @@ export const rageSave = (function () {
         }
 
         return {
-            win: win,
-            rangeInfos: rangeInfos,
+            win,
+            rangeInfos,
             restored: false
         };
     }
@@ -239,13 +239,13 @@ export const rageSave = (function () {
     }
 
     return {
-        saveRange: saveRange,
-        restoreRange: restoreRange,
-        saveRanges: saveRanges,
-        restoreRanges: restoreRanges,
-        saveSelection: saveSelection,
-        restoreSelection: restoreSelection,
-        removeMarkerElement: removeMarkerElement,
-        removeMarkers: removeMarkers
+        saveRange,
+        restoreRange,
+        saveRanges,
+        restoreRanges,
+        saveSelection,
+        restoreSelection,
+        removeMarkerElement,
+        removeMarkers
     };
 })();

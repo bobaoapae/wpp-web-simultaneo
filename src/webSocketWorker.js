@@ -20,7 +20,7 @@ self.addEventListener('message', function (event) {
                 const response = e.data.split(/,(.+)/);
                 const cmd = response[0];
                 const data = response[1];
-                self.postMessage({ cmd: 'ws-message', data: { cmd: cmd, data: data } });
+                self.postMessage({ cmd: 'ws-message', data: { cmd, data } });
                 return false;
             };
             break;

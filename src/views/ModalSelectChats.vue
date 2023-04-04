@@ -55,7 +55,7 @@ export default {
         },
 
         handleChatClick (chat) {
-            this.TOGGLE_SELECT_CHAT({ chat: chat });
+            this.TOGGLE_SELECT_CHAT({ chat });
             this.activeChat.forwardMessages({
                 msgs: this.selectMsgs.msgs,
                 chats: this.selectChats.chats

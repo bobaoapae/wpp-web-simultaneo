@@ -10,6 +10,7 @@ import SendMessageToNumber from '@/views/SendMessageToNumber';
 import ConfirmChangeNumber from '@/views/ConfirmChangeNumber';
 import NotFound from '@/views/NotFound';
 import store from '@/store';
+import OperatorDashboard from '@/views/OperatorDashboard';
 
 Vue.use(VueRouter);
 
@@ -65,6 +66,11 @@ const routes = [
         path: '/sendmessagetonumber',
         name: 'send-message-to-number',
         component: SendMessageToNumber
+    },
+    {
+        path: '/operatordashboard',
+        name: 'operator-dashboard',
+        component: OperatorDashboard
     },
     {
         path: '*',
