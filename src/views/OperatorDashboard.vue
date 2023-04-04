@@ -23,7 +23,7 @@
                 class="icon-default"
               />
             </button>
-            <button class="delete-btn">
+            <button class="delete-btn" @click="callDeleteOperator(operator.uuid)">
               <img
                 src="@/assets/images/delete.svg"
                 alt="delete"
@@ -81,11 +81,14 @@ export default {
     },
 
     methods: {
-        ...mapActions(['fetchAllOperators']),
+        ...mapActions(['fetchAllOperators', 'deleteOperator']),
         async getOperators () {
-            let operators = await this.fetchAllOperators();
-            this.operators = operators;
-            console.log(operators);
+            this.operators = await this.fetchAllOperators();
+        },
+
+        async callDeleteOperator (uuid) {
+            await this.deleteOperator({ uuid });
+            await this.getOperators();
         },
 
         nextPage () {

@@ -681,6 +681,10 @@ const store = new Vuex.Store({
             return api.get('/api/operators').then(response => response.data);
         },
 
+        deleteOperator (context, payload) {
+            return api.delete('/api/operators/' + payload.uuid);
+        },
+
         initPong (context) {
             context.commit('INTERVAL_PONG', setInterval(() => {
                 context.dispatch('checkDelayToServer');
