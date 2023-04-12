@@ -85,16 +85,21 @@ export default {
     methods: {
         ...mapActions(['fetchAllOperators', 'deleteOperator']),
         async getOperators () {
-            this.$swal({
+            let loadingSwal = this.$swal({
                 title: 'Aguarde...',
                 text: 'Carregando Operadores',
                 didOpen: () => {
                     this.$swal.showLoading();
                 },
-                timer: 1000,
+                didClose: () => {
+                    this.$swal.hideLoading();
+                },
                 heightAuto: false
             });
+
             this.operators = await this.fetchAllOperators();
+
+            loadingSwal.close();
         },
 
         swalDeleteUser: async function (uuid) {
