@@ -108,8 +108,8 @@ export default {
                 text: 'Ao excluir um operador, os dados serão excluídos permanentemente!',
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
+                confirmButtonColor: 'green',
+                cancelButtonColor: 'red',
                 confirmButtonText: 'Sim, excluir!',
                 cancelButtonText: 'Voltar',
                 heightAuto: false
@@ -130,6 +130,7 @@ export default {
                             title: 'Feito!',
                             text: 'Operador excluido com sucesso!',
                             icon: 'success',
+                            confirmButtonColor: 'green',
                             heightAuto: false
                         });
                     }
