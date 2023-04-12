@@ -16,8 +16,14 @@ import VueTelInput from 'vue-tel-input';
 import { msg } from '@/helper.js';
 import vueDebounce from 'vue-debounce';
 import VueVirtualScroller from 'vue-virtual-scroller';
+// import swal
+import VueSweetalert2 from 'vue-sweetalert2';
+// style swal
+import 'sweetalert2/dist/sweetalert2.min.css';
 
 Vue.config.productionTip = false;
+// use swal
+Vue.use(VueSweetalert2);
 
 Vue.use(BootstrapVue);
 Vue.use(IconsPlugin);

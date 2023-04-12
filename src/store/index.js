@@ -7,7 +7,7 @@ import vCardParse from 'vcard-parser';
 import api from '@/api';
 import randomColor from 'random-color';
 import WebSocketWorker from 'worker-loader!@/webSocketWorker';
-import throttledQueue from 'throttled-queue';
+import throttledQueue from 'throttled-queue';// main.js
 
 Vue.use(Vuex);
 

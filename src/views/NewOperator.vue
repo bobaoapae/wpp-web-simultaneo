@@ -40,7 +40,9 @@
             {{ btn.label }}
           </button>
 
-          <button class="cancel-button" to="/" type="button">Cancelar</button>
+            <router-link class='cancel-button' to='/operatordashboard' tag="button">
+                cancelar
+            </router-link>
         </form>
       </div>
     </div>
@@ -83,9 +85,9 @@ export default {
             api
                 .post('/api/operators', data)
                 .then((r) => {
+                    this.swalCreateUser();
                     this.btn.label = 'ENVIAR';
                     this.btn.loading = false;
-                    alert('Operador Criado com Sucesso!');
                     this.$router.push('/operatordashboard');
                 })
                 .catch((r) => {
@@ -100,6 +102,15 @@ export default {
                         this.error.msg = error;
                     }
                 });
+        },
+
+        swalCreateUser () {
+            this.$swal({
+                title: 'Feito!',
+                text: 'Operador adicionado com sucesso!!!',
+                icon: 'success',
+                heightAuto: false
+            });
         }
     }
 };
