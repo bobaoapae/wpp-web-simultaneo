@@ -175,6 +175,7 @@ export default {
                 title: 'Feito!',
                 text: 'Operador adicionado com sucesso!!!',
                 icon: 'success',
+                confirmButtonColor: 'green',
                 heightAuto: false
             });
         },
