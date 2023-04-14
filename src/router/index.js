@@ -48,6 +48,11 @@ const routes = [
         component: NewOperator
     },
     {
+        path: '/editoperator/:id',
+        name: 'edit-operator',
+        component: NewOperator
+    },
+    {
         path: '/changepassword',
         name: 'change-password',
         component: ChangePassword

@@ -4,7 +4,7 @@
             <div class="content">
                 <div class="content-header"></div>
                 <form @submit.prevent="handleSubmit" id="form-login">
-                    <p class="title">Novo Operador</p>
+                    <p class="title">{{ form.title }}</p>
 
                     <input
                             id="name"
@@ -20,16 +20,17 @@
                             required
                             type="text"
                             v-model="form.login"
+                            :disabled="isEditing"
                             minlength="5"
                             maxlength="40"
                     />
 
-                    <input
-                            id="password"
-                            placeholder="Senha"
-                            required
-                            type="password"
-                            v-model="form.password"
+                    <input v-if="!isEditing"
+                           id="password"
+                           placeholder="Senha"
+                           required
+                           type="password"
+                           v-model="form.password"
                     />
 
                     <span class="error" v-if="error.active">
@@ -51,12 +52,38 @@
 
 <script>
 import api from '@/api';
+import { mapActions } from 'vuex';
 
 export default {
     name: 'NewOperator',
+    async created () {
+        console.log(this.$route.params);
+        if (this.$route.params.id) {
+            this.form.title = 'Editar Operador';
+            this.btn.label = 'EDITAR';
+            this.isEditing = true;
+            let loadingSwal = this.$swal({
+                title: 'Aguarde...',
+                text: 'Carregando Operadores',
+                didOpen: () => {
+                    this.$swal.showLoading();
+                },
+                didClose: () => {
+                    this.$swal.hideLoading();
+                },
+                heightAuto: false
+            });
+            let operator = await this.fetchOperator({ uuid: this.$route.params.id });
+            this.editingOperator = operator;
+            this.form.name = operator.nome;
+            this.form.login = operator.login;
+            loadingSwal.close();
+        }
+    },
     data () {
         return {
             form: {
+                title: 'Novo Operador',
                 name: '',
                 login: '',
                 password: ''
@@ -68,17 +95,26 @@ export default {
             error: {
                 active: false,
                 msg: ''
-            }
+            },
+            editingOperator: null,
+            isEditing: false
         };
     },
     methods: {
+        ...mapActions(['fetchOperator']),
+
         async handleSubmit () {
-            this.btn.label = 'CRIANDO...';
+            if (!this.isEditing) {
+                this.btn.label = 'CRIANDO...';
+            } else {
+                this.btn.label = 'EDITANDO...';
+            }
+
             this.btn.loading = true;
 
             let loadingSwal = this.$swal({
                 title: 'Aguarde...',
-                text: 'Criado Operador',
+                text: this.isEditing ? 'Editando Operador' : 'Criando Operador',
                 didOpen: () => {
                     this.$swal.showLoading();
                 },
@@ -89,15 +125,37 @@ export default {
             });
 
             const data = {
-                nome: this.form.name,
-                login: this.form.login,
-                senha: this.form.password
+                nome: this.form.name
             };
 
+            if (!this.isEditing) {
+                Object.assign(data, {
+                    login: this.form.login,
+                    senha: this.form.password
+                });
+            } else {
+                Object.assign(data, {
+                    uuid: this.editingOperator.uuid
+                });
+            }
+
             try {
-                await api.post('/api/operators', data);
+                // TODO: create function on store
+
+                if (!this.isEditing) {
+                    await api.post('/api/operators', data);
+                } else {
+                    await api.put('/api/operators', data);
+                }
+
                 loadingSwal.close();
-                await this.swalCreateUser();
+
+                if (this.isEditing) {
+                    await this.swalEditUser();
+                } else {
+                    await this.swalCreateUser();
+                }
+
                 await this.$router.push('/operatordashboard');
             } catch (e) {
                 this.btn.label = 'ENVIAR';
@@ -108,6 +166,7 @@ export default {
                 } else {
                     this.error.msg = e;
                 }
+                loadingSwal.close();
             }
         },
 
@@ -115,6 +174,15 @@ export default {
             await this.$swal({
                 title: 'Feito!',
                 text: 'Operador adicionado com sucesso!!!',
+                icon: 'success',
+                heightAuto: false
+            });
+        },
+
+        async swalEditUser () {
+            await this.$swal({
+                title: 'Feito!',
+                text: 'Operador editado com sucesso!!!',
                 icon: 'success',
                 heightAuto: false
             });

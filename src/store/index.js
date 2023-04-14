@@ -681,6 +681,10 @@ const store = new Vuex.Store({
             return api.get('/api/operators').then(response => response.data);
         },
 
+        fetchOperator (context, payload) {
+            return api.get(`/api/users/${payload.uuid}`).then(response => response.data);
+        },
+
         deleteOperator (context, payload) {
             return api.delete('/api/operators/' + payload.uuid);
         },
