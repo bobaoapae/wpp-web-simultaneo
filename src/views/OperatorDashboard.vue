@@ -18,11 +18,11 @@
                     <div class="table-row" v-for="operator in operatorsPaginated" :key="operator.uuid">
                         <div>{{ operator.nome }}</div>
                         <div>{{ operator.login }}</div>
-                        <router-link class="edit-btn" :to="'/editoperator/' + operator.uuid" tag="button">
+                        <router-link to="/newoperator" class="edit-btn" tag="button">
                             <img
-                                src="@/assets/images/edit.png"
-                                alt="edit"
-                                class="icon-default"
+                                    src="@/assets/images/wpp-new-chat.png"
+                                    alt="edit"
+                                    class="icon-default"
                             />
                         </router-link>
                         <button class="delete-btn" @click="swalDeleteUser(operator.uuid)">

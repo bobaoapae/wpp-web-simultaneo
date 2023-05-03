@@ -1,13 +1,12 @@
 <template>
     <div id="chat" @mousemove="handleActive" @keypress="handleActive" @focusin="handleActive">
-        <div class="my-container">
+        <SideMenu/>
             <div class="box-chat container-fluid">
                 <div class="row">
                     <SideLeft/>
                     <SideRight/>
                     <ChatInfo v-if="activeChat && activeChat.openChatInfo"/>
                 </div>
-            </div>
         </div>
 
         <ModalMedia/>
@@ -24,6 +23,7 @@ import SideRight from '@/components/chat/sideRight/SideRight.vue';
 import ModalMedia from './ModalMedia';
 import ModalDeleteMsg from './ModalDeleteMsg';
 import ModalSelectChats from './ModalSelectChats';
+import SideMenu from '@/views/SideMenu.vue';
 
 export default {
     name: 'Chat',
@@ -33,7 +33,8 @@ export default {
         ModalSelectChats,
         SideLeft,
         SideRight,
-        ChatInfo
+        ChatInfo,
+        SideMenu
     },
     computed: {
         ...mapState(['activeChat'])
@@ -56,13 +57,6 @@ export default {
     justify-content: center;
     align-items: center;
     min-width: 648px;
-}
-
-.my-container {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
 }
 
 .box-chat {

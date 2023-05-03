@@ -1,7 +1,7 @@
 <template>
     <div id="chat-list">
         <div class="box-input-search">
-            <input placeholder="Procurar" style="outline: none;" type="text" v-model.trim="inputData"
+            <input placeholder="Pesquisar ou começar nova conversa" style="outline: none;" type="text" v-model.trim="inputData"
                    @keydown.exact.esc="handleEscPress" v-debounce:200ms.lock="handleInput"/>
         </div>
 

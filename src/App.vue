@@ -35,5 +35,18 @@ export default {
    .emoji-type-image.emoji-set-apple {
       background-image: url("assets/images/emojis-apple.png") !important;
    }
-
+   .custom-space {
+       height: 100%;
+       width: 100%;
+   }
+   .default-icons {
+       height: 25px;
+       width: 25px;
+   }
+   .default-button {
+       cursor: pointer;
+       margin: 5px;
+       height: 30px;
+       width: 30px;
+   }
 </style>
