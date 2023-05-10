@@ -18,7 +18,7 @@
                     <div class="table-row" v-for="operator in operatorsPaginated" :key="operator.uuid">
                         <div>{{ operator.nome }}</div>
                         <div>{{ operator.login }}</div>
-                        <router-link to="/newoperator" class="edit-btn" tag="button">
+                        <router-link class="edit-btn" :to="'/editoperator/' + operator.uuid" tag="button">
                             <img
                                     src="@/assets/images/wpp-new-chat.png"
                                     alt="edit"
@@ -65,7 +65,7 @@ export default {
         return {
             operators: [],
             indexPage: 0,
-            operatorsPerPage: 10
+            operatorsPerPage: 8
         };
     },
 
@@ -236,33 +236,32 @@ select {
 }
 
 .new-btn {
-    background-color: green;
+    background-color: darkseagreen;
     color: black;
-    border-color: grey;
     height: 40px;
     width: 40px;
-    border-radius: 50px;
     margin-left: 20px;
     font-weight: bold;
     font-size: 20px;
+    border-radius: 10px;
 }
 
 .delete-btn {
-    background-color: #ff2a00;
-    border-color: grey;
+    background-color: indianred;
     height: 40px;
     width: 40px;
-    border-radius: 50px;
     margin-left: 10px;
+    border-color: black;
+    border-radius: 10px;
 }
 
 .edit-btn {
-    background-color: #ffe600;
-    border-color: grey;
+        background-color: lightblue;
+    border-color: black;
     height: 40px;
     width: 40px;
-    border-radius: 50px;
     margin-left: 20px;
+    border-radius: 10px;
 }
 
 .return-btn {
