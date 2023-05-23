@@ -11,6 +11,8 @@ import ConfirmChangeNumber from '@/views/ConfirmChangeNumber';
 import NotFound from '@/views/NotFound';
 import store from '@/store';
 import OperatorDashboard from '@/views/OperatorDashboard';
+import SectorDashboard from '@/views/SectorDashboard.vue';
+import NewSector from '@/views/NewSector.vue';
 
 Vue.use(VueRouter);
 
@@ -76,6 +78,16 @@ const routes = [
         path: '/operatordashboard',
         name: 'operator-dashboard',
         component: OperatorDashboard
+    },
+    {
+        path: '/sectordashboard',
+        name: 'sector-dashboard',
+        component: SectorDashboard
+    },
+    {
+        path: '/newsector',
+        name: 'new-sector',
+        component: NewSector
     },
     {
         path: '*',

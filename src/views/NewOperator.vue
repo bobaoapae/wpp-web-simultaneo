@@ -316,7 +316,6 @@ hr {
     text-align: center;
 }
 
-/* botão cancelar */
 .cancel-button {
     margin-bottom: 30px;
     border: none;

@@ -14,6 +14,11 @@
             <b-dropdown-item to="/operatordashboard" v-if="user.canCreateOperator">
                 Gerenciar Operadores
             </b-dropdown-item>
+            <!--
+            <b-dropdown-item to="/sectordashboard" v-if="user.canCreateOperator">
+                Gerenciar Setores
+            </b-dropdown-item>
+            -->
             <b-dropdown-form class="text-nowrap" v-if="user.canCreateOperator">
                 <b-form-checkbox
                         name="check-button"
@@ -40,7 +45,7 @@ import { mapMutations, mapState } from 'vuex';
 import api from '@/api';
 
 export default {
-    name: 'ButtonSettings',
+    name: 'SettingsButton',
     watch: {
         'user.configuracao.enviarNomeOperadores': function () {
             api.post('/api/users/config/toggleEnvioNomeOperador').then((e) => {

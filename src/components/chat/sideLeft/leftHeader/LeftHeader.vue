@@ -3,7 +3,7 @@
     <div><h5>Conversas</h5></div>
     <div class="custom-space"></div>
     <div class="default-button">
-        <img class="default-icons" @click="handleClick" src="@/assets/images/wpp-new-chat.png" />
+        <img class="default-icons" @click="handleClick" src="@/assets/images/wpp-icon-message.svg" />
     </div>
   </header>
 </template>
@@ -27,7 +27,7 @@ export default {
 <style scoped>
 .header {
   display: flex;
-  background: #eeeeee;
+  background: #f0f2f5;
   padding: 11px 16px;
 }
 

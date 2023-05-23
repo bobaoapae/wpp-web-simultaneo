@@ -2,11 +2,11 @@
     <div class="bg">
         <div class="content">
             <div class="content-header">
-                <router-link class="return-btn" to="/" tag="button"></router-link>
+                <ReturnButton />
             </div>
-            <div id="table">
+            <div>
                 <div>
-                    <div id="table-heading">
+                    <div id="table-header">
                         <div>Operador</div>
                         <div>Login</div>
                         <router-link class="new-btn" to="/newoperator" tag="button">
@@ -18,28 +18,43 @@
                     <div class="table-row" v-for="operator in operatorsPaginated" :key="operator.uuid">
                         <div>{{ operator.nome }}</div>
                         <div>{{ operator.login }}</div>
-                        <router-link class="edit-btn" :to="'/editoperator/' + operator.uuid" tag="button">
-                            <img
+                        <div v-if="isDesk">
+                            <router-link class="edit-btn" :to="'/editoperator/' + operator.uuid" tag="button">
+                                <img
                                     src="@/assets/images/wpp-new-chat.png"
                                     alt="edit"
-                                    class="icon-default"
-                            />
-                        </router-link>
-                        <button class="delete-btn" @click="swalDeleteUser(operator.uuid)">
-                            <img
-                                    src="@/assets/images/delete.svg"
-                                    alt="delete"
-                                    class="icon-default"
-                            />
-                        </button>
+                                    class="default-icons"
+                                />
+                            </router-link>
+                            <button class="delete-btn" @click="swalDeleteUser(operator.uuid)">
+                                <img
+                                        src="@/assets/images/delete.svg"
+                                        alt="delete"
+                                        class="default-icons"
+                                />
+                            </button>
+                        </div>
+                            <div v-else class="default-button">
+                            <b-dropdown no-caret toggle-class="text-decoration-none p-0" variant="link">
+                                <template v-slot:button-content>
+                                    <img class="default-icons" src="@/assets/images/wpp-icon-kebab-menu.svg"/>
+                                </template>
+                                <b-dropdown-item :to="'/editoperator/' + operator.uuid">
+                                    Editar
+                                </b-dropdown-item>
+                                <b-dropdown-item @click="swalDeleteUser(operator.uuid)">
+                                    Excluir
+                                </b-dropdown-item>
+                            </b-dropdown>
+                        </div>
                     </div>
                 </div>
-                <div class="controller-label">
+                <div class="table-footer">
                     <button class="list-btn" @click="previousPage">
                         <img
                                 src="@/assets/images/left.png"
                                 alt="<"
-                                class="icon-default"
+                                class="default-icons"
                         />
                     </button>
                     <p>{{ indexPage + 1 }}/{{ totalPage }}</p>
@@ -47,7 +62,7 @@
                         <img
                                 src="@/assets/images/right.png"
                                 alt=">"
-                                class="icon-default"
+                                class="default-icons"
                         />
                     </button>
                 </div>
@@ -58,19 +73,30 @@
 
 <script>
 import { mapActions } from 'vuex';
+import ReturnButton from '@/components/ui/ReturnButton.vue';
 
 export default {
     name: 'OperatorDashboard',
+    components: {
+        ReturnButton
+    },
     data () {
         return {
             operators: [],
             indexPage: 0,
+            screenWidth: 0,
             operatorsPerPage: 8
         };
     },
 
+    beforeUnmount () {
+        window.removeEventListener('resize', this.handleResize);
+    },
+
     mounted () {
         this.getOperators();
+        this.screenWidth = window.innerWidth;
+        window.addEventListener('resize', this.handleResize);
     },
 
     computed: {
@@ -79,6 +105,9 @@ export default {
         },
         totalPage () {
             return Math.ceil(this.operators.length / this.operatorsPerPage);
+        },
+        isDesk () {
+            return this.screenWidth > 500;
         }
     },
 
@@ -147,153 +176,11 @@ export default {
             if (this.indexPage > 0) {
                 this.indexPage -= 1;
             }
+        },
+
+        handleResize () {
+            this.screenWidth = window.innerWidth;
         }
     }
 };
 </script>
-
-<style scoped>
-.bg {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: linear-gradient(175deg, #009688 0%, #1ebea5 50%);
-}
-
-.bg:before {
-    content: "";
-    display: block;
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0.2;
-    background-image: url("../assets/images/bg-login.png");
-    background-position: center;
-}
-
-.content-header {
-    height: 50px;
-    width: 100%;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    background: linear-gradient(300deg, #009688 0%, #1ebea5 50%);
-}
-
-.content {
-    align-self: start;
-    flex: 2;
-    background: #fff;
-    border-radius: 20px;
-    z-index: 1;
-    box-shadow: 0 17px 50px 0 rgba(0, 0, 0, 0.19),
-    0 12px 15px 0 rgba(0, 0, 0, 0.24);
-    margin: 50px 15%;
-}
-
-#table {
-    padding: 20px;
-}
-
-#table-heading,
-#table-rows,
-.table-row,
-.controller-label {
-    display: flex;
-    flex-wrap: wrap;
-    text-align: center;
-}
-
-#table-heading {
-    font-weight: bold;
-    padding: 20px;
-    border-bottom: 3px solid #333;
-    border-top: 3px solid #333;
-}
-
-.table-row {
-    width: 100%;
-    padding: 12px;
-    border-bottom: 1px solid #ccc;
-}
-
-#table-rows {
-    border-bottom: 3px solid #333;
-}
-
-#table-heading div,
-.table-row div {
-    width: 19%;
-    height: 20px;
-}
-
-select {
-    padding: 12px 6px;
-    margin-right: 12px;
-}
-
-.new-btn {
-    background-color: darkseagreen;
-    color: black;
-    height: 40px;
-    width: 40px;
-    margin-left: 20px;
-    font-weight: bold;
-    font-size: 20px;
-    border-radius: 10px;
-}
-
-.delete-btn {
-    background-color: indianred;
-    height: 40px;
-    width: 40px;
-    margin-left: 10px;
-    border-color: black;
-    border-radius: 10px;
-}
-
-.edit-btn {
-        background-color: lightblue;
-    border-color: black;
-    height: 40px;
-    width: 40px;
-    margin-left: 20px;
-    border-radius: 10px;
-}
-
-.return-btn {
-    background-color: transparent;
-    border-color: transparent;
-    height: 25px;
-    width: 25px;
-    background-image:url("../assets/images/return_arrow.png");
-    background-repeat: no-repeat;
-    background-size: cover;
-    margin: 12px;
-}
-
-.controller-label {
-    padding-top: 15px;
-    align-self: center;
-    align-content: center;
-    align-items: center;
-    margin-left: 40%;
-}
-
-.list-btn {
-    margin-top: -15px;
-    margin-right: 10px;
-    margin-left: 10px;
-    border: transparent;
-    background: transparent;
-    color: blue;
-}
-
-.icon-default {
-    height: 25px;
-    width: 25px;
-}
-</style>

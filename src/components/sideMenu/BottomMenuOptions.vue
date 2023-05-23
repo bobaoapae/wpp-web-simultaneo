@@ -1,6 +1,6 @@
 <template>
 <div>
-    <ButtonSettings/>
+    <SettingsButton/>
     <div class="box-photo-profile">
         <img
                 :src="self.picture"
@@ -22,16 +22,16 @@
 <script>
 
 import { mapState } from 'vuex';
-import ButtonSettings from '@/components/ui/ButtonSettings.vue';
+import SettingsButton from '@/components/ui/SettingsButton.vue';
 
 export default {
     name: 'BottomMenuOption',
-    components: { ButtonSettings },
+    components: { SettingsButton },
     computed: {
         ...mapState(['self'])
     },
     import: {
-        ButtonSettings
+        SettingsButton
     }
 };
 </script>
