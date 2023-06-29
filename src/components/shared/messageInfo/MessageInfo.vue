@@ -61,8 +61,8 @@ export default {
         isMe () {
             if (this.msg.senderObj && this.msg.senderObj.id === this.self.id) {
                 return 'Você';
-            } else if (this.msg.senderObj && this.msg.senderObj.formattedName) {
-                return this.msg.senderObj.formattedName;
+            } else if (this.msg.senderObj && this.msg.senderObj.name) {
+                return this.msg.senderObj.name;
             } else if (this.msg.senderObj) {
                 return '+' + this.msg.senderObj.id.replace('@c.us', '');
             }

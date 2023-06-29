@@ -47,7 +47,7 @@
 
                     <div class="d-flex justify-content-between" v-else>
                     <span :style="{color: activeChat.getColor(msg.senderObj.id)}" @click="handleClick"
-                          class="btn-link number">{{msg.senderObj.formattedName | emojify}}</span>
+                          class="btn-link number">{{msg.senderObj.name | emojify}}</span>
                         <span class="name">~{{msg.senderObj.pushname}}</span>
                     </div>
                 </div>

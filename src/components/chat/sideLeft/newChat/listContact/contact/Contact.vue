@@ -5,7 +5,7 @@
         <div class="info">
             <div class="name">
                 <div>
-                    <span>{{contact.formattedName}}</span>
+                    <span>{{contact.name}}</span>
                 </div>
             </div>
 

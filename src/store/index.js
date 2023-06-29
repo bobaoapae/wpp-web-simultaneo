@@ -429,6 +429,7 @@ const store = new Vuex.Store({
 
                                 context.dispatch('getAllContacts').then(contacts => {
                                     context.commit('SET_CONTACTS', contacts);
+                                    console.log(contacts);
                                 });
 
                                 if (r.isBussiness) {
@@ -576,8 +577,8 @@ const store = new Vuex.Store({
         findFormattedNameFromId (context, payload) {
             return new Promise((resolve, reject) => {
                 context.dispatch('findChatFromId', payload).then(el => {
-                    if (el && el.contact && el.contact.formattedName) {
-                        resolve(el.contact.formattedName);
+                    if (el && el.contact && el.contact.name) {
+                        resolve(el.contact.name);
                     } else {
                         resolve('+' + (payload.id.split('@')[0]));
                     }
@@ -1077,8 +1078,11 @@ const store = new Vuex.Store({
                 });
                 Object.defineProperty(el, 'formattedTitle', {
                     get () {
-                        if (this.contact && this.contact.formattedName) {
-                            return this.contact.formattedName;
+                        if (this.contact && this.contact.name) {
+                            return this.contact.name;
+                        }
+                        if (this.contact && this.contact.name) {
+                            return this.contact.name;
                         }
                         return '+' + this.id.replace('@c.us', '');
                     }

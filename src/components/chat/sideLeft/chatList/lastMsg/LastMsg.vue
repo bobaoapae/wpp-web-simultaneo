@@ -3,7 +3,7 @@
         <template v-if="chat.lastMsg">
             <MessageIconStatus :ack="chat.lastMsg.ack" class="icon-status" v-if="chat.lastMsg.id.fromMe"/>
 
-            <span :inner-html.prop="`${chat.lastMsg.senderObj.formattedName}: ` | emojify"
+            <span :inner-html.prop="`${chat.lastMsg.senderObj.name}: ` | emojify"
                   v-if="chat.isGroup && chat.lastMsg && chat.lastMsg.senderObj && !chat.lastMsg.id.fromMe"></span>
 
             <MessageBody :lastMsg="chat.lastMsg"/>

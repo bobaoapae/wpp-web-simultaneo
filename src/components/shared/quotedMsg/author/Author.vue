@@ -25,8 +25,8 @@ export default {
         autor () {
             if (this.senderObj.name) {
                 return this.senderObj.name;
-            } else if (this.senderObj.formattedName) {
-                return this.senderObj.formattedName;
+            } else if (this.senderObj.name) {
+                return this.senderObj.name;
             } else if (this.senderObj.id === this.self.id) {
                 return 'Você';
             }

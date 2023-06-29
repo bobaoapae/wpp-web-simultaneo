@@ -39,12 +39,12 @@ export default {
 
             if (this.filter !== '') {
                 contacts = contacts.filter(contact => {
-                    return contact.formattedName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(this.filter.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')) ||
+                    return contact.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(this.filter.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')) ||
                         contact.id.replace('@c.us', '').includes(this.filter);
                 });
             }
 
-            return sort(contacts).asc(contact => contact.formattedName);
+            return sort(contacts).asc(contact => contact.name);
         }
     },
     mounted () {
